@@ -1,28 +1,38 @@
 #include "ServerSocket.hpp"
+#include "SocketMgr.hpp"
+#include "SessionSocket.hpp"
 
 using boost::asio::ip::tcp;
 
-ServerSocket::ServerSocket(SocketMgr* mgr, std::string const& addr, unsigned short port) :
-    _sockMgr(mgr), _acceptor(mgr->NetService(), tcp::endpoint(addr, port))
-{}
-
-void ServerSocket::StartAccept()
+ServerSocket::ServerSocket(SocketMgr* mgr, unsigned short port) :
+    _sockMgr(mgr), _acceptor(mgr->io_service(), tcp::endpoint(tcp::v4(), port))
 {
-    SessionSocket* newSock = new SessionSocket(_service);
+    startAccept();
+}
+
+void ServerSocket::startAccept()
+{
+    SessionSocket* newSock = new SessionSocket(_sockMgr->io_service());
     _acceptor.async_accept(newSock->socket(),
-            boost::bind(&ServerSocket::HandleAccept, this, newSock, boost::asio::placeholders::error)
+            boost::bind(&ServerSocket::handleAccept, this, newSock, boost::asio::placeholders::error)
             );
 }
 
-void ServerSocket::HandleAccept(SessionSocket* newSock, boost::system::error_code const& error)
+void ServerSocket::handleAccept(SessionSocket* newSock, boost::system::error_code const& error)
 {
     if (!error)
-        _sockMgr->RegisterNewSock(newSock);
+        _sockMgr->registerNewSock(newSock);
     else
     {
         std::cerr << "ServerSocket::HandleAccept : " << error.message() << std::endl;
         delete newSock;
     }
-    StartAccept();
+    startAccept();
+}
+
+void ServerSocket::shutdown()
+{
+    _acceptor.cancel();
+    _acceptor.close();
 }
 
