@@ -17,11 +17,13 @@ int main(int ac, char **av) {
 
     dbConnection.execute("INSERT INTO account(id, username) VALUES(NULL, 'TOTO')");
 
-    DbResult *result = dbConnection.query("SELECT * FROM account");
+    pDbResult result = dbConnection.query("SELECT * FROM account");
     while (result->fetch())
     {
         std::cout << (*result)["username"]->getValue() << std::endl;
     }
+
+    dbConnection.close();
 
     return 0;
 }

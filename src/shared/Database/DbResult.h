@@ -15,6 +15,7 @@ private:
     DbField *_currentRow;
 public:
     DbResult(MYSQL_RES *result, MYSQL_FIELD *fields, int nbFields, int nbRows);
+    ~DbResult();
     bool fetch();
     DbField const *operator[](std::string const &index) const;
 };

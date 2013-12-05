@@ -7,6 +7,12 @@ DbResult::DbResult(MYSQL_RES *result, MYSQL_FIELD *fields, int nbFields, int nbR
     _currentRow = new DbField[_nbFields];
 }
 
+DbResult::~DbResult()
+{
+    delete[] _currentRow;
+    mysql_free_result(_result);
+}
+
 bool DbResult::fetch()
 {
     MYSQL_ROW row;
