@@ -2,6 +2,7 @@
 # define DBCONNECTION_H_
 
 #include <string>
+#include <memory>
 #include <mysql.h>
 #include "DbResult.h"
 
@@ -14,6 +15,7 @@ struct DbInfo
     std::string database;
 };
 
+
 class DbConnection
 {
 private:
@@ -25,7 +27,9 @@ public:
     bool open();
     void close();
     bool execute(const char *sql);
-    DbResult *query(const char *sql);
+    std::shared_ptr<DbResult> query(const char *sql);
 };
+
+typedef std::shared_ptr<DbResult> pDbResult;
 
 #endif

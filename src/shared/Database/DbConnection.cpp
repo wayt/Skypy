@@ -42,7 +42,7 @@ bool DbConnection::execute(const char *sql)
     return !hasError();
 }
 
-DbResult *DbConnection::query(const char *sql)
+pDbResult DbConnection::query(const char *sql)
 {
     if (!execute(sql))
         return NULL;
@@ -55,7 +55,7 @@ DbResult *DbConnection::query(const char *sql)
     int nbRows = mysql_affected_rows(_conn);
     MYSQL_FIELD *fields = mysql_fetch_fields(result);
 
-    return new DbResult(result, fields, nbFields, nbRows);
+    return std::shared_ptr<DbResult>(new DbResult(result, fields, nbFields, nbRows));
 }
 
 void DbConnection::close()
