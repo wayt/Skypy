@@ -25,5 +25,11 @@ if (!dbConnection.open())
 
 dbConnection.execute("INSERT INTO account(id, username) VALUES(NULL, 'TOTO')");
 
-dbConnection.query("SELECT * FROM account");
+DbResult *result = dbConnection.query("SELECT id, username FROM account");
+
+while (result->fetch())
+{
+    std::cout << (*result)["username"]->getValue() << std::endl;
+}
+
 ```
