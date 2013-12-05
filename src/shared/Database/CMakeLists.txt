@@ -11,6 +11,7 @@ if ( NOT CMAKE_BUILD_TYPE )
 endif()
 
 set(EXECUTABLE_NAME "test_mysql")
+set(CMAKE_CXX_FLAGS "-std=c++0x -g ${CMAKE_CXX_FLAGS}")
 
 file(GLOB source_file *.cpp *.h *.hpp)
 set(current_SRCS
