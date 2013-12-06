@@ -2,6 +2,7 @@
 # define SERVERSOCKET_H_
 
 #include <boost/asio.hpp>
+#include "SessionSocket.hpp"
 
 using boost::asio::ip::tcp;
 class SocketMgr;
@@ -9,14 +10,12 @@ class SocketMgr;
 class ServerSocket
 {
 public:
-    ServerSocket(SocketMgr* mgr, std::string const& addr, unsigned short port);
+    ServerSocket(SocketMgr* mgr, unsigned short port);
 
-protected:
-    NetService& _service;
-
+    void shutdown();
 private:
-    void StartAccept();
-    void HandleAccept();
+    void startAccept();
+    void handleAccept(SessionSocket* newSock, boost::system::error_code const& error);
 
     SocketMgr* _sockMgr;
     tcp::acceptor _acceptor;
