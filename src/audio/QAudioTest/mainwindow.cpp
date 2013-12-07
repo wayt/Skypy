@@ -1,6 +1,5 @@
 #include <QMessageBox>
 #include <QDebug>
-#include <portaudio.h>
 
 #include "mainwindow.h"
 
@@ -14,8 +13,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _output(new AudioStream()),
     _playAudio(new PlayAudio(this))
 {
-    Pa_Initialize();
-
     this->setCentralWidget(new QWidget(this));
     this->centralWidget()->setLayout(_layG);
 
@@ -38,12 +35,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    _playAudio->quit();
+    _playAudio->terminate();
 
     delete _input;
     delete _output;
+}
 
-    Pa_Terminate();
+void MainWindow::closeEvent(QCloseEvent *e)
+{
+    _input->stop();
+    _output->stop();
+
+    _playAudio->quit();
+
+    e->accept();
 }
 
 void MainWindow::_pbOpen_clicked()
@@ -86,8 +91,12 @@ void MainWindow::_pbStart_clicked()
     {
         _input->stop();
         _output->stop();
-        _playAudio->quit();
+
         _pbStart->setText("Start recording and encoding");
+        _pbOpen->setEnabled(true);
+
+        _playAudio->quit();
+
         return ;
     }
 
@@ -104,5 +113,6 @@ void MainWindow::_pbStart_clicked()
         return ;
     }
 
+    _pbOpen->setEnabled(false);
     _pbStart->setText("Stop recording and encoding");
 }

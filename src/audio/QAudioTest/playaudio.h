@@ -21,6 +21,8 @@ public:
     inline const AudioStream* output() const { return _output; }
 
 public slots:
+    void quit();
+    void terminate();
     void setGain(int gain);
 
 protected:
@@ -30,6 +32,7 @@ private:
     AudioStream *_input;
     AudioStream *_output;
     EncodedSample *_encodedSample;
+    bool _run;
 };
 
 #endif // PLAYAUDIO_H

@@ -1,5 +1,7 @@
 #include "audiostream.h"
 
+int AudioStream::_nbStream = 0;
+
 AudioStream::AudioStream() :
     _streamType(NO_STREAM),
     _errText(),
@@ -13,12 +15,20 @@ AudioStream::AudioStream() :
     _inputQueue(),
     _outputQueue()
 {
+    if (_nbStream == 0)
+        Pa_Initialize();
+
+    ++_nbStream;
 }
 
 AudioStream::~AudioStream()
 {
     stop();
     closeDevice();
+
+    --_nbStream;
+    if (_nbStream == 0)
+        Pa_Terminate();
 }
 
 bool AudioStream::setInputDevice(int device, AudioSample::eChannel channel, eLatency latency)

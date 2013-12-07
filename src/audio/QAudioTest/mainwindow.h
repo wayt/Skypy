@@ -5,6 +5,7 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QSlider>
+#include <QCloseEvent>
 
 #include "audiostream.h"
 #include "playaudio.h"
@@ -16,6 +17,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = 0);
     virtual ~MainWindow();
+
+protected:
+    void closeEvent(QCloseEvent *e);
 
 private:
     QGridLayout *_layG;
