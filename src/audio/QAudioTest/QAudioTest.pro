@@ -13,11 +13,23 @@ TARGET = QAudioTest
 TEMPLATE = app
 
 win32: {
-    INCLUDEPATH += ../AudioPackage/include/portaudio/
-    INCLUDEPATH += ../AudioPackage/include/
+    INCLUDEPATH += $$_PRO_FILE_PWD_/../AudioPackage/include/portaudio/
+    INCLUDEPATH += $$_PRO_FILE_PWD_/../AudioPackage/include/
 
-    LIBS += ../AudioPackage/portaudio_x64.lib
-    LIBS += ../AudioPackage/opus.lib
+    CONFIG(release, release|debug) {
+        CONFIG_PATH = Release
+    }
+    CONFIG(debug, release|debug) {
+        CONFIG_PATH = Debug
+    }
+
+    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/portaudio_x64.lib
+
+    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/opus.lib
+    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/celt.lib
+    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/silk_common.lib
+    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/silk_fixed.lib
+    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/silk_float.lib
 }
 unix: {
     LIBS += -lportaudio
