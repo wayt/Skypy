@@ -5,13 +5,26 @@ PlayAudio::PlayAudio(QObject *parent) :
     QThread(parent),
     _input(NULL),
     _output(NULL),
-    _encodedSample(new EncodedSample())
+    _encodedSample(new EncodedSample()),
+    _run(false)
 {
 }
 
 PlayAudio::~PlayAudio()
 {
     delete _encodedSample;
+}
+
+void PlayAudio::quit()
+{
+    _run = false;
+    QThread::quit();
+}
+
+void PlayAudio::terminate()
+{
+    _run = false;
+    QThread::terminate();
 }
 
 void PlayAudio::setGain(int gain)
@@ -30,10 +43,15 @@ void PlayAudio::run()
         return ;
     }
 
-    while (QThread::isRunning())
+    _run = true;
+
+    while (_run)
     {
-        while ((!_input->isStarted() || !_output->isStarted()))
+        while ((!_input->isStarted() || !_output->isStarted()) && _run)
             QThread::msleep(100);
+
+        if (!_run)
+            break;
 
         AudioSample sample(_input->inputQueue().dequeue());
         _encodedSample->encode(sample);

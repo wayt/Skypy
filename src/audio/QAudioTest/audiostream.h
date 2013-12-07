@@ -75,6 +75,9 @@ private:
     QSynchronizedQueue<AudioSample> _outputQueue;
 
 private:
+    static int _nbStream;
+
+private:
     friend int _callback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData);
 };
 
