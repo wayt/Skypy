@@ -3,5 +3,5 @@
 
 void ASession::sendPkt(Packet const& pkt)
 {
-    _socket->send(pkt.content(), pkt.size());
+    _socket->send(pkt);
 }

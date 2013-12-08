@@ -5,7 +5,8 @@
 #include "SocketMgr.hpp"
 
 SessionSocket::SessionSocket(SocketMgr* mgr) :
-    _socket(mgr->io_service()), _sockMgr(mgr)
+    _socket(mgr->io_service()), _sockMgr(mgr), _pingTime(0), _latency(0),
+    _status(STATUS_NONE)
 {}
 
 void SessionSocket::init()
@@ -13,7 +14,19 @@ void SessionSocket::init()
     boost::asio::ip::tcp::no_delay option(true);
     _socket.set_option(option);
 
+    _status = STATUS_UNAUTHED;
+
+    Packet pkt(SMSG_WELCOME);
+    send(pkt);
+
     _registerHeader();
+}
+
+void SessionSocket::close()
+{
+    boost::system::error_code ec;
+    _socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+    _socket.close();
 }
 
 void SessionSocket::_registerHeader()
@@ -60,6 +73,12 @@ void SessionSocket::_handleBody(uint16_t code, boost::system::error_code const& 
     handlePacketInput(pkt);
 
     _registerHeader();
+}
+
+void SessionSocket::send(Packet const& pkt)
+{
+    std::cerr << "SEND: " << uint32(pkt.getOpcode()) << std::endl;
+    send(pkt.content(), pkt.size());
 }
 
 void SessionSocket::send(uint8 const* data, uint16 size)

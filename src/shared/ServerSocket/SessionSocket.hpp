@@ -10,6 +10,13 @@
 using boost::asio::ip::tcp;
 class SocketMgr;
 
+enum SocketStatus
+{
+    STATUS_NONE         = 0,
+    STATUS_UNAUTHED     = 1,
+    STATUS_AUTHED       = 2
+};
+
 class SessionSocket
 {
 public:
@@ -18,14 +25,18 @@ public:
     tcp::socket& socket() { return _socket; }
 
     void init();
+    void close();
 
     void handlePacketInput(Packet& pkt);
 
     void _handleHeader(boost::system::error_code const& error);
     void _handleBody(uint16_t code, boost::system::error_code const& error, std::size_t inputSize);
 
-    void send(uint8 const* data, uint16 size);
+    void send(Packet const& pkt);
+
+    SocketStatus getStatus() const { return _status; }
 private:
+    void send(uint8 const* data, uint16 size);
     void _registerHeader();
     void _handleWrite(boost::system::error_code const& error);
 
@@ -35,6 +46,7 @@ private:
     SocketMgr* _sockMgr;
     uint32 _pingTime;
     uint32 _latency;
+    SocketStatus _status;
 };
 
 #endif /* !SESSIONSOCKET_H_ */
