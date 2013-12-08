@@ -19,9 +19,10 @@ public:
     void setGain(int gain);
 
     inline int size() const { return _encodedSample.size(); }
+    inline void setEncodedSample(const QByteArray &encodedSample) { _encodedSample = encodedSample; }
     inline const QByteArray& encodedSample() const { return _encodedSample; }
 
-    bool init(AudioSample::eFrequency frequency, AudioSample::eChannel channel);
+    bool init(AudioSample::eFrequency frequency = AudioSample::FREQ_48000, AudioSample::eChannel channel = AudioSample::MONO);
 
     bool encode(const AudioSample &sample);
     bool decode(AudioSample &sample);
