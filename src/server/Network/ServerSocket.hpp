@@ -1,10 +1,9 @@
 #ifndef SERVERSOCKET_H_
 # define SERVERSOCKET_H_
 
-#include <boost/asio.hpp>
 #include "SessionSocket.hpp"
+#include "TcpAcceptor.hpp"
 
-using boost::asio::ip::tcp;
 class SocketMgr;
 
 class ServerSocket
@@ -18,7 +17,7 @@ private:
     void handleAccept(SessionSocket* newSock, boost::system::error_code const& error);
 
     SocketMgr* _sockMgr;
-    tcp::acceptor _acceptor;
+    TcpAcceptor _acceptor;
 };
 
 #endif /* !SERVERSOCKET_H_ */

@@ -10,7 +10,7 @@ class SocketMgr
 {
 public:
     SocketMgr() : _service(), _srvSock(NULL), _thread(NULL), _newSocks(),
-    _newSocksMutex()
+    _newSocksMutex(), _opcodesMgr()
     {}
 
     bool startNetwork(unsigned short port, unsigned int threadCount = 1);
@@ -22,11 +22,13 @@ public:
     void shutdown();
     void wait() { if (_thread) _thread->join(); }
 
-    virtual void handleHeaderError(SessionSocket* sock, std::error_code const& error);
-    virtual void handleBodyError(SessionSocket* sock, std::error_code const& error);
-    virtual void handleInvalidHeaderSize(SessionSocket* sock, uint16_t size);
-    virtual void handleWriteError(SessionSocket* sock, std::error_code const& error);
+    void handleHeaderError(SessionSocket* sock, std::error_code const& error);
+    void handleBodyError(SessionSocket* sock, std::error_code const& error);
+    void handleInvalidHeaderSize(SessionSocket* sock, uint16_t size);
+    void handleWriteError(SessionSocket* sock, std::error_code const& error);
 
+    Opcodes const& getOpcodesMgr() const { return _opcodesMgr; }
+    Opcodes& getOpcodesMgr() { return _opcodesMgr; }
 
 private:
     void addNewSock(SessionSocket* newSock);
@@ -38,6 +40,7 @@ private:
     Thread* _thread;
     std::map<SessionSocket*, uint32> _newSocks;
     Mutex _newSocksMutex;
+    Opcodes _opcodesMgr;
 };
 
 #endif /* !SOCKETMGR_H_ */
