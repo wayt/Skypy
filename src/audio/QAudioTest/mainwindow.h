@@ -6,9 +6,9 @@
 #include <QPushButton>
 #include <QSlider>
 #include <QCloseEvent>
+#include <QLineEdit>
 
-#include "audiostream.h"
-#include "playaudio.h"
+#include "audiosocket.h"
 
 class MainWindow : public QMainWindow
 {
@@ -28,7 +28,8 @@ private:
     QSlider *_sliderSound;
     AudioStream *_input;
     AudioStream *_output;
-    PlayAudio *_playAudio;
+    AudioSocket *_socket;
+    QLineEdit *_leIp;
 
 private slots:
     void _pbOpen_clicked();
