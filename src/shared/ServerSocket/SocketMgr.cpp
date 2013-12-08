@@ -20,6 +20,13 @@ bool SocketMgr::startNetwork(unsigned short port, unsigned int threadCount)
     return true;
 }
 
+void SocketMgr::registerNewSock(SessionSocket* newSock)
+{
+    clearOldSock();
+    addNewSock(newSock);
+    newSock->init();
+}
+
 void SocketMgr::shutdown()
 {
     if (_srvSock)
@@ -29,4 +36,74 @@ void SocketMgr::shutdown()
 
     if (_thread)
         _thread->join();
+}
+
+void SocketMgr::addNewSock(SessionSocket* newSock)
+{
+    Mutex::ScopLock lock(_newSocksMutex);
+    _newSocks[newSock] = Utils::getMSTime() + 10 * IN_MILLISECONDS;
+}
+
+void SocketMgr::removeNewSock(SessionSocket* newSock)
+{
+    Mutex::ScopLock lock(_newSocksMutex);
+    _newSocks.erase(newSock);
+}
+
+void SocketMgr::clearOldSock()
+{
+    Mutex::ScopLock lock(_newSocksMutex);
+
+    uint32 msTime = Utils::getMSTime();
+    for (std::map<SessionSocket*, uint32>::iterator itr = _newSocks.begin(); itr != _newSocks.end();)
+    {
+        if (itr->second >= msTime)
+        {
+            SessionSocket* sock = itr->first;
+            _newSocks.erase(itr++);
+            sock->close();
+            delete sock;
+        }
+        ++itr;
+    }
+}
+
+void SocketMgr::handleHeaderError(SessionSocket* sock, std::error_code const& error)
+{
+    if (sock->getStatus() == STATUS_UNAUTHED)
+    {
+        removeNewSock(sock);
+        sock->close();
+        delete sock;
+    }
+}
+
+void SocketMgr::handleBodyError(SessionSocket* sock, std::error_code const& error)
+{
+    if (sock->getStatus() == STATUS_UNAUTHED)
+    {
+        removeNewSock(sock);
+        sock->close();
+        delete sock;
+    }
+}
+
+void SocketMgr::handleInvalidHeaderSize(SessionSocket* sock, uint16_t size)
+{
+    if (sock->getStatus() == STATUS_UNAUTHED)
+    {
+        removeNewSock(sock);
+        sock->close();
+        delete sock;
+    }
+}
+
+void SocketMgr::handleWriteError(SessionSocket* sock, std::error_code const& error)
+{
+    if (sock->getStatus() == STATUS_UNAUTHED)
+    {
+        removeNewSock(sock);
+        sock->close();
+        delete sock;
+    }
 }

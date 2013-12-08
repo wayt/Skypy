@@ -29,12 +29,6 @@ public:
         append(buff, size);
     }
 
-    Packet(uint32 size = PACKET_DEFAULT_SIZE) :
-        _rpos(4), _wpos(4)
-    {
-        _storage.reserve(size + 4);
-    }
-
     void setOpcode(uint16 code)
     {
         uint16 saved = _wpos;

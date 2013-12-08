@@ -1,8 +1,20 @@
 #ifndef UTILS_H_
 # define UTILS_H_
 
+#include "SharedDefines.h"
+#include <sys/time.h>
+
 namespace Utils
 {
+
+    inline uint32 getMSTime()
+    {
+        struct timeval tv;
+        struct timezone tz;
+        gettimeofday(&tv, &tz);
+        return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+    }
+
 class endian
 {
 private:
