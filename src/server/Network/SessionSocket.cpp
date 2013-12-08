@@ -4,29 +4,18 @@
 #include "Utils.hpp"
 #include "SocketMgr.hpp"
 
-SessionSocket::SessionSocket(SocketMgr* mgr) :
-    _socket(mgr->io_service()), _sockMgr(mgr), _pingTime(0), _latency(0),
-    _status(STATUS_NONE)
+SessionSocket::SessionSocket(SocketMgr* mgr) : TcpSocket(mgr->io_service()),
+    _sockMgr(mgr), _status(STATUS_UNAUTHED)
 {}
 
 void SessionSocket::init()
 {
-    boost::asio::ip::tcp::no_delay option(true);
-    _socket.set_option(option);
-
     _status = STATUS_UNAUTHED;
 
-    Packet pkt(SMSG_WELCOME);
-    send(pkt);
+    uint8 buff[] = "WELCOME";
+    send(buff, 8);
 
     _registerHeader();
-}
-
-void SessionSocket::close()
-{
-    boost::system::error_code ec;
-    _socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-    _socket.close();
 }
 
 void SessionSocket::_registerHeader()
@@ -100,10 +89,11 @@ void SessionSocket::_handleWrite(boost::system::error_code const& error)
 
 void SessionSocket::handlePacketInput(Packet& pkt)
 {
-    switch (pkt.getOpcode())
+    Opcodes::OpcodeDefinition const* opcode = _sockMgr->getOpcodesMgr()->getOpcodeDefinition(pkt.getOpcode(), (_status == STATUS_UNAUTHED ? OPSTATUS_SYNC_UNAUTHED : OPSTATUS_SYNC_AUTHED));
+    if (opcode)
     {
-        default:
-            break;
+
     }
+    else
 
 }

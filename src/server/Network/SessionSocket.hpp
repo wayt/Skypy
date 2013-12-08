@@ -1,23 +1,20 @@
 #ifndef SESSIONSOCKET_H_
 # define SESSIONSOCKET_H_
 
-#include <boost/asio.hpp>
 #include <stdint.h>
 #include <system_error>
 #include "Opcodes.hpp"
 #include "Packet.hpp"
 
-using boost::asio::ip::tcp;
 class SocketMgr;
 
 enum SocketStatus
 {
-    STATUS_NONE         = 0,
-    STATUS_UNAUTHED     = 1,
-    STATUS_AUTHED       = 2
+    STATUS_UNAUTHED     = 0,
+    STATUS_AUTHED       = 1
 };
 
-class SessionSocket
+class SessionSocket public TcpSocket
 {
 public:
     SessionSocket(SocketMgr* mgr);
@@ -36,16 +33,12 @@ public:
 
     SocketStatus getStatus() const { return _status; }
 private:
-    void send(uint8 const* data, uint16 size);
     void _registerHeader();
     void _handleWrite(boost::system::error_code const& error);
 
-    tcp::socket _socket;
     unsigned char _header[Packet::HeaderSize];
     unsigned char _body[Packet::MaxBodySize];
     SocketMgr* _sockMgr;
-    uint32 _pingTime;
-    uint32 _latency;
     SocketStatus _status;
 };
 
