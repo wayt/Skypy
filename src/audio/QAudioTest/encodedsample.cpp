@@ -78,7 +78,7 @@ bool EncodedSample::encode(const AudioSample &sample)
         return false;
     }
 
-#ifdef USE_FLOAT
+#ifdef AUDIO_USE_FLOAT
     nbBytes = opus_encode_float(_encoder, sample.buffer(), NB_MAX_FRAMES, data, MAX_DATA_BYTES);
 #else
     nbBytes = opus_encode(_encoder, sample.buffer(), NB_MAX_FRAMES, data, MAX_DATA_BYTES);
@@ -105,7 +105,7 @@ bool EncodedSample::decode(AudioSample &sample)
         return false;
     }
 
-#ifdef USE_FLOAT
+#ifdef AUDIO_USE_FLOAT
     nbBytes = opus_decode_float(_decoder, data, _encodedSample.size(), sample.buffer(), NB_MAX_FRAMES, 0);
 #else
     nbBytes = opus_decode(_decoder, data, _encodedSample.size(), sample.buffer(), NB_MAX_FRAMES, 0);
@@ -115,6 +115,8 @@ bool EncodedSample::decode(AudioSample &sample)
         _errText = opus_strerror(nbBytes);
         return false;
     }
+
+    sample.setNbFrame(nbBytes);
 
     return true;
 }

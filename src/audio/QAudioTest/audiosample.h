@@ -6,9 +6,7 @@
 
 #define NB_MAX_FRAMES           (NB_FRAMES_PER_BUFFER * NB_MAX_CHANNEL)
 
-#define USE_FLOAT
-
-#ifdef USE_FLOAT
+#ifdef AUDIO_USE_FLOAT
 # define SAMPLE         float
 # define SAMPLE_FORMAT  paFloat32
 # define ZERO           0.f
@@ -38,6 +36,7 @@ public:
 
 public:
     AudioSample();
+    AudioSample(const SAMPLE *buffer, int nbFrame);
     AudioSample(const AudioSample &other);
     virtual ~AudioSample();
 
@@ -53,6 +52,7 @@ public:
     void clearBuffer();
 
     inline int nbFrame() const { return _nbFrame; }
+    inline void setNbFrame(int nbFrame) { _nbFrame = nbFrame; }
 
 public:
     static double frequencyToDouble(eFrequency frequency);

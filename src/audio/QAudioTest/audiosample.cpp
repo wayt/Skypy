@@ -8,6 +8,14 @@ AudioSample::AudioSample() :
 {
 }
 
+AudioSample::AudioSample(const SAMPLE *buffer, int nbFrame) :
+    _nbFrame(nbFrame),
+    _buffer()
+{
+    for (int i = 0; i < _nbFrame; ++i)
+        _buffer[i] = buffer[i];
+}
+
 AudioSample::AudioSample(const AudioSample &other) :
     _nbFrame(other._nbFrame),
     _buffer()
@@ -43,6 +51,7 @@ void AudioSample::clearBuffer()
 {
     for (int i = 0; i < NB_MAX_FRAMES; ++i)
         _buffer[i] = ZERO;
+    _nbFrame = 0;
 }
 
 double AudioSample::frequencyToDouble(eFrequency frequency)

@@ -101,6 +101,9 @@ bool AudioStream::start()
         return false;
     }
 
+    _inputQueue.clear();
+    _outputQueue.clear();
+
     _isActive = true;
     return true;
 }
@@ -167,6 +170,9 @@ void AudioStream::_clearDevice(PaStreamParameters &parameter, const PaDeviceInfo
     parameter.suggestedLatency = 0;
 }
 
+/**********************************************/
+/* This function must be the fastest possible */
+/**********************************************/
 int AudioStream::_callback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData)
 {
     AudioSample sample;
