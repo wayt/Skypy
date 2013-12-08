@@ -17,6 +17,7 @@ public:
 
 protected:
     void send(uint8 const* data, uint16 size);
+    void _handleWrite(boost::system::error_code const& error);
 
     tcp::socket _socket;
 };
