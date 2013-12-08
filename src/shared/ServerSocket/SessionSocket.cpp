@@ -1,6 +1,12 @@
 #include "SessionSocket.hpp"
 #include <boost/bind.hpp>
+#include <iostream>
 #include "Utils.hpp"
+#include "SocketMgr.hpp"
+
+SessionSocket::SessionSocket(SocketMgr* mgr) :
+    _socket(mgr->io_service()), _sockMgr(mgr)
+{}
 
 void SessionSocket::init()
 {
@@ -21,7 +27,7 @@ void SessionSocket::_handleHeader(boost::system::error_code const& error)
 {
     if (error)
     {
-        handleHeaderError(std::error_code(/*error.value()*/));
+        _sockMgr->handleHeaderError(this, std::error_code(/*error.value()*/));
         return;
     }
 
@@ -32,7 +38,7 @@ void SessionSocket::_handleHeader(boost::system::error_code const& error)
 
     if (size > Packet::MaxBodySize)
     {
-        handleInvalidHeaderSize(size);
+        _sockMgr->handleInvalidHeaderSize(this, size);
         return;
     }
 
@@ -46,7 +52,7 @@ void SessionSocket::_handleBody(uint16_t code, boost::system::error_code const& 
 {
     if (error)
     {
-        handleBodyError(std::error_code(/*error.value()*/));
+        _sockMgr->handleBodyError(this, std::error_code(/*error.value()*/));
         return;
     }
 
@@ -56,3 +62,29 @@ void SessionSocket::_handleBody(uint16_t code, boost::system::error_code const& 
     _registerHeader();
 }
 
+void SessionSocket::send(uint8 const* data, uint16 size)
+{
+    boost::asio::async_write(_socket,
+            boost::asio::buffer(data, size),
+            boost::bind(&SessionSocket::_handleWrite, this,
+                boost::asio::placeholders::error));
+}
+
+void SessionSocket::_handleWrite(boost::system::error_code const& error)
+{
+    if (error)
+    {
+        std::cerr << "SessionSocket::_handleWrite: " << error.message() << std::endl;
+        _sockMgr->handleWriteError(this, std::error_code(/*error.value()*/));
+    }
+}
+
+void SessionSocket::handlePacketInput(Packet& pkt)
+{
+    switch (pkt.getOpcode())
+    {
+        default:
+            break;
+    }
+
+}

@@ -2,13 +2,13 @@
 # define SOCKETMGR_H_
 
 #include <boost/asio.hpp>
-#include <boost/thread/thread.hpp>
+#include "ThreadPool.hpp"
 #include "ServerSocket.hpp"
 
 class SocketMgr
 {
 public:
-    SocketMgr() : _service(), _srvSock(NULL), _threads()
+    SocketMgr() : _service(), _srvSock(NULL), _thread(NULL), _newSock()
     {}
 
     bool startNetwork(unsigned short port, unsigned int threadCount = 1);
@@ -18,11 +18,19 @@ public:
     virtual void registerNewSock(SessionSocket *) {}
 
     void shutdown();
-    void wait() { _threads.join_all(); }
+    void wait() { if (_thread) _thread->join(); }
+
+    virtual void handleHeaderError(SessionSocket* sock, std::error_code const& error) {}
+    virtual void handleBodyError(SessionSocket* sock, std::error_code const& error) {}
+    virtual void handleInvalidHeaderSize(SessionSocket* sock, uint16_t size) {}
+    virtual void handleWriteError(SessionSocket* sock, std::error_code const& error) {}
+
+
 private:
     boost::asio::io_service _service;
     ServerSocket* _srvSock;
-    boost::thread_group _threads;
+    Thread* _thread;
+    std::list<SessionSocket*> _newSock;
 };
 
 #endif /* !SOCKETMGR_H_ */

@@ -16,15 +16,18 @@ add_definitions(
 
 file(GLOB source_file *.cpp *.h *.hpp)
 file(GLOB serversock_file ServerSocket/*.cpp ServerSocket/*.h ServerSocket/*.hpp)
+file(GLOB threading_file Threading/*.cpp Threading/*.h Threading/*.hpp)
 set(current_SRCS
     ${current_SRCS}
     ${source_file}
     ${serversock_file}
+    ${threading_file}
 )
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/ServerSocket
+    ${CMAKE_CURRENT_SOURCE_DIR}/Threading
     ${Boost_INCLUDE_DIRS}
 )
 
