@@ -1,18 +1,22 @@
-#ifndef PLAYAUDIO_H
-#define PLAYAUDIO_H
+#ifndef AUDIOSOCKET_H
+#define AUDIOSOCKET_H
 
 #include <QThread>
+#include <QAbstractSocket>
+#include <QUdpSocket>
 
 #include "audiostream.h"
 #include "encodedsample.h"
 
-class PlayAudio : public QThread
+#define AUDIO_PORT  1337
+
+class AudioSocket : public QThread
 {
     Q_OBJECT
 
 public:
-    PlayAudio(QObject *parent = 0);
-    virtual ~PlayAudio();
+    AudioSocket(QObject *parent = 0);
+    virtual ~AudioSocket();
 
     inline void setInput(AudioStream *input) { _input = input; }
     inline const AudioStream* input() const { return _input; }
@@ -21,18 +25,25 @@ public:
     inline const AudioStream* output() const { return _output; }
 
 public slots:
+    void setHostAddr(const QHostAddress &addr);
+    void setGain(int gain);
+
     void quit();
     void terminate();
-    void setGain(int gain);
 
 protected:
     virtual void run();
 
 private:
+    bool _run;
+    QUdpSocket *_socket;
+    QHostAddress _hostAddr;
     AudioStream *_input;
     AudioStream *_output;
     EncodedSample *_encodedSample;
-    bool _run;
+
+private slots:
+    void _socket_readyRead();
 };
 
-#endif // PLAYAUDIO_H
+#endif // AUDIOSOCKET_H

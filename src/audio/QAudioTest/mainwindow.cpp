@@ -6,47 +6,50 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     _layG(new QGridLayout),
-    _pbOpen(new QPushButton("Open device", this)),
-    _pbStart(new QPushButton("Start recording and encoding", this)),
+    _pbOpen(new QPushButton("Open audio device", this)),
+    _pbStart(new QPushButton("Start", this)),
     _sliderSound(new QSlider(Qt::Horizontal, this)),
     _input(new AudioStream()),
     _output(new AudioStream()),
-    _playAudio(new PlayAudio(this))
+    _socket(new AudioSocket(this)),
+    _leIp(new QLineEdit(this))
 {
     this->setCentralWidget(new QWidget(this));
     this->centralWidget()->setLayout(_layG);
 
     _layG->addWidget(_pbOpen, 0, 0);
-    _layG->addWidget(_pbStart, 1, 0);
-    _layG->addWidget(_sliderSound, 2, 0);
+    _layG->addWidget(_leIp, 1, 0);
+    _layG->addWidget(_pbStart, 2, 0);
+    _layG->addWidget(_sliderSound, 3, 0);
 
     _pbStart->setEnabled(false);
 
-    _playAudio->setInput(_input);
-    _playAudio->setOutput(_output);
+    _sliderSound->setTracking(true);
+    _sliderSound->setRange(-32768, 32767);
+
+    _leIp->setInputMask("009.009.009.009;_");
+    _leIp->setText("127.000.000.001");
+
+    _socket->setInput(_input);
+    _socket->setOutput(_output);
 
     QObject::connect(_pbOpen, SIGNAL(clicked()), this, SLOT(_pbOpen_clicked()));
     QObject::connect(_pbStart, SIGNAL(clicked()), this, SLOT(_pbStart_clicked()));
-    QObject::connect(_sliderSound, SIGNAL(valueChanged(int)), _playAudio, SLOT(setGain(int)));
-
-    _sliderSound->setTracking(true);
-    _sliderSound->setRange(-32768, 32767);
+    QObject::connect(_sliderSound, SIGNAL(valueChanged(int)), _socket, SLOT(setGain(int)));
 }
 
 MainWindow::~MainWindow()
 {
-    _playAudio->terminate();
-
     delete _input;
     delete _output;
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
+    _socket->quit();
+
     _input->stop();
     _output->stop();
-
-    _playAudio->quit();
 
     e->accept();
 }
@@ -89,18 +92,16 @@ void MainWindow::_pbStart_clicked()
 {
     if (_input->isStarted() || _output->isStarted())
     {
+        _socket->quit();
+
         _input->stop();
         _output->stop();
 
-        _pbStart->setText("Start recording and encoding");
+        _pbStart->setText("Start");
         _pbOpen->setEnabled(true);
-
-        _playAudio->quit();
 
         return ;
     }
-
-    _playAudio->start();
 
     if (!_input->start())
     {
@@ -113,6 +114,10 @@ void MainWindow::_pbStart_clicked()
         return ;
     }
 
+    _socket->setHostAddr(QHostAddress(_leIp->text()));
+    _socket->setGain(_sliderSound->value());
+    _socket->start();
+
     _pbOpen->setEnabled(false);
-    _pbStart->setText("Stop recording and encoding");
+    _pbStart->setText("Stop");
 }
