@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <cstring>
+#include <string>
 #include "Utils.hpp"
-#include "Opcodes.hpp"
 #include "SharedDefines.h"
 
 #define PACKET_DEFAULT_SIZE 512

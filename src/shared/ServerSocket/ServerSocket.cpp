@@ -12,7 +12,7 @@ ServerSocket::ServerSocket(SocketMgr* mgr, unsigned short port) :
 
 void ServerSocket::startAccept()
 {
-    SessionSocket* newSock = new SessionSocket(_sockMgr->io_service());
+    SessionSocket* newSock = new SessionSocket(_sockMgr);
     _acceptor.async_accept(newSock->socket(),
             boost::bind(&ServerSocket::handleAccept, this, newSock, boost::asio::placeholders::error)
             );

@@ -1,4 +1,6 @@
+#include <functional>
 #include "SocketMgr.hpp"
+#include "ServerSocket.hpp"
 
 bool SocketMgr::startNetwork(unsigned short port, unsigned int threadCount)
 {
@@ -10,18 +12,7 @@ bool SocketMgr::startNetwork(unsigned short port, unsigned int threadCount)
 
     try {
         _srvSock = new ServerSocket(this, port);
-
-        for (unsigned int i = 0; i < threadCount; ++i)
-        {
-            _threads.create_thread(
-                        [&]() {
-                        std::cout << "START THERAD" << std::endl;
-                            _service.run();
-                            std::cout << "END THREAD" << std::endl;
-                        }
-                    );
-        }
-
+        _thread = new Thread(_service);
     } catch (std::exception const& e) {
         std::cerr << "Fail to start network: " << e.what() << std::endl;
         return false;
@@ -35,4 +26,7 @@ void SocketMgr::shutdown()
         _srvSock->shutdown();
 
     _service.stop();
+
+    if (_thread)
+        _thread->join();
 }
