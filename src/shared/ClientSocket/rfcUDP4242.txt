@@ -1,0 +1,116 @@
+Network Working Group                                         M. Stroher
+Request for Comments: 4242                                       Epitech
+Category: Standards Track                                   October 2013
+
+                    Babel  communication protocol
+
+Abstract
+    This document describes how the RType Protocol session is mapped
+    onto a Transmission Control Protocol (TCP) connection. And another
+    User Datagram Protocol (UDP) connection to manage client
+    communication.
+
+Status of this Memo
+
+    This document specifies an Internet standards track protocol for
+    the Internet community, and requests discussion and suggestions
+    for improvements.  Please refer to the current edition of the
+    "Internet Official Protocol Standards" (STD 1) for the
+    standardization state and status of this protocol.  Distribution
+    of this memo is unlimited.
+
+Copyright Notice
+
+    Copyright (C) 2013 Epitech.
+
+    This document is free; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This document is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public license
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
+RFC 4242            RType communication protocol            October 2013
+
+------------------------------------------------------------------------
+
+1.1.    Conventions Used in This Document
+
+    The key words "INVITE", "ACK", "CANCEL", "BYE", "OPTIONS", "REGISTER"
+    , "INFO" in this document are to be interpreted as described in
+    [RFC3261].
+
+    After being now successfully connected to the server, the client will
+    have access to his contact list.
+
+Make a call
+    Mapping Babel session management facilities onto the UDP service is
+    straightfoward. An Babel session first requires creation of a UDP
+    connection between two peers, one that initiates the connection
+    request and one that responds to the connection request. The
+    initialising peer is called the "client", and the responding peer is
+    called the "server".
+
+    The client will first send an "INVITE" call to the server using an UDP
+    socket. This Invite packet MUST have the following structure:
+
+    <FLAGS_FIELD><COMMAND><0x9><USER_NAME@USER_ADRESS><0x9>
+    <CONTACT_NAME@CONTACT_ADRESS>
+
+    this will be in this case
+
+    RINVITE	 toto@192.168.1.11	titi@192.168.1.10
+
+    Note: Here 0x9 is replaced by tabulations
+
+    where:
+    <FLAGS_FIELD> Request/Response flag (R = request, r = response)
+    <COMMAND> is the command name. Here is the command list:
+    INVITE: Indicates a client is being invited to participate in a call session.
+    ACK: Confirms that the client has received a final response to an INVITE request.
+    BYE: Terminates a call and can be sent by either the caller or the callee.
+    CANCEL: Cancels any pending request.
+    MESSAGE: Transports instant messages using SIP.
+    <USER_NAME> is the caller (client) name
+    <USER_ADRESS> is the caller (client) adresS
+    <SERVER_ADRESS> is the current server adress
+    <CONTACT_NAME> is the name of the contact you are trying to join
+    <CONTACT_ADRESS> is the adress of the contact you are trying to join
+
+    The server will respond with a "TRYING" respond, wich mean that he is
+    currently trying to join the contact. This respond will have the
+    following structure:
+
+    <FLAGS_FIELD><REPONSE_CODE><COMMAND><0x9><USER_ADRESS><0x9>
+    <CONTACT_NAME@CONTACT_ADRESS>
+
+    r100INVITE	  toto@192.168.1.11	titi@192.168.1.10
+
+    the <REPONSE_CODE> flag is limited by the following codes:
+    <100> = Trying
+    <200> = Ok
+    <487> = Request canceled
+    <404> = Not found
+    <180> = Ringing
+
+    If the server reach the contact he will now respond using a "RINGING"
+    packets.
+
+    r180RINGING	  toto@192.168.1.11	titi@192.168.1.10
+
+    Otherwise he will throw a 404 packet. This will mean that the contact
+    you are trying to join is currently unreachable.
+
+    r404NOTFOUND   toto@192.168.1.11	titi@192.168.1.10
+
+    If the contact accept the call he will now respond an "OK" packets:
+
+    r100OK   toto@192.168.1.11	titi@192.168.1.10
+
