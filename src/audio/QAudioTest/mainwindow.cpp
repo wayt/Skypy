@@ -1,6 +1,7 @@
 #include <QMessageBox>
-#include <QDebug>
 
+#include "audiomanager.h"
+#include "audioencoder.h"
 #include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -9,8 +10,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _pbOpen(new QPushButton("Open audio device", this)),
     _pbStart(new QPushButton("Start", this)),
     _sliderSound(new QSlider(Qt::Horizontal, this)),
-    _input(new AudioStream()),
-    _output(new AudioStream()),
     _socket(new AudioSocket(this)),
     _leIp(new QLineEdit(this))
 {
@@ -30,58 +29,34 @@ MainWindow::MainWindow(QWidget *parent) :
     _leIp->setInputMask("009.009.009.009;_");
     _leIp->setText("127.000.000.001");
 
-    _socket->setInput(_input);
-    _socket->setOutput(_output);
-
     QObject::connect(_pbOpen, SIGNAL(clicked()), this, SLOT(_pbOpen_clicked()));
     QObject::connect(_pbStart, SIGNAL(clicked()), this, SLOT(_pbStart_clicked()));
-    QObject::connect(_sliderSound, SIGNAL(valueChanged(int)), _socket, SLOT(setGain(int)));
+    QObject::connect(_sliderSound, SIGNAL(valueChanged(int)), this, SLOT(_sliderSound_valueChanged(int)));
 }
 
 MainWindow::~MainWindow()
 {
-    delete _input;
-    delete _output;
+    delete sAudioEncoder;
+    delete sAudioManager;
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
     _socket->quit();
 
-    _input->stop();
-    _output->stop();
-
     e->accept();
 }
 
 void MainWindow::_pbOpen_clicked()
 {
-    _input->stop();
-    _input->closeDevice();
-    _input->clearInputDevice();
-    _output->stop();
-    _output->closeDevice();
-    _output->clearOutputDevice();
-
-    if (!_input->setInputDevice(-1, AudioSample::MONO, AudioStream::LOW_LATENCY))
+    if (!sAudioManager->setInputDevice(DEFAULT_DEVICE, AudioSample::MONO, AudioSample::FREQ_48000))
     {
-        QMessageBox::critical(this, "Error", "Unable to set input device\n" + _input->getErrorText());
+        QMessageBox::critical(this, "Error", "Fail to init input device: " + sAudioManager->errorText());
         return ;
     }
-    if (!_output->setOutputDevice(-1, AudioSample::MONO, AudioStream::LOW_LATENCY))
+    if (!sAudioManager->setOutputDevice(DEFAULT_DEVICE, AudioSample::MONO, AudioSample::FREQ_48000))
     {
-        QMessageBox::critical(this, "Error", "Unable to set output device\n" + _output->getErrorText());
-        return ;
-    }
-
-    if (!_input->openDevice(AudioSample::FREQ_48000))
-    {
-        QMessageBox::critical(this, "Error", "Unable to open input device\n" + _input->getErrorText());
-        return ;
-    }
-    if (!_output->openDevice(AudioSample::FREQ_48000))
-    {
-        QMessageBox::critical(this, "Error", "Unable to open output device\n" + _output->getErrorText());
+        QMessageBox::critical(this, "Error", "Fail to init output device: " + sAudioManager->errorText());
         return ;
     }
 
@@ -90,12 +65,10 @@ void MainWindow::_pbOpen_clicked()
 
 void MainWindow::_pbStart_clicked()
 {
-    if (_input->isStarted() || _output->isStarted())
+    if (sAudioManager->input()->isStarted() || sAudioManager->output()->isStarted())
     {
         _socket->quit();
-
-        _input->stop();
-        _output->stop();
+        sAudioManager->quit();
 
         _pbStart->setText("Start");
         _pbOpen->setEnabled(true);
@@ -103,21 +76,21 @@ void MainWindow::_pbStart_clicked()
         return ;
     }
 
-    if (!_input->start())
+    if (!sAudioManager->start())
     {
-        QMessageBox::critical(this, "Error", "Unable to start input device\n" + _input->getErrorText());
-        return ;
-    }
-    if (!_output->start())
-    {
-        QMessageBox::critical(this, "Error", "Unable to start output device\n" + _output->getErrorText());
+        QMessageBox::critical(this, "Error", "Unable to start device\n" + sAudioManager->errorText());
         return ;
     }
 
+    sAudioEncoder->setGain(_sliderSound->value());
     _socket->setHostAddr(QHostAddress(_leIp->text()));
-    _socket->setGain(_sliderSound->value());
     _socket->start();
 
     _pbOpen->setEnabled(false);
     _pbStart->setText("Stop");
+}
+
+void MainWindow::_sliderSound_valueChanged(int value)
+{
+    sAudioEncoder->setGain(value);
 }

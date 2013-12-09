@@ -8,6 +8,8 @@
 #include "audiosample.h"
 #include "qsynchronizedqueue.h"
 
+#define DEFAULT_DEVICE  -1
+
 class AudioStream
 {
 public:
@@ -30,8 +32,8 @@ public:
     AudioStream();
     virtual ~AudioStream();
 
-    bool setInputDevice(int device = -1, AudioSample::eChannel channel = AudioSample::MONO, eLatency latency = LOW_LATENCY);
-    bool setOutputDevice(int device = -1, AudioSample::eChannel channel = AudioSample::MONO, eLatency latency = LOW_LATENCY);
+    bool setInputDevice(int device = DEFAULT_DEVICE, AudioSample::eChannel channel = AudioSample::MONO, eLatency latency = LOW_LATENCY);
+    bool setOutputDevice(int device = DEFAULT_DEVICE, AudioSample::eChannel channel = AudioSample::MONO, eLatency latency = LOW_LATENCY);
     inline void clearInputDevice() { _clearDevice(_inputParameter, _inputDeviceInfo); }
     inline void clearOutputDevice() { _clearDevice(_outputParameter, _outputDeviceInfo); }
 
@@ -39,6 +41,10 @@ public:
 
     bool openDevice(AudioSample::eFrequency frequency = AudioSample::FREQ_48000);
     void closeDevice();
+
+    inline eLatency latency() const { return _latency; }
+    inline AudioSample::eFrequency frequency() const { return _frequency; }
+    inline AudioSample::eChannel channel() const { return _channel; }
 
     inline bool isOpen() const { return _isOpen; }
 
@@ -52,7 +58,7 @@ public:
     inline QSynchronizedQueue<AudioSample>& outputQueue() { return _outputQueue; }
     inline const QSynchronizedQueue<AudioSample>& outputQueue() const { return _outputQueue; }
 
-    inline QString getErrorText() const { return _errText; }
+    inline const QString& errorText() const { return _errText; }
 
 private:
     bool _setDevice(int device, AudioSample::eChannel channel, eLatency latency, PaStreamParameters &parameter, eStreamTypes streamType, const PaDeviceInfo *&info);
@@ -68,6 +74,9 @@ private:
     const PaDeviceInfo *_inputDeviceInfo;
     const PaDeviceInfo *_outputDeviceInfo;
     PaStream *_stream;
+    eLatency _latency;
+    AudioSample::eFrequency _frequency;
+    AudioSample::eChannel _channel;
     int _channelCount;
     bool _isOpen;
     bool _isActive;

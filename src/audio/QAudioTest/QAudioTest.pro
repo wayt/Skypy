@@ -62,7 +62,9 @@ SOURCES += main.cpp\
     audiostream.cpp \
     audiosample.cpp \
     encodedsample.cpp \
-    audiosocket.cpp
+    audiosocket.cpp \
+    audiomanager.cpp \
+    audioencoder.cpp
 
 HEADERS  += mainwindow.h \
     qsynchronizedqueue.h \
@@ -70,4 +72,6 @@ HEADERS  += mainwindow.h \
     audiosample.h \
     singleton.h \
     encodedsample.h \
-    audiosocket.h
+    audiosocket.h \
+    audiomanager.h \
+    audioencoder.h

@@ -7,11 +7,11 @@
 #include <QWaitCondition>
 
 template<typename T>
-class QSynchronizedQueue : public QQueue<T>
+class QSynchronizedQueue
 {
 public:
     QSynchronizedQueue() :
-        QQueue<T>(),
+        _q(),
         _mutex(QMutex::NonRecursive),
         _cond()
     {}
@@ -20,11 +20,16 @@ public:
     T dequeue();
     void enqueue(const T &t);
 
-    /*bool isEmpty();
+    T& head();
 
-    int size();*/
+    void clear();
+
+    bool isEmpty();
+
+    int size();
 
 private:
+    QQueue<T> _q;
     QMutex _mutex;
     QWaitCondition _cond;
 };
@@ -35,10 +40,22 @@ T QSynchronizedQueue<T>::dequeue()
     QMutexLocker lock(&_mutex);
     Q_UNUSED(lock);
 
-    while (this->isEmpty())
+    while (_q.isEmpty())
         _cond.wait(&_mutex);
 
-    return QQueue<T>::dequeue();
+    return _q.dequeue();
+}
+
+template<typename T>
+T& QSynchronizedQueue<T>::head()
+{
+    QMutexLocker lock(&_mutex);
+    Q_UNUSED(lock);
+
+    while (_q.isEmpty())
+        _cond.wait(&_mutex);
+
+    return _q.head();
 }
 
 template<typename T>
@@ -47,26 +64,29 @@ void QSynchronizedQueue<T>::enqueue(const T &t)
     QMutexLocker lock(&_mutex);
     Q_UNUSED(lock);
 
-    QQueue<T>::enqueue(t);
+    _q.enqueue(t);
     _cond.wakeOne();
 }
 
-/*template<typename T>
-bool QSynchronizedQueue<T>::isEmpty()
+template<typename T>
+void QSynchronizedQueue<T>::clear()
 {
     QMutexLocker lock(&_mutex);
     Q_UNUSED(lock);
 
-    return QQueue<T>::isEmpty();
+    _q.clear();
+}
+
+template<typename T>
+bool QSynchronizedQueue<T>::isEmpty()
+{
+    return _q.isEmpty();
 }
 
 template<typename T>
 int QSynchronizedQueue<T>::size()
 {
-    QMutexLocker lock(&_mutex);
-    Q_UNUSED(lock);
-
-    return QQueue<T>::size();
-}*/
+    return _q.size();
+}
 
 #endif // QSYNCHRONIZEDQUEUE_H
