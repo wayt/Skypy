@@ -9,11 +9,14 @@ AudioSample::AudioSample() :
 }
 
 AudioSample::AudioSample(const SAMPLE *buffer, int nbFrame) :
-    _nbFrame(nbFrame),
+    _nbFrame(0),
     _buffer()
 {
-    for (int i = 0; i < _nbFrame; ++i)
+    int maxFrame = qMin(nbFrame, NB_MAX_FRAMES);
+
+    for (int i = 0; i < maxFrame; ++i)
         _buffer[i] = buffer[i];
+    _nbFrame = maxFrame;
 }
 
 AudioSample::AudioSample(const AudioSample &other) :

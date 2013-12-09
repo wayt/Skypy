@@ -41,6 +41,7 @@ private:
     OpusEncoder *_encoder;
     OpusDecoder *_decoder;
     QString _errText;
+    int _channelCount;
 
 private:
     static const int _enable = 1;

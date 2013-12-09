@@ -7,7 +7,8 @@ EncodedSample::EncodedSample() :
     _encodedSample(),
     _encoder(NULL),
     _decoder(NULL),
-    _errText()
+    _errText(),
+    _channelCount(0)
 {
 }
 
@@ -64,6 +65,8 @@ bool EncodedSample::init(AudioSample::eFrequency frequency, AudioSample::eChanne
         return false;
     }
 
+    _channelCount = channelCount;
+
     return true;
 }
 
@@ -79,9 +82,9 @@ bool EncodedSample::encode(const AudioSample &sample)
     }
 
 #ifdef AUDIO_USE_FLOAT
-    nbBytes = opus_encode_float(_encoder, sample.buffer(), NB_MAX_FRAMES, data, MAX_DATA_BYTES);
+    nbBytes = opus_encode_float(_encoder, sample.buffer(), NB_FRAMES_PER_BUFFER, data, MAX_DATA_BYTES);
 #else
-    nbBytes = opus_encode(_encoder, sample.buffer(), NB_MAX_FRAMES, data, MAX_DATA_BYTES);
+    nbBytes = opus_encode(_encoder, sample.buffer(), NB_FRAMES_PER_BUFFER, data, MAX_DATA_BYTES);
 #endif
     if (nbBytes < 0)
     {
@@ -106,9 +109,9 @@ bool EncodedSample::decode(AudioSample &sample)
     }
 
 #ifdef AUDIO_USE_FLOAT
-    nbBytes = opus_decode_float(_decoder, data, _encodedSample.size(), sample.buffer(), NB_MAX_FRAMES, 0);
+    nbBytes = opus_decode_float(_decoder, data, _encodedSample.size(), sample.buffer(), NB_FRAMES_PER_BUFFER, 0);
 #else
-    nbBytes = opus_decode(_decoder, data, _encodedSample.size(), sample.buffer(), NB_MAX_FRAMES, 0);
+    nbBytes = opus_decode(_decoder, data, _encodedSample.size(), sample.buffer(), NB_FRAMES_PER_BUFFER, 0);
 #endif
     if (nbBytes < 0)
     {
@@ -116,7 +119,7 @@ bool EncodedSample::decode(AudioSample &sample)
         return false;
     }
 
-    sample.setNbFrame(nbBytes);
+    sample.setNbFrame(nbBytes * _channelCount);
 
     return true;
 }
