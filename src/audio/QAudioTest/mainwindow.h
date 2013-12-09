@@ -26,14 +26,13 @@ private:
     QPushButton *_pbOpen;
     QPushButton *_pbStart;
     QSlider *_sliderSound;
-    AudioStream *_input;
-    AudioStream *_output;
     AudioSocket *_socket;
     QLineEdit *_leIp;
 
 private slots:
     void _pbOpen_clicked();
     void _pbStart_clicked();
+    void _sliderSound_valueChanged(int value);
 };
 
 #endif // MAINWINDOW_H

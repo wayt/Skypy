@@ -10,6 +10,8 @@ AudioStream::AudioStream() :
     _inputDeviceInfo(NULL),
     _outputDeviceInfo(NULL),
     _stream(NULL),
+    _latency(LOW_LATENCY),
+    _frequency(AudioSample::FREQ_8000),
     _channelCount(0),
     _isOpen(false),
     _isActive(false),
@@ -76,6 +78,7 @@ bool AudioStream::openDevice(AudioSample::eFrequency frequency)
         return false;
     }
 
+    _frequency = frequency;
     _isOpen = true;
     return true;
 }
@@ -163,6 +166,8 @@ bool AudioStream::_setDevice(int device, AudioSample::eChannel channel, eLatency
             return false;
     }
 
+    _latency = latency;
+    _channel = channel;
     _channelCount = channelCount;
     _streamType |= streamType;
     return true;

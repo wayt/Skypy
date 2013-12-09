@@ -18,15 +18,8 @@ public:
     AudioSocket(QObject *parent = 0);
     virtual ~AudioSocket();
 
-    inline void setInput(AudioStream *input) { _input = input; }
-    inline const AudioStream* input() const { return _input; }
-
-    inline void setOutput(AudioStream *output) { _output = output; }
-    inline const AudioStream* output() const { return _output; }
-
 public slots:
     void setHostAddr(const QHostAddress &addr);
-    void setGain(int gain);
 
     void quit();
     void terminate();
@@ -38,9 +31,6 @@ private:
     bool _run;
     QUdpSocket *_socket;
     QHostAddress _hostAddr;
-    AudioStream *_input;
-    AudioStream *_output;
-    EncodedSample *_encodedSample;
 
 private slots:
     void _socket_readyRead();
