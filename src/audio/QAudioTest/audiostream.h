@@ -68,6 +68,7 @@ private:
     const PaDeviceInfo *_inputDeviceInfo;
     const PaDeviceInfo *_outputDeviceInfo;
     PaStream *_stream;
+    int _channelCount;
     bool _isOpen;
     bool _isActive;
 

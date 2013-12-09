@@ -10,6 +10,7 @@ AudioStream::AudioStream() :
     _inputDeviceInfo(NULL),
     _outputDeviceInfo(NULL),
     _stream(NULL),
+    _channelCount(0),
     _isOpen(false),
     _isActive(false),
     _inputQueue(),
@@ -57,13 +58,19 @@ bool AudioStream::openDevice(AudioSample::eFrequency frequency)
     if (_isOpen)
         closeDevice();
 
+    if (_channelCount == 0)
+    {
+        _errText = "The input or the output must be set before openning";
+        return false;
+    }
+
     if (qFuzzyCompare(sample, 0.))
     {
         _errText = "Invalid frequency choose";
         return false;
     }
 
-    if ((err = Pa_OpenStream(&_stream, input, output, sample, NB_MAX_FRAMES, paClipOff, &AudioStream::_callback, this)) != paNoError)
+    if ((err = Pa_OpenStream(&_stream, input, output, sample, NB_FRAMES_PER_BUFFER * _channelCount, paClipOff, &AudioStream::_callback, this)) != paNoError)
     {
         _errText = Pa_GetErrorText(err);
         return false;
@@ -156,6 +163,7 @@ bool AudioStream::_setDevice(int device, AudioSample::eChannel channel, eLatency
             return false;
     }
 
+    _channelCount = channelCount;
     _streamType |= streamType;
     return true;
 }
