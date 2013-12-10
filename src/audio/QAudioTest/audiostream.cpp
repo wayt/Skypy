@@ -127,6 +127,24 @@ void AudioStream::stop()
     _isActive = false;
 }
 
+int AudioStream::deviceCount()
+{
+    return Pa_GetDeviceCount();
+}
+
+const QString &AudioStream::deviceName(int device)
+{
+    static QString name;
+    const PaDeviceInfo* info = Pa_GetDeviceInfo(device);
+
+    if (!info)
+        name.clear();
+    else
+        name = info->name;
+
+    return name;
+}
+
 bool AudioStream::_setDevice(int device, AudioSample::eChannel channel, eLatency latency, PaStreamParameters &parameter, eStreamTypes streamType, const PaDeviceInfo *&info)
 {
     int channelCount = AudioSample::channelToInt(channel);

@@ -60,6 +60,10 @@ public:
 
     inline const QString& errorText() const { return _errText; }
 
+public:
+    static int deviceCount();
+    static const QString& deviceName(int device);
+
 private:
     bool _setDevice(int device, AudioSample::eChannel channel, eLatency latency, PaStreamParameters &parameter, eStreamTypes streamType, const PaDeviceInfo *&info);
     void _clearDevice(PaStreamParameters &parameter, const PaDeviceInfo *&info);
