@@ -3,9 +3,14 @@
 
 #include <boost/asio.hpp>
 
-class TcpAcceptor : public boost::asio::ip::tcp::acceptor
+using boost::asio::ip::tcp;
+
+class TcpAcceptor : public tcp::acceptor
 {
 public:
+    TcpAcceptor(boost::asio::io_service& service, tcp::endpoint endpoint) :
+        tcp::acceptor(service, endpoint)
+    {}
 };
 
 #endif /* !TCPACCEPTOR_H_ */

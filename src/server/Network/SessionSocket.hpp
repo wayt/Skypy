@@ -5,6 +5,7 @@
 #include <system_error>
 #include "Opcodes.hpp"
 #include "Packet.hpp"
+#include "TcpSocket.hpp"
 
 class SocketMgr;
 
@@ -14,15 +15,14 @@ enum SocketStatus
     STATUS_AUTHED       = 1
 };
 
-class SessionSocket public TcpSocket
+class SessionSocket : public TcpSocket
 {
 public:
     SessionSocket(SocketMgr* mgr);
 
     tcp::socket& socket() { return _socket; }
 
-    void init();
-    void close();
+    void onInit();
 
     void handlePacketInput(Packet& pkt);
 

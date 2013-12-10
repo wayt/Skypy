@@ -35,7 +35,7 @@ public:
     OpcodeDefinition const* getOpcodeDefinition(uint16 opcode, OpcodeHandleMode mode) const;
 
 private:
-    std::map<uint16, OpcodeDefinition*>> _opcodeMap;
+    std::map<uint16, OpcodeDefinition*> _opcodeMap;
 };
 
 #endif /* !OPCODES_H_ */
