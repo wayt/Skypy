@@ -2,10 +2,11 @@
 #include <boost/bind.hpp>
 #include <iostream>
 #include "Utils.hpp"
-#include "SocketMgr.hpp"
+#include "SocketMgr.h"
+#include "Session.h"
 
 SessionSocket::SessionSocket(SocketMgr* mgr) : TcpSocket(mgr->io_service()),
-    _sockMgr(mgr), _status(STATUS_UNAUTHED)
+    _sockMgr(mgr), _status(STATUS_UNAUTHED), _session(NULL)
 {}
 
 void SessionSocket::onInit()
@@ -72,10 +73,16 @@ void SessionSocket::send(Packet const& pkt)
 
 void SessionSocket::handlePacketInput(Packet& pkt)
 {
-    Opcodes::OpcodeDefinition const* opcode = _sockMgr->getOpcodesMgr().getOpcodeDefinition(pkt.getOpcode(), (_status == STATUS_UNAUTHED ? OPSTATUS_SYNC_UNAUTHED : OPSTATUS_SYNC_AUTHED));
-    if (opcode)
+    if (_status == STATUS_UNAUTHED)
     {
-
+        Opcodes::OpcodeDefinition const* opcode = _sockMgr->getOpcodesMgr().getOpcodeDefinition(pkt.getOpcode(), OPSTATUS_SYNC_UNAUTHED);
+        if (opcode)
+            if (opcode->socketFunc)
+                opcode->socketFunc(*this, pkt);
+        return;
     }
+
+    if (_session)
+        _session->handlePacketInput(pkt);
 
 }

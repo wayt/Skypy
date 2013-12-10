@@ -15,7 +15,7 @@
 enum OpcodeHandleMode
 {
     OPSTATUS_SYNC_UNAUTHED      = 0,
-    OPSTATUS_ASYNC_UNAUTHED     = 1,
+    //OPSTATUS_ASYNC_UNAUTHED     = 1, NYI
     OPSTATUS_SYNC_AUTHED        = 2,
     OPSTATUS_ASYNC_AUTHED       = 3
 };
@@ -26,7 +26,8 @@ public:
     struct OpcodeDefinition
     {
         uint16 opcode;
-        std::function<void(ASession&, Packet&)> func;
+        std::function<void(Session&, Packet&)> sessionFunc;
+        std::function<void(SessionSocket&, Packet&)> socketFunc;
         OpcodeHandleMode mode;
     };
 

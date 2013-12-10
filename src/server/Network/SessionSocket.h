@@ -8,6 +8,7 @@
 #include "TcpSocket.hpp"
 
 class SocketMgr;
+class Session;
 
 enum SocketStatus
 {
@@ -40,6 +41,7 @@ private:
     unsigned char _body[Packet::MaxBodySize];
     SocketMgr* _sockMgr;
     SocketStatus _status;
+    Session* _session;
 };
 
 #endif /* !SESSIONSOCKET_H_ */
