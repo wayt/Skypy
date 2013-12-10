@@ -8,12 +8,12 @@ SessionSocket::SessionSocket(SocketMgr* mgr) : TcpSocket(mgr->io_service()),
     _sockMgr(mgr), _status(STATUS_UNAUTHED)
 {}
 
-void SessionSocket::init()
+void SessionSocket::onInit()
 {
     _status = STATUS_UNAUTHED;
 
     uint8 buff[] = "WELCOME";
-    send(buff, 8);
+    _send(buff, 8);
 
     _registerHeader();
 }
@@ -67,33 +67,15 @@ void SessionSocket::_handleBody(uint16_t code, boost::system::error_code const& 
 void SessionSocket::send(Packet const& pkt)
 {
     std::cerr << "SEND: " << uint32(pkt.getOpcode()) << std::endl;
-    send(pkt.content(), pkt.size());
-}
-
-void SessionSocket::send(uint8 const* data, uint16 size)
-{
-    boost::asio::async_write(_socket,
-            boost::asio::buffer(data, size),
-            boost::bind(&SessionSocket::_handleWrite, this,
-                boost::asio::placeholders::error));
-}
-
-void SessionSocket::_handleWrite(boost::system::error_code const& error)
-{
-    if (error)
-    {
-        std::cerr << "SessionSocket::_handleWrite: " << error.message() << std::endl;
-        _sockMgr->handleWriteError(this, std::error_code(/*error.value()*/));
-    }
+    _send(pkt.content(), pkt.size());
 }
 
 void SessionSocket::handlePacketInput(Packet& pkt)
 {
-    Opcodes::OpcodeDefinition const* opcode = _sockMgr->getOpcodesMgr()->getOpcodeDefinition(pkt.getOpcode(), (_status == STATUS_UNAUTHED ? OPSTATUS_SYNC_UNAUTHED : OPSTATUS_SYNC_AUTHED));
+    Opcodes::OpcodeDefinition const* opcode = _sockMgr->getOpcodesMgr().getOpcodeDefinition(pkt.getOpcode(), (_status == STATUS_UNAUTHED ? OPSTATUS_SYNC_UNAUTHED : OPSTATUS_SYNC_AUTHED));
     if (opcode)
     {
 
     }
-    else
 
 }

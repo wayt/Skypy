@@ -5,8 +5,14 @@
 TcpSocket::TcpSocket(boost::asio::io_service& service) :
     _socket(service)
 {
+}
+
+void TcpSocket::init()
+{
     boost::asio::ip::tcp::no_delay option(true);
     _socket.set_option(option);
+
+    onInit();
 }
 
 void TcpSocket::close()
@@ -16,7 +22,7 @@ void TcpSocket::close()
     _socket.close();
 }
 
-void TcpSocket::send(uint8 const* data, uint16 size)
+void TcpSocket::_send(uint8 const* data, uint16 size)
 {
     boost::asio::async_write(_socket,
             boost::asio::buffer(data, size),

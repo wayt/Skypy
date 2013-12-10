@@ -1,7 +1,7 @@
 #include "Opcodes.hpp"
 #include <sstream>
 
-OpcodeDefinition const* Opcodes::getOpcodeDefinition(uint16 opcode, OpcodeHandleMode mode) const
+Opcodes::OpcodeDefinition const* Opcodes::getOpcodeDefinition(uint16 opcode, OpcodeHandleMode mode) const
 {
     std::map<uint16, OpcodeDefinition*>::const_iterator itr = _opcodeMap.find(opcode);
     if (itr == _opcodeMap.end())

@@ -6,6 +6,8 @@
 #include "ServerSocket.hpp"
 #include "Mutex.hpp"
 
+class SessionSocket;
+
 class SocketMgr
 {
 public:
