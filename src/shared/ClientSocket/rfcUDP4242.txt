@@ -114,3 +114,96 @@ Make a call
 
     r100OK   toto@192.168.1.11	titi@192.168.1.10
 
+7. UDP Message Exchange
+
+    An Babel client streams voice to another Babel client on an
+    established UDP connection. A client should establish a TCP connections
+    to first get hist contact list.
+
+    Babel describes client-server interaction as a stream
+    exchange. This UDP connection is a pipe between both client,
+    they are both listening and sending in the same way.
+     Each Babel data unit MUST be split into multiple message of 256
+     bits each.
+
+
+                    Client                  Server
+                |                                     |
+                |                Connect              |
+                | >>------------------------------->> |
+                |                                     |
+                |             Send Greeting           |
+                | <<-------------------------------<< |
+                |                                     |
+                |             Send <token>            |
+                | >>------------------------------->> |
+                |                                     |
+                |             Send Response           |
+                | <<-------------------------------<< |
+                |                                     |
+                |            Send Command X           |
+                | >>------------------------------->> |
+                |                                     |
+                |    Send Command Y                   |
+                | >>---------------+                  |
+                |                  |                  |
+                |                  |                  |
+                |            Send Response X          |
+                | <<---------------(---------------<< |
+                |                  |                  |
+                |                  |                  |
+                |            Send Response X          |
+                | <<---------------(---------------<< |
+                |                  |                  |
+                |                  |                  |
+                |                  +--------------->> |
+                |                                     |
+                |            Send Response Y          |
+                | <<-------------------------------<< |
+                |                                     |
+                |             Send <logout>           |
+                | >>------------------------------->> |
+                |                                     |
+                |     Send Response & Disconnect      |
+                | <<-------------------------------<< |
+                |                                     |
+                Figure 1: UDP Client-Server Message Exchange
+
+8. UDP Data Unit Format
+
+    The Babel data unit contains three fields: a 32-bits header that
+    describes the total length of the message field, the message
+    field and some 0 bits to fill the packet size (256 bits).
+    A receiver MUST successfully read the full packet bits before
+    processing the RType message.
+
+    Babel Data Unit Format (one tick mark represents one bit position):
+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                           Total Length                        |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                         RType Message Instance                |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                         Bits stuffing                         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+    Total Length (32 bits): The total length of the Babel data unit
+    measured in octets in network (big endian) byte order.  The octets
+    contained in this field MUST NOT be included in the total length
+    calculation.
+
+    Babel Message Instance (variable length): The Babel message instance
+    carried in the data unit.
+
+    Bits stuffing: a bits field with a 0 value to fill the 256 bits
+    message size.
+
+RFC 42              RType communication protocol            October 2013
+
+
+
+
+
+
