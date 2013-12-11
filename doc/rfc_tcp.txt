@@ -255,6 +255,7 @@ RFC 42              Babel communication protocol            October 2013
 
     A CMSG is a packet sent from client to server.
     A SMSG is a packet sent from server to client.
+    The hexa value after the command name is the command value.
     Fields type:
         -   string, one Byte by character terminated by a null Byte.
         -   int8, one signed Byte
@@ -271,19 +272,19 @@ RFC 42              Babel communication protocol            October 2013
 
     6.1.    Globals commands
 
-    -   SMSG ping, data: none.
-        The client should answer with a CMSG pong, data: none.
+    -   SMSG ping(0x0004), data: none.
+        The client should answer with a CMSG pong(0x0005), data: none.
 
     6.2.    Auth commands
 
-    -   CMSG auth, data: string(username), string(sha1 password)
-        the server should answer with and SMSG auth_result,
+    -   CMSG auth(0x0001), data: string(username), string(sha1 password)
+        the server should answer with and SMSG auth_result(0x0002),
         data: uint8(result). The result can be:
             - 0, successfully authed
             - 1, invalide username / password
             - 2, internal error
 
-    -   CMSG logout, data: none.
+    -   CMSG logout(0x0003), data: none.
         the server should not answer.
 
 
