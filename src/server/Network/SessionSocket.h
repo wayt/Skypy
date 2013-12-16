@@ -16,6 +16,13 @@ enum SocketStatus
     STATUS_AUTHED       = 1
 };
 
+enum AuthResults
+{
+    AUTHRESULT_OK           = 0,
+    AUTHRESULT_BAD_LOG      = 1,
+    AUTHRESULT_INTERAL_ERR  = 2,
+};
+
 class SessionSocket : public TcpSocket
 {
 public:
@@ -36,6 +43,8 @@ public:
 private:
     void _registerHeader();
     void _handleWrite(boost::system::error_code const& error);
+
+    void _handleAuthRequest(Packet& pkt);
 
     unsigned char _header[Packet::HeaderSize];
     unsigned char _body[Packet::MaxBodySize];

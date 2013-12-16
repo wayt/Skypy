@@ -7,6 +7,9 @@
 #include "Utils.hpp"
 #include "SharedDefines.h"
 
+#include <iostream>
+#include <iomanip>
+
 #define PACKET_DEFAULT_SIZE 512
 #define PACKET_HEADER_SIZE 4
 
@@ -217,6 +220,18 @@ public:
     static const unsigned int HeaderSize = PACKET_HEADER_SIZE;
     static const unsigned int MaxBodySize = PACKET_DEFAULT_SIZE;
 
+    void dumpHex()
+    {
+        uint64 size = _storage.size();
+        for (uint64 i = 0; i < size; ++i)
+        {
+            if (i % 4 == 0)
+                std::cout << std::endl;
+            std::cout << int32(_storage[i]) << " - ";
+        }
+        std::cout << std::endl;
+    }
+
 private:
     template<class T>
     void append(T value)
@@ -235,7 +250,7 @@ private:
 
     void updateSize()
     {
-        uint16 size = _wpos - 2;
+        uint16 size = _wpos - 4;
         Utils::endian::native_to_big<uint16>(size);
         memcpy(&_storage[0], (const uint8*)&size, 2);
     }

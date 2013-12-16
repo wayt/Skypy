@@ -6,38 +6,25 @@
 #include "SessionSocket.h"
 #include <map>
 
-/*enum InternalOpcodes
+enum Opcodes
 {
     SMSG_WELCOME        = 1,
     CMSG_AUTH           = 2,
     SMSG_AUTH_RESULT    = 3,
-}*/
-
-enum OpcodeHandleMode
-{
-    OPSTATUS_SYNC_UNAUTHED      = 0,
-    //OPSTATUS_ASYNC_UNAUTHED     = 1, NYI
-    OPSTATUS_SYNC_AUTHED        = 2,
-    OPSTATUS_ASYNC_AUTHED       = 3
+    MSG_MAX
 };
 
-class Opcodes
+class OpcodeMgr
 {
 public:
     struct OpcodeDefinition
     {
         uint16 opcode;
-        std::function<void(Session&, Packet&)> sessionFunc;
-        std::function<void(SessionSocket&, Packet&)> socketFunc;
-        OpcodeHandleMode mode;
+        void (Session::*func)(Packet&);
     };
 
-    void addOpcode(OpcodeDefinition const& def) { _opcodeMap[def.opcode] = new OpcodeDefinition(def); }
+    static OpcodeDefinition const* getOpcodeDefinition(uint16 opcode);
 
-    OpcodeDefinition const* getOpcodeDefinition(uint16 opcode, OpcodeHandleMode mode) const;
-
-private:
-    std::map<uint16, OpcodeDefinition*> _opcodeMap;
 };
 
 #endif /* !OPCODES_H_ */

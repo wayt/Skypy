@@ -4,13 +4,21 @@
 #include "mainwindow.h"
 #include "networkmgr.h"
 
+#include "packet.hpp"
+#include "opcodemgr.h"
+
+#include <iostream>
+
 MainWindow::MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
-    _layF(new QFormLayout(this)),
+    _layF(new QFormLayout),
     _leMdp(new QLineEdit(this)),
     _leMail(new QLineEdit(this)),
-    _pbConnection(new QPushButton("Connection", this))
+    _pbConnection(new QPushButton("Connection", this)),
+    _networkMgr(this)
 {
+    this->setCentralWidget(new QWidget(this));
+    this->centralWidget()->setLayout(_layF);
     _layF->addRow("Mail address", _leMail);
     _layF->addRow("Password", _leMdp);
     _layF->addWidget(_pbConnection);
@@ -27,14 +35,35 @@ MainWindow::~MainWindow()
 
 void MainWindow::_pbConnection_clicked()
 {
-    //if (_leMdp->text().isEmpty() || _leMail->text().isEmpty())
-    //    return ;
+    if (_leMdp->text().isEmpty() || _leMail->text().isEmpty())
+        return ;
 
     /*
      * Insert your code here
      */
 
-    sNetworkMgr->tcpConnect("localhost", 8000);
+    _networkMgr.tcpConnect("localhost", 5000);
 
     QMessageBox::information(this, "Authentification", "Authentification successful");
+}
+
+void MainWindow::handleTcpConnected()
+{
+    QMessageBox::information(this, "Debug", "CONNECTED !");
+}
+
+void MainWindow::handleTcpError(QAbstractSocket::SocketError e)
+{
+    (void)e;
+    QMessageBox::information(this, "Debug", "SOCK ERROR");
+}
+
+void MainWindow::handleRequireAuth()
+{
+    Packet pkt(CMSG_AUTH);
+    pkt << _leMail->text();
+    pkt << _leMdp->text();
+    _networkMgr.tcpSendPacket(pkt);
+    std::cout << "AUTH SENDED" << std::endl;
+    pkt.dumpHex();
 }
