@@ -1,5 +1,4 @@
-#include "Opcodes.hpp"
-#include <sstream>
+#include "Opcodes.h"
 
 Opcodes::OpcodeDefinition const* Opcodes::getOpcodeDefinition(uint16 opcode, OpcodeHandleMode mode) const
 {

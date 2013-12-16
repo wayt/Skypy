@@ -6,18 +6,18 @@ DbQueue::DbQueue() : _queue(), _mutex(), _cond()
 
 void DbQueue::enqueue(std::string const &sql)
 {
-    boost::mutex::scoped_lock lock(_mutex);
+    boost::unique_lock<boost::mutex> lock(_mutex);
 
     _queue.push(sql);
-    _cond.notify();
+    _cond.notify_one();
 }
 
-std::string const &DbQueue::dequeue()
+std::string DbQueue::dequeue()
 {
-    boost::mutex::scoped_lock lock(_mutex);
+    boost::unique_lock<boost::mutex> lock(_mutex);
 
     while (!_queue.size())
-        _cond.wait(_mutex);
+        _cond.wait(lock);
 
     std::string ret = _queue.front();
     _queue.pop();
@@ -27,7 +27,7 @@ std::string const &DbQueue::dequeue()
 
 unsigned int DbQueue::size()
 {
-    boost::mutex::scoped_lock lock(_mutex);
+    boost::unique_lock<boost::mutex> lock(_mutex);
 
     return _queue.size();
 }

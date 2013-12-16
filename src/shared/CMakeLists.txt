@@ -41,4 +41,3 @@ target_link_libraries(${LIBRARY_NAME}
     ${MYSQL_LIBRARIES}
 )
 
-set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})

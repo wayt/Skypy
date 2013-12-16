@@ -2,7 +2,8 @@
 # define OPCODES_H_
 
 #include "SharedDefines.h"
-#include "ASession.hpp"
+#include "Session.h"
+#include "SessionSocket.h"
 #include <map>
 
 /*enum InternalOpcodes
