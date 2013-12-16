@@ -8,7 +8,7 @@ class ThreadPool
 public:
 
     template<class T>
-    void create_thread(T& func) { _threads.push_back(new Thread(func)); }
+    void create_thread(T *func) { _threads.push_back(new Thread(func)); }
     void join_all()
     {
         for (std::list<Thread*>::iterator itr = _threads.begin(); itr != _threads.end(); ++itr)
