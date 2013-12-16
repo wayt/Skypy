@@ -18,6 +18,7 @@ bool DbConnection::hasError() const
 bool DbConnection::open()
 {
     mysql_library_init(0, NULL, NULL);
+    mysql_thread_init();
 
     _conn = mysql_init(NULL);
 
@@ -68,4 +69,5 @@ void DbConnection::close()
         _conn = NULL;
     }
     mysql_library_end();
+    mysql_thread_end();
 }

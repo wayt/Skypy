@@ -1,4 +1,6 @@
 #find_package(Boost 1.46 COMPONENTS system thread-mt REQUIRED)
+find_package(Threads)
+find_package(MySQL REQUIRED)
 
 set(EXECUTABLE_NAME "server")
 
@@ -24,11 +26,12 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/shared/Database
     ${CMAKE_SOURCE_DIR}/src/shared/ServerSocket
     ${CMAKE_SOURCE_DIR}/src/shared/Threading
-    ${Boost_INCLUDE_DIRS}
+    ${MYSQL_INCLUDE_DIR}
+#    ${Boost_INCLUDE_DIRS}
 )
 
 link_directories(
-    ${Boost_LIBRARY_DIRS}
+#    ${Boost_LIBRARY_DIRS}
 )
 
 add_executable(${EXECUTABLE_NAME}
@@ -36,6 +39,7 @@ add_executable(${EXECUTABLE_NAME}
 )
 
 target_link_libraries(${EXECUTABLE_NAME}
-    ${Boost_LIBRARIES}
     shared
+#    ${Boost_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
 )

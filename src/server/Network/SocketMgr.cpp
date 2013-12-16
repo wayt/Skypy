@@ -2,6 +2,7 @@
 #include "SocketMgr.h"
 #include "ServerSocket.h"
 #include "SessionSocket.h"
+#include <iostream>
 
 bool SocketMgr::startNetwork(unsigned short port, unsigned int threadCount)
 {
@@ -13,7 +14,7 @@ bool SocketMgr::startNetwork(unsigned short port, unsigned int threadCount)
 
     try {
         _srvSock = new ServerSocket(this, port);
-        _thread = new Thread(_service);
+        _thread = new Thread(&_service);
     } catch (std::exception const& e) {
         std::cerr << "Fail to start network: " << e.what() << std::endl;
         return false;

@@ -1,13 +1,3 @@
-/*
-** DbQueue.h for  in /home/vaga/Projects/Skypy/src/shared/Database
-** 
-** Made by 
-** Login   <@epitech.eu>
-** 
-** Started on  Mon Dec 09 17:03:02 2013 
-** Last update Mon Dec 09 17:42:40 2013 
-*/
-
 #ifndef DBQUEUE_H_
 # define DBQUEUE_H_
 
