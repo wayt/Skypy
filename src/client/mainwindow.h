@@ -1,18 +1,18 @@
 #ifndef WIDGET_H
 #define WIDGET_H
 
-#include <QWidget>
+#include <QMainWindow>
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QPushButton>
 
-class Widget : public QWidget
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    Widget(QWidget *parent = 0);
-    virtual ~Widget();
+    MainWindow(QMainWindow *parent = 0);
+    virtual ~MainWindow();
 
 private:
     QFormLayout *_layF;

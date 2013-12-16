@@ -1,11 +1,11 @@
 #include <QMessageBox>
 #include <QRegExpValidator>
 
-#include "widget.h"
+#include "mainwindow.h"
 #include "networkmgr.h"
 
-Widget::Widget(QWidget *parent) :
-    QWidget(parent),
+MainWindow::MainWindow(QMainWindow *parent) :
+    QMainWindow(parent),
     _layF(new QFormLayout(this)),
     _leMdp(new QLineEdit(this)),
     _leMail(new QLineEdit(this)),
@@ -21,11 +21,11 @@ Widget::Widget(QWidget *parent) :
     QObject::connect(_pbConnection, SIGNAL(clicked()), this, SLOT(_pbConnection_clicked()));
 }
 
-Widget::~Widget()
+MainWindow::~MainWindow()
 {
 }
 
-void Widget::_pbConnection_clicked()
+void MainWindow::_pbConnection_clicked()
 {
     //if (_leMdp->text().isEmpty() || _leMail->text().isEmpty())
     //    return ;
