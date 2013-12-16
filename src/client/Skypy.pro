@@ -4,18 +4,16 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = Skypy
 TEMPLATE = app
 
-LIBS += -L../../lib/ -lshared
-INCLUDEPATH += ../shared
-
-
 SOURCES += main.cpp\
-        widget.cpp
+        widget.cpp \
+    networkmgr.cpp
 
-HEADERS  += widget.h
+HEADERS  += widget.h \
+    networkmgr.h

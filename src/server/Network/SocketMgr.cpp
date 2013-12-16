@@ -1,7 +1,7 @@
 #include <functional>
-#include "SocketMgr.hpp"
-#include "ServerSocket.hpp"
-#include "SessionSocket.hpp"
+#include "SocketMgr.h"
+#include "ServerSocket.h"
+#include "SessionSocket.h"
 
 bool SocketMgr::startNetwork(unsigned short port, unsigned int threadCount)
 {

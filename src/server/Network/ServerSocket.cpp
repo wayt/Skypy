@@ -1,5 +1,5 @@
-#include "ServerSocket.hpp"
-#include "SocketMgr.hpp"
+#include "ServerSocket.h"
+#include "SocketMgr.h"
 
 using boost::asio::ip::tcp;
 

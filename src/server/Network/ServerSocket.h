@@ -1,7 +1,7 @@
 #ifndef SERVERSOCKET_H_
 # define SERVERSOCKET_H_
 
-#include "SessionSocket.hpp"
+#include "SessionSocket.h"
 #include "TcpAcceptor.hpp"
 
 class SocketMgr;

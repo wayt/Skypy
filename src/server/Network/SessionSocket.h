@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <system_error>
-#include "Opcodes.hpp"
+#include "Opcodes.h"
 #include "Packet.hpp"
 #include "TcpSocket.hpp"
 

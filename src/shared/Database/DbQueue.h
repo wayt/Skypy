@@ -12,6 +12,7 @@
 # define DBQUEUE_H_
 
 #include <string>
+#include <queue>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -20,7 +21,7 @@ class DbQueue
 public:
     DbQueue();
     void enqueue(std::string const &sql);
-    std::string const &dequeue();
+    std::string dequeue();
     unsigned int size();
 
 private:

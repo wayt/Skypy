@@ -2,6 +2,7 @@
 #include <QRegExpValidator>
 
 #include "widget.h"
+#include "networkmgr.h"
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -26,12 +27,14 @@ Widget::~Widget()
 
 void Widget::_pbConnection_clicked()
 {
-    if (_leMdp->text().isEmpty() || _leMail->text().isEmpty())
-        return ;
+    //if (_leMdp->text().isEmpty() || _leMail->text().isEmpty())
+    //    return ;
 
     /*
      * Insert your code here
      */
+
+    sNetworkMgr->tcpConnect("localhost", 8000);
 
     QMessageBox::information(this, "Authentification", "Authentification successful");
 }
