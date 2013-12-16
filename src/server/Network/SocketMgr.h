@@ -12,7 +12,7 @@ class SocketMgr
 {
 public:
     SocketMgr() : _service(), _srvSock(NULL), _thread(NULL), _newSocks(),
-    _newSocksMutex(), _opcodesMgr()
+    _newSocksMutex()
     {}
 
     bool startNetwork(unsigned short port, unsigned int threadCount = 1);
@@ -29,12 +29,9 @@ public:
     void handleInvalidHeaderSize(SessionSocket* sock, uint16_t size);
     void handleWriteError(SessionSocket* sock, std::error_code const& error);
 
-    Opcodes const& getOpcodesMgr() const { return _opcodesMgr; }
-    Opcodes& getOpcodesMgr() { return _opcodesMgr; }
-
-private:
     void addNewSock(SessionSocket* newSock);
     void removeNewSock(SessionSocket* newSock);
+private:
     void clearOldSock();
 
     boost::asio::io_service _service;
@@ -42,7 +39,6 @@ private:
     Thread* _thread;
     std::map<SessionSocket*, uint32> _newSocks;
     Mutex _newSocksMutex;
-    Opcodes _opcodesMgr;
 };
 
 #endif /* !SOCKETMGR_H_ */
