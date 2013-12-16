@@ -12,8 +12,9 @@ TARGET = Skypy
 TEMPLATE = app
 
 SOURCES += main.cpp\
-        widget.cpp \
-    networkmgr.cpp
+    networkmgr.cpp \
+    mainwindow.cpp
 
-HEADERS  += widget.h \
-    networkmgr.h
+HEADERS  += \
+    networkmgr.h \
+    mainwindow.h
