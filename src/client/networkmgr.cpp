@@ -1,4 +1,5 @@
 #include "networkmgr.h"
+#include "opcodemgr.h"
 #include "mainwindow.h"
 #include <QtNetwork>
 #include <iostream>
@@ -34,4 +35,17 @@ void NetworkMgr::_readInput()
         }
     }
     std::cout << "DATA: " << data[0] << data[1] << data[2] << data[3] << std::endl;
+}
+
+void NetworkMgr::makeCall(const std::string &userName, const std::string &userAdress, const std::string &contactName)
+{
+  Packet pkt(CMSG_SIP);
+  const std::string cmd("RINVITE");
+  QHostAddress addr(QHostAddress::LocalHost);
+
+  pkt << cmd;
+  pkt << userName;
+  pkt << ((addr.toString()).toStdString());
+  pkt << contactName;
+  this->tcpSendPacket(pkt);
 }
