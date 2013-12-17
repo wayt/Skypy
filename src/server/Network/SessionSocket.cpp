@@ -120,26 +120,28 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
     pkt >> email >> password;
     std::cout << "HANDLE AUTH: " << email << " - " << password << std::endl;
 
-    bool login_ok = (email == "titi");
+    bool login_ok = (password == "titi");
     if (login_ok)
     {
         _sockMgr->removeNewSock(this);
         _status = STATUS_AUTHED;
 
         static uint32 titi = 1;
-        _session = new Session(titi++, this);
+        _session = new Session(titi++, this, email);
 
         sSkypy->addSession(_session);
 
         Packet data(SMSG_AUTH_RESULT);
         data << uint8(AUTHRESULT_OK);
         send(data);
+        std::cout << "SEND LOGIN OK" << std::endl;
     }
     else
     {
         Packet data(SMSG_AUTH_RESULT);
         data << uint8(AUTHRESULT_BAD_LOG);
         send(data);
+        std::cout << "SEND LOGIN PAS OK, CLOSING" << std::endl;
         close();
     }
 }

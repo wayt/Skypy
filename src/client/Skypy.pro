@@ -14,10 +14,18 @@ TEMPLATE = app
 SOURCES += main.cpp\
     networkmgr.cpp \
     mainwindow.cpp \
-    opcodemgr.cpp
+    opcodemgr.cpp \
+    widgetloginform.cpp \
+    widgetcontactslist.cpp
 
 HEADERS  += \
     networkmgr.h \
     mainwindow.h \
     packet.hpp \
-    opcodemgr.h
+    opcodemgr.h \
+    widgetloginform.h \
+    widgetcontactslist.h \
+    Singleton.hpp
+
+FORMS += \
+    widgetcontactslist.ui

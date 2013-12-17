@@ -48,6 +48,7 @@ void Skypy::addSession(Session* sess)
 void Skypy::delSession(Session* sess)
 {
     Mutex::ScopLock lock(_sessionDelMutex);
+
     _sessionDelList.push_back(sess);
 }
 
@@ -56,7 +57,30 @@ void Skypy::_processAddSession()
     Mutex::ScopLock lock(_sessionAddMutex);
     for (std::list<Session*>::const_iterator itr = _sessionAddList.begin();
             itr != _sessionAddList.end(); ++itr)
+    {
+        Session* sess = *itr;
+
+        Packet selfData(SMSG_CONTACT_LOGIN);
+        selfData << uint32(1);
+        selfData << uint32(sess->getId());
+        selfData << sess->getName();
+        selfData << sess->getEmail();
+        for (std::map<uint32, Session*>::const_iterator itr2 = _sessionMap.begin();
+                itr2 != _sessionMap.end(); ++itr2)
+        {
+            Packet data(SMSG_CONTACT_LOGIN);
+            data << uint32(1);
+            data << uint32(itr2->second->getId());
+            data << itr2->second->getName();
+            data << itr2->second->getEmail();
+            sess->send(data);
+            itr2->second->send(selfData);
+        }
+
+
+
         _sessionMap[(*itr)->getId()] = *itr;
+    }
     _sessionAddList.clear();
 }
 
@@ -66,6 +90,17 @@ void Skypy::_processDelSession()
     for (std::list<Session*>::const_iterator itr = _sessionDelList.begin();
             itr != _sessionDelList.end(); ++itr)
     {
+        Session* sess = *itr;
+
+        Packet data(SMSG_CONTACT_LOGOUT);
+        data << uint32(1);
+        data << uint32(sess->getId());
+        for (std::map<uint32, Session*>::const_iterator itr2 = _sessionMap.begin();
+                itr2 != _sessionMap.end(); ++itr2)
+            itr2->second->send(data);
+
+
+
         _sessionMap.erase((*itr)->getId());
         delete *itr;
     }

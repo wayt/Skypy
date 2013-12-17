@@ -6,7 +6,7 @@
 #include "opcodemgr.h"
 #include <QtEndian>
 
-NetworkMgr::NetworkMgr(MainWindow* window) : _tcpSock(), _window(window), _connState(STATE_DISCONNECTED)
+NetworkMgr::NetworkMgr() : _tcpSock(), _window(NULL), _connState(STATE_DISCONNECTED)
 {
     QTcpSocket::connect(&_tcpSock, SIGNAL(connected()), this, SLOT(_handleTcpConnected()));
     QTcpSocket::connect(&_tcpSock, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(_handleTcpError(QAbstractSocket::SocketError)));

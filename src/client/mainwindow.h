@@ -3,10 +3,11 @@
 
 #include <QMainWindow>
 #include <QLineEdit>
-#include <QFormLayout>
-#include <QPushButton>
-#include "networkmgr.h"
 #include "packet.hpp"
+#include <QStackedWidget>
+#include "widgetloginform.h"
+#include "widgetcontactslist.h"
+#include "networkmgr.h"
 
 class MainWindow : public QMainWindow
 {
@@ -20,17 +21,15 @@ public:
 
     bool handleAuthResult(Packet& pkt);
     void handleServerConnectionLost(QAbstractSocket::SocketError e, QString const& msg);
+
+    // Network handlers
+    void handleContactLogin(Packet& pkt);
+    void handleContactLogout(Packet& pkt);
 private:
-    QFormLayout *_layF;
-    QLineEdit *_leMdp;
-    QLineEdit *_leMail;
-    QPushButton *_pbConnection;
+    QStackedWidget* _widgets;
 
-    NetworkMgr _networkMgr;
-
-private slots:
-    void _pbConnection_clicked();
-
+    WidgetLoginForm* _loginForm;
+    WidgetContactsList* _contactForm;
 
 };
 

@@ -13,6 +13,8 @@ enum Opcodes
     SMSG_AUTH_RESULT    = 3,
     CMSG_SIP            = 4,
     SMSG_SIP            = 5,
+    SMSG_CONTACT_LOGIN  = 6,
+    SMSG_CONTACT_LOGOUT = 7,
     MSG_MAX                ,
 };
 

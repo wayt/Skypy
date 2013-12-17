@@ -11,47 +11,28 @@
 
 MainWindow::MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
-    _layF(new QFormLayout),
-    _leMdp(new QLineEdit(this)),
-    _leMail(new QLineEdit(this)),
-    _pbConnection(new QPushButton("Connection", this)),
-    _networkMgr(this)
+    _widgets(new QStackedWidget(this)),
+    _loginForm(new WidgetLoginForm(this)),
+    _contactForm(new WidgetContactsList(this))
 {
-    this->setCentralWidget(new QWidget(this));
-    this->centralWidget()->setLayout(_layF);
-    _layF->addRow("Mail address", _leMail);
-    _layF->addRow("Password", _leMdp);
-    _layF->addWidget(_pbConnection);
+    setCentralWidget(_widgets);
+    _widgets->addWidget(_loginForm);
+    _widgets->addWidget(_contactForm);
+    _widgets->setCurrentWidget(_loginForm);
 
-    _leMdp->setEchoMode(QLineEdit::Password);
-    _leMail->setValidator(new QRegExpValidator(QRegExp("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,6}$", Qt::CaseSensitive, QRegExp::RegExp2), this));
-
-    QObject::connect(_pbConnection, SIGNAL(clicked()), this, SLOT(_pbConnection_clicked()));
+    sNetworkMgr->setMainWindow(this);
 }
 
 MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::_pbConnection_clicked()
-{
-    if (_leMdp->text().isEmpty() || _leMail->text().isEmpty())
-        return ;
-
-    /*
-     * Insert your code here
-     */
-
-    _networkMgr.tcpConnect("localhost", 5000);
-    //_networkMgr.makeCall(((_leMail->text()).toStdString()), "192.168.1.11", "TOTO le blaireau");
-}
-
 void MainWindow::handleRequireAuth()
 {
     Packet pkt(CMSG_AUTH);
-    pkt << _leMail->text();
-    pkt << _leMdp->text();
-    _networkMgr.tcpSendPacket(pkt);
+    pkt << _loginForm->getEmailText();
+    pkt << _loginForm->getPasswordText();
+    sNetworkMgr->tcpSendPacket(pkt);
     std::cout << "AUTH SENDED" << std::endl;
     pkt.dumpHex();
 }
@@ -64,7 +45,10 @@ bool MainWindow::handleAuthResult(Packet& pkt)
     std::cout << "AUTH RESULT: " << quint32(result) << std::endl;
 
     if (result == 0)
-        QMessageBox::information(this, "Authentification", "Authentification successful");
+    {
+        _contactForm->initialize();
+        _widgets->setCurrentWidget(_contactForm);
+    }
     else
         QMessageBox::information(this, "Authentification", "Fail to authenticate");
 
@@ -74,5 +58,35 @@ bool MainWindow::handleAuthResult(Packet& pkt)
 void MainWindow::handleServerConnectionLost(QAbstractSocket::SocketError e, QString const& msg)
 {
     (void)e;
+    _widgets->setCurrentWidget(_loginForm);
     QMessageBox::information(this, "Connection error", "Error: " + msg);
+}
+
+void MainWindow::handleContactLogin(Packet& pkt)
+{
+    quint32 count;
+    pkt >> count;
+    for (quint32 i = 0; i < count; ++i)
+    {
+        quint32 id;
+        QString name;
+        QString email;
+        pkt >> id;
+        pkt >> name;
+        pkt >> email;
+        WidgetContactsList::ContactInfo* info = new WidgetContactsList::ContactInfo(_contactForm->getContactListWidget(), id, name, email);
+        _contactForm->loginContact(info);
+    }
+}
+
+void MainWindow::handleContactLogout(Packet& pkt)
+{
+    quint32 count;
+    pkt >> count;
+    for (quint32 i = 0; i < count; ++i)
+    {
+        quint32 id;
+        pkt >> id;
+        _contactForm->logoutContact(id);
+    }
 }
