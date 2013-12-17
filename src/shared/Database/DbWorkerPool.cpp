@@ -1,52 +1,38 @@
 #include "DbWorkerPool.h"
 
 DbWorkerPool::DbWorkerPool(DbInfo const &info, unsigned int nbWorker)
-    : ThreadPool(), _queue(), _conn(info)
+    : ThreadPool(), _queue(), _conns()
 {
-    _conn.open();
-
     for (int i = 0; i < nbWorker; ++i)
-        create_thread(new DbWorker(&_queue, &_conn));
+    {
+        DbConnection *conn = new DbConnection(info);
+        conn->open();
+        create_thread(new DbWorker(&_queue, conn));
+        _conns.push_back(conn);
+    }
 }
 
 void DbWorkerPool::execute(std::string const &sql)
 {
-    _queue.enqueue(sql);
+    _queue.enqueue(new DbQuery(QUERY_ASYNC, sql));
 }
 
-/* TODO: struct DbQuery
+pDbResult DbWorkerPool::query(std::string const &sql)
 {
-    const char* sql;
-    bool done;
-    Mutex mutex;
-    Condition cond;
-};
+    DbQuery* query = new DbQuery(QUERY_SYNC, sql);
 
-pDbResult DbWorkerPool::query(const char *sql)
-{
-    DbQuery* query = new DbQuery(sql);
+    _queue.enqueue(query);
 
-    _appendQuery(query);
+    pDbResult result = query->getResult();
 
-    Lock lock(query->mutex);
+    query->wait();
 
-    while (!query->done)
-        query->cond.wait(query->mutex);
-
-    DbResult result = query.result;
     delete query;
+
     return result;
-
-    boost::unique_lock<boost::mutex> lock(_mutex);
-
-    _cond.wait(lock);
-    _conn.query(sql);
-    _cond.notify();
-
-    return _conn.query(sql);
-}*/
+}
 
 void DbWorkerPool::waitAll()
 {
-    join_all(); 
+    join_all();
 }

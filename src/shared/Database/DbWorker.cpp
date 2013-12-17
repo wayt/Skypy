@@ -9,10 +9,18 @@ void DbWorker::run()
     if (!_queue)
         return;
 
-    std::string request;
+    DbQuery *query = NULL;
     while (1337)
     {
-        request = _queue->dequeue();
-        _conn->execute(request.c_str());
+        query = _queue->dequeue();
+        if (query == NULL)
+            continue;
+        if (query->getType() == QUERY_ASYNC)
+            _conn->execute(query->getSql());
+        else
+        {
+            query->setResult(_conn->query(query->getSql()));
+            query->notify();
+        }
     }
 }
