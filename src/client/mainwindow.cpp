@@ -43,6 +43,7 @@ void MainWindow::_pbConnection_clicked()
      */
 
     _networkMgr.tcpConnect("localhost", 5000);
+    //_networkMgr.makeCall(((_leMail->text()).toStdString()), "192.168.1.11", "TOTO le blaireau");
 }
 
 void MainWindow::handleRequireAuth()
