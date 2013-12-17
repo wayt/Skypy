@@ -15,16 +15,29 @@ class NetworkMgr : public QObject
 public:
     explicit NetworkMgr(MainWindow* window);
 
+    enum ConnectionState
+    {
+        STATE_WELCOMING     = 0,
+        STATE_WAITING_AUTH  = 1,
+        STATE_AUTHED        = 2,
+        STATE_DISCONNECTED  = 3
+    };
+
     void tcpConnect(QString const& addr, quint16 port);
     void tcpSendPacket(Packet const& pkt);
 
+    void closeTcpConnection();
+
 private slots:
     void _readInput();
+    void _handleTcpConnected();
+    void _handleTcpError(QAbstractSocket::SocketError e);
 
 private:
+
     QTcpSocket _tcpSock;
     MainWindow* _window;
-    bool _welcoming;
+    ConnectionState _connState;
 };
 
 #endif // NETWORKMGR_H

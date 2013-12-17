@@ -6,6 +6,7 @@
 #include <QFormLayout>
 #include <QPushButton>
 #include "networkmgr.h"
+#include "packet.hpp"
 
 class MainWindow : public QMainWindow
 {
@@ -17,6 +18,7 @@ public:
 
     void handleRequireAuth(); // When network layout receive a WELCOME msg
 
+    bool handleAuthResult(Packet& pkt);
 private:
     QFormLayout *_layF;
     QLineEdit *_leMdp;
@@ -28,9 +30,6 @@ private:
 private slots:
     void _pbConnection_clicked();
 
-public slots:
-    void handleTcpConnected();
-    void handleTcpError(QAbstractSocket::SocketError e);
 
 };
 
