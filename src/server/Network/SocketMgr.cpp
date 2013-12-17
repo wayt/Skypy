@@ -24,6 +24,7 @@ bool SocketMgr::startNetwork(unsigned short port, unsigned int threadCount)
 
 void SocketMgr::registerNewSock(SessionSocket* newSock)
 {
+    std::cout << "registerNewSock" << std::endl;
     clearOldSock();
     addNewSock(newSock);
     newSock->init();
@@ -72,6 +73,7 @@ void SocketMgr::clearOldSock()
 
 void SocketMgr::handleHeaderError(SessionSocket* sock, std::error_code const& error)
 {
+    std::cout << "handleHeaderError" << std::endl;
     if (sock->getStatus() == STATUS_UNAUTHED)
     {
         removeNewSock(sock);
@@ -82,6 +84,7 @@ void SocketMgr::handleHeaderError(SessionSocket* sock, std::error_code const& er
 
 void SocketMgr::handleBodyError(SessionSocket* sock, std::error_code const& error)
 {
+    std::cout << "handleBodyError" << std::endl;
     if (sock->getStatus() == STATUS_UNAUTHED)
     {
         removeNewSock(sock);
@@ -92,6 +95,7 @@ void SocketMgr::handleBodyError(SessionSocket* sock, std::error_code const& erro
 
 void SocketMgr::handleInvalidHeaderSize(SessionSocket* sock, uint16_t size)
 {
+    std::cout << "handleInvalidHeaderSize" << std::endl;
     if (sock->getStatus() == STATUS_UNAUTHED)
     {
         removeNewSock(sock);
@@ -102,6 +106,7 @@ void SocketMgr::handleInvalidHeaderSize(SessionSocket* sock, uint16_t size)
 
 void SocketMgr::handleWriteError(SessionSocket* sock, std::error_code const& error)
 {
+    std::cout << "handleWriteError" << std::endl;
     if (sock->getStatus() == STATUS_UNAUTHED)
     {
         removeNewSock(sock);
