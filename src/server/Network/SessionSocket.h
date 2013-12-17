@@ -31,6 +31,7 @@ public:
     tcp::socket& socket() { return _socket; }
 
     void onInit();
+    void onClose();
 
     void handlePacketInput(Packet& pkt);
 

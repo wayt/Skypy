@@ -12,10 +12,12 @@ public:
     TcpSocket(boost::asio::io_service& service);
 
     tcp::socket& socket() { return _socket; }
+    boost::asio::io_service& io_service() { return _socket.get_io_service(); }
 
     void init();
     virtual void onInit() {}
     void close();
+    virtual void onClose() {}
 
 protected:
     void _send(uint8 const* data, uint16 size);

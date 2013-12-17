@@ -11,18 +11,17 @@ class SessionSocket;
 class SocketMgr
 {
 public:
-    SocketMgr() : _service(), _srvSock(NULL), _thread(NULL), _newSocks(),
+    SocketMgr() : _service(), _serviceThreads(), _srvSock(NULL), _newSocks(),
     _newSocksMutex()
     {}
 
     bool startNetwork(unsigned short port, unsigned int threadCount = 1);
 
     boost::asio::io_service& io_service() { return _service; }
-    boost::asio::io_service const& io_service() const { return _service; }
     virtual void registerNewSock(SessionSocket *);
 
     void shutdown();
-    void wait() { if (_thread) _thread->join(); }
+    void wait() { _serviceThreads.join_all(); }
 
     void handleHeaderError(SessionSocket* sock, std::error_code const& error);
     void handleBodyError(SessionSocket* sock, std::error_code const& error);
@@ -35,8 +34,8 @@ private:
     void clearOldSock();
 
     boost::asio::io_service _service;
+    ThreadPool _serviceThreads;
     ServerSocket* _srvSock;
-    Thread* _thread;
     std::map<SessionSocket*, uint32> _newSocks;
     Mutex _newSocksMutex;
 };

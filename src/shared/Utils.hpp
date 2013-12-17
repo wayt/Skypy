@@ -15,6 +15,16 @@ namespace Utils
         return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
     }
 
+    inline uint32 getMSTimeDiff(uint32 prev, uint32 now)
+    {
+        return now - prev;
+    }
+
+    inline uint32 getMSTimeDiffToNow(uint32 time)
+    {
+        return getMSTimeDiff(time, getMSTime());
+    }
+
 class endian
 {
 private:

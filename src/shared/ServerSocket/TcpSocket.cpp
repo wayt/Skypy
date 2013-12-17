@@ -20,6 +20,8 @@ void TcpSocket::close()
     boost::system::error_code ec;
     _socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
     _socket.close();
+
+    onClose();
 }
 
 void TcpSocket::_send(uint8 const* data, uint16 size)
