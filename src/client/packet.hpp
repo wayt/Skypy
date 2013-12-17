@@ -291,7 +291,8 @@ private:
     T read(quint32 pos) const
     {
         T val = *((T const*)&_storage[pos]);
-        val = qFromBigEndian<T>(val);
+        if (sizeof(T) > 1)
+            val = qFromBigEndian<T>(val);
         return val;
     }
 

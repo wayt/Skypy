@@ -2,9 +2,13 @@
 #include "SessionSocket.h"
 #include "Skypy.h"
 
-Session::Session(uint32 id, SessionSocket* sock) : _id(id), _socket(sock), _packetQueue(),
-    _logout(false)
-{}
+Session::Session(uint32 id, SessionSocket* sock, std::string const& email) : _id(id), _socket(sock), _packetQueue(),
+    _logout(false), _name(email), _email(email)
+{
+    std::size_t found = _email.find('@');
+    if (found != std::string::npos)
+        _name = _email.substr(0, found);
+}
 
 void Session::logout()
 {
@@ -44,6 +48,12 @@ void Session::handlePacketInput(Packet& pkt)
 {
   Packet* newPacket = new Packet(pkt);
   _packetQueue.add(newPacket);
+}
+
+void Session::send(Packet const& pkt)
+{
+    if (_socket && !_logout)
+        _socket->send(pkt);
 }
 
 void Session::handleSipPacket(Packet& pkt)

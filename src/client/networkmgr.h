@@ -5,15 +5,16 @@
 #include <QString>
 #include <QTcpSocket>
 #include "packet.hpp"
+#include "Singleton.hpp"
 
 class MainWindow;
 
-class NetworkMgr : public QObject
+class NetworkMgr : public QObject, public Singleton<NetworkMgr>
 {
     Q_OBJECT
 
 public:
-    explicit NetworkMgr(MainWindow* window);
+    explicit NetworkMgr();
 
     enum ConnectionState
     {
@@ -28,6 +29,7 @@ public:
     void makeCall(const std::string &userName, const std::string &userAdress, const std::string &contactName);
 
     void closeTcpConnection();
+    void setMainWindow(MainWindow* window) { _window = window; }
 
 private slots:
     void _readInput();
@@ -40,5 +42,7 @@ private:
     MainWindow* _window;
     ConnectionState _connState;
 };
+
+#define sNetworkMgr NetworkMgr::instance()
 
 #endif // NETWORKMGR_H
