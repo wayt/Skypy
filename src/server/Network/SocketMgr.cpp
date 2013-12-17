@@ -64,7 +64,6 @@ void SocketMgr::clearOldSock()
             SessionSocket* sock = itr->first;
             _newSocks.erase(itr++);
             sock->close();
-            delete sock;
         }
         ++itr;
     }
@@ -74,26 +73,22 @@ void SocketMgr::handleHeaderError(SessionSocket* sock, std::error_code const& er
 {
     std::cout << "handleHeaderError" << std::endl;
     sock->close();
-    delete sock;
 }
 
 void SocketMgr::handleBodyError(SessionSocket* sock, std::error_code const& error)
 {
     std::cout << "handleBodyError" << std::endl;
     sock->close();
-    delete sock;
 }
 
 void SocketMgr::handleInvalidHeaderSize(SessionSocket* sock, uint16_t size)
 {
     std::cout << "handleInvalidHeaderSize" << std::endl;
     sock->close();
-    delete sock;
 }
 
 void SocketMgr::handleWriteError(SessionSocket* sock, std::error_code const& error)
 {
     std::cout << "handleWriteError" << std::endl;
     sock->close();
-    delete sock;
 }

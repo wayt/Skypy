@@ -8,6 +8,7 @@ Session::Session(uint32 id, SessionSocket* sock) : _id(id), _socket(sock), _pack
 
 void Session::logout()
 {
+    delete _socket;
     _socket = NULL;
     _logout = true;
     sSkypy->delSession(this);

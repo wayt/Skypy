@@ -25,7 +25,10 @@ void SessionSocket::onInit()
 void SessionSocket::onClose()
 {
     if (getStatus() == STATUS_UNAUTHED)
+    {
         _sockMgr->removeNewSock(this);
+        delete this;
+    }
     else if (_session)
         _session->logout();
 }
@@ -91,8 +94,8 @@ void SessionSocket::send(Packet const& pkt)
 
 void SessionSocket::handlePacketInput(Packet& pkt)
 {
-  std::cout << "RECEIV PACKET: " << pkt.getOpcode() << std::endl;
-  pkt.dumpHex();
+    std::cout << "RECEIV PACKET: " << pkt.getOpcode() << std::endl;
+    pkt.dumpHex();
     if (_status == STATUS_UNAUTHED) // Special cases
     {
         switch (pkt.getOpcode())
