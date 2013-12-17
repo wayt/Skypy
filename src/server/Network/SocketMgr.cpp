@@ -14,11 +14,13 @@ bool SocketMgr::startNetwork(unsigned short port, unsigned int threadCount)
 
     try {
         _srvSock = new ServerSocket(this, port);
-        _thread = new Thread(&_service);
+        for (uint32 i = 0; i < threadCount; ++i)
+            _serviceThreads.create_thread(&_service);
     } catch (std::exception const& e) {
         std::cerr << "Fail to start network: " << e.what() << std::endl;
         return false;
     }
+    std::cout << "Network started on port " << port << " with " << threadCount << " threads" << std::endl;
     return true;
 }
 
@@ -36,9 +38,6 @@ void SocketMgr::shutdown()
         _srvSock->shutdown();
 
     _service.stop();
-
-    if (_thread)
-        _thread->join();
 }
 
 void SocketMgr::addNewSock(SessionSocket* newSock)
@@ -74,43 +73,27 @@ void SocketMgr::clearOldSock()
 void SocketMgr::handleHeaderError(SessionSocket* sock, std::error_code const& error)
 {
     std::cout << "handleHeaderError" << std::endl;
-    if (sock->getStatus() == STATUS_UNAUTHED)
-    {
-        removeNewSock(sock);
-        sock->close();
-        delete sock;
-    }
+    sock->close();
+    delete sock;
 }
 
 void SocketMgr::handleBodyError(SessionSocket* sock, std::error_code const& error)
 {
     std::cout << "handleBodyError" << std::endl;
-    if (sock->getStatus() == STATUS_UNAUTHED)
-    {
-        removeNewSock(sock);
-        sock->close();
-        delete sock;
-    }
+    sock->close();
+    delete sock;
 }
 
 void SocketMgr::handleInvalidHeaderSize(SessionSocket* sock, uint16_t size)
 {
     std::cout << "handleInvalidHeaderSize" << std::endl;
-    if (sock->getStatus() == STATUS_UNAUTHED)
-    {
-        removeNewSock(sock);
-        sock->close();
-        delete sock;
-    }
+    sock->close();
+    delete sock;
 }
 
 void SocketMgr::handleWriteError(SessionSocket* sock, std::error_code const& error)
 {
     std::cout << "handleWriteError" << std::endl;
-    if (sock->getStatus() == STATUS_UNAUTHED)
-    {
-        removeNewSock(sock);
-        sock->close();
-        delete sock;
-    }
+    sock->close();
+    delete sock;
 }

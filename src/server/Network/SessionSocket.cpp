@@ -4,6 +4,7 @@
 #include "Utils.hpp"
 #include "SocketMgr.h"
 #include "Session.h"
+#include "Skypy.h"
 
 SessionSocket::SessionSocket(SocketMgr* mgr) : TcpSocket(mgr->io_service()),
     _sockMgr(mgr), _status(STATUS_UNAUTHED), _session(NULL)
@@ -16,7 +17,17 @@ void SessionSocket::onInit()
     uint8 buff[] = "WELCOME";
     _send(buff, 8);
 
+    std::cout << "SOCKET INIT" << std::endl;
+
     _registerHeader();
+}
+
+void SessionSocket::onClose()
+{
+    if (getStatus() == STATUS_UNAUTHED)
+        _sockMgr->removeNewSock(this);
+    else if (_session)
+        _session->logout();
 }
 
 void SessionSocket::_registerHeader()
@@ -108,10 +119,11 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
 
     _sockMgr->removeNewSock(this);
     _status = STATUS_AUTHED;
-    _session = new Session(this);
 
-    // TODO - add session to session list
-    
+    static uint32 titi = 1;
+    _session = new Session(titi++, this);
+
+    sSkypy->addSession(_session);
 
     Packet data(SMSG_AUTH_RESULT);
     data << uint8(AUTHRESULT_OK);
