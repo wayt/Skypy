@@ -36,8 +36,9 @@ void NetworkMgr::_handleTcpConnected()
 
 void NetworkMgr::_handleTcpError(QAbstractSocket::SocketError e)
 {
-    (void)e;
     std::cerr << "TCP Error " << qint32(e) << std::endl;
+    if (_connState == STATE_AUTHED)
+        _window->handleServerConnectionLost(e, _tcpSock.errorString());
     closeTcpConnection();
 }
 

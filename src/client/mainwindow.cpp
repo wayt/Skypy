@@ -70,3 +70,9 @@ bool MainWindow::handleAuthResult(Packet& pkt)
 
     return (result == 0);
 }
+
+void MainWindow::handleServerConnectionLost(QAbstractSocket::SocketError e, QString const& msg)
+{
+    (void)e;
+    QMessageBox::information(this, "Connection error", "Error: " + msg);
+}

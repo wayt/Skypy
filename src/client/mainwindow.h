@@ -19,6 +19,7 @@ public:
     void handleRequireAuth(); // When network layout receive a WELCOME msg
 
     bool handleAuthResult(Packet& pkt);
+    void handleServerConnectionLost(QAbstractSocket::SocketError e, QString const& msg);
 private:
     QFormLayout *_layF;
     QLineEdit *_leMdp;
