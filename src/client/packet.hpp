@@ -6,6 +6,7 @@
 #include <QtEndian>
 #include <iostream>
 #include <iomanip>
+#include <QString>
 
 #define PACKET_DEFAULT_SIZE 512
 #define PACKET_HEADER_SIZE 4
@@ -290,7 +291,7 @@ private:
     T read(quint32 pos) const
     {
         T val = *((T const*)&_storage[pos]);
-        qFromBigEndian<T>(val);
+        val = qFromBigEndian<T>(val);
         return val;
     }
 

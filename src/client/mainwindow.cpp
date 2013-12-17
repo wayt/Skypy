@@ -43,19 +43,6 @@ void MainWindow::_pbConnection_clicked()
      */
 
     _networkMgr.tcpConnect("localhost", 5000);
-
-    QMessageBox::information(this, "Authentification", "Authentification successful");
-}
-
-void MainWindow::handleTcpConnected()
-{
-    QMessageBox::information(this, "Debug", "CONNECTED !");
-}
-
-void MainWindow::handleTcpError(QAbstractSocket::SocketError e)
-{
-    (void)e;
-    QMessageBox::information(this, "Debug", "SOCK ERROR");
 }
 
 void MainWindow::handleRequireAuth()
@@ -66,4 +53,19 @@ void MainWindow::handleRequireAuth()
     _networkMgr.tcpSendPacket(pkt);
     std::cout << "AUTH SENDED" << std::endl;
     pkt.dumpHex();
+}
+
+bool MainWindow::handleAuthResult(Packet& pkt)
+{
+    quint8 result;
+    pkt >> result;
+
+    std::cout << "AUTH RESULT: " << quint32(result) << std::endl;
+
+    if (result == 0)
+        QMessageBox::information(this, "Authentification", "Authentification successful");
+    else
+        QMessageBox::information(this, "Authentification", "Fail to authenticate");
+
+    return (result == 0);
 }
