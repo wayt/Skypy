@@ -1,11 +1,16 @@
 #include "Opcodes.h"
 
-Opcodes::OpcodeDefinition const* Opcodes::getOpcodeDefinition(uint16 opcode, OpcodeHandleMode mode) const
+OpcodeMgr::OpcodeDefinition const* OpcodeMgr::getOpcodeDefinition(uint16 opcode)
 {
-    std::map<uint16, OpcodeDefinition*>::const_iterator itr = _opcodeMap.find(opcode);
-    if (itr == _opcodeMap.end())
-        return NULL;
-    if (itr->second->mode == mode)
-        return itr->second;
+
+    static OpcodeDefinition opcodes[] = {
+        { SMSG_WELCOME, NULL },
+        { CMSG_AUTH, NULL },
+        { MSG_MAX, NULL }
+    };
+
+    for (uint32 i = 0; opcodes[i].opcode != MSG_MAX; ++i)
+        if (opcodes[i].opcode == opcode)
+            return &opcodes[i];
     return NULL;
 }

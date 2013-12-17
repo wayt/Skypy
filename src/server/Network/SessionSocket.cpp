@@ -34,11 +34,17 @@ void SessionSocket::_handleHeader(boost::system::error_code const& error)
         return;
     }
 
-    uint16_t size = (*((uint16 const*)&_header[0]));
+    std::cout << "RECV: " << int32(_header[0])
+       << " - " << int32(_header[1])
+       << " - " << int32(_header[2])
+       << " - " << int32(_header[3]) << std::endl;
+
+    uint16_t size = (*((uint16_t const*)&_header[0]));
     Utils::endian::big_to_native<uint16_t>(size);
-    uint16_t opcode = (*((uint16 const*)&_header[2]));
+    uint16_t opcode = (*((uint16_t const*)&_header[2]));
     Utils::endian::big_to_native<uint16_t>(opcode);
 
+    std::cout << "HEADER INPUT " << size << " - " << opcode << std::endl;
     if (size > Packet::MaxBodySize)
     {
         _sockMgr->handleInvalidHeaderSize(this, size);
@@ -58,6 +64,7 @@ void SessionSocket::_handleBody(uint16_t code, boost::system::error_code const& 
         _sockMgr->handleBodyError(this, std::error_code(/*error.value()*/));
         return;
     }
+    std::cout << "BODY READED" << std::endl;
 
     Packet pkt(code, _body, uint16_t(inputSize));
     handlePacketInput(pkt);
@@ -73,16 +80,40 @@ void SessionSocket::send(Packet const& pkt)
 
 void SessionSocket::handlePacketInput(Packet& pkt)
 {
-    if (_status == STATUS_UNAUTHED)
+    std::cout << "RECEIV PACKET: " << pkt.getOpcode() << std::endl;
+    pkt.dumpHex();
+    if (_status == STATUS_UNAUTHED) // Special cases
     {
-        Opcodes::OpcodeDefinition const* opcode = _sockMgr->getOpcodesMgr().getOpcodeDefinition(pkt.getOpcode(), OPSTATUS_SYNC_UNAUTHED);
-        if (opcode)
-            if (opcode->socketFunc)
-                opcode->socketFunc(*this, pkt);
+        switch (pkt.getOpcode())
+        {
+            case CMSG_AUTH:
+                _handleAuthRequest(pkt);
+                break;
+            default:
+                break;
+        }
         return;
     }
 
     if (_session)
         _session->handlePacketInput(pkt);
+}
 
+void SessionSocket::_handleAuthRequest(Packet& pkt)
+{
+    std::string email;
+    std::string password;
+    pkt >> email >> password;
+    std::cout << "HANDLE AUTH: " << email << " - " << password << std::endl;
+
+    _sockMgr->removeNewSock(this);
+    _status = STATUS_AUTHED;
+    _session = new Session(this);
+
+    // TODO - add session to session list
+    
+
+    Packet data(SMSG_AUTH_RESULT);
+    data << uint8(AUTHRESULT_OK);
+    send(data);
 }

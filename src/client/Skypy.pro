@@ -13,8 +13,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     networkmgr.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    opcodemgr.cpp
 
 HEADERS  += \
     networkmgr.h \
-    mainwindow.h
+    mainwindow.h \
+    packet.hpp \
+    opcodemgr.h

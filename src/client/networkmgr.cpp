@@ -1,25 +1,14 @@
 #include "networkmgr.h"
+#include "mainwindow.h"
 #include <QtNetwork>
 #include <iostream>
 
-NetworkMgr::NetworkMgr()
+NetworkMgr::NetworkMgr(MainWindow* window) : _tcpSock(), _window(window), _welcoming(true)
 {
-    QTcpSocket::connect(&_tcpSock, SIGNAL(connected()), this, SLOT(handleConnected()));
-    QTcpSocket::connect(&_tcpSock, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(handleError(QAbstractSocket::SocketError)));
-    // signal émis lors de la connexion au serveur
-    //QTcpSocket::connect(&_tcpSock, SIGNAL(readyRead()), this, SLOT(lecture()));
-    // signal émis lorsque des données sont prêtes à être lues
+    QTcpSocket::connect(&_tcpSock, SIGNAL(connected()), _window, SLOT(handleTcpConnected()));
+    QTcpSocket::connect(&_tcpSock, SIGNAL(error(QAbstractSocket::SocketError)), _window, SLOT(handleTcpError(QAbstractSocket::SocketError)));
+    QTcpSocket::connect(&_tcpSock, SIGNAL(readyRead()), this, SLOT(_readInput()));
 }
-
-
-NetworkMgr* NetworkMgr::Instance()
-{
-    static NetworkMgr* instance = NULL;
-    if (!instance)
-        instance = new NetworkMgr();
-    return instance;
-}
-
 
 void NetworkMgr::tcpConnect(QString const& addr, quint16 port)
 {
@@ -27,12 +16,22 @@ void NetworkMgr::tcpConnect(QString const& addr, quint16 port)
     _tcpSock.connectToHost(addr, port, QTcpSocket::ReadWrite);
 }
 
-void NetworkMgr::handleConnected()
+void NetworkMgr::tcpSendPacket(Packet const& pkt)
 {
-    std::cout << "HANDLE CONNECTED" << std::endl;
+    _tcpSock.write(pkt.content(), pkt.size());
 }
 
-void NetworkMgr::handleError(QAbstractSocket::SocketError e)
+void NetworkMgr::_readInput()
 {
-    std::cout << "HANDLE ERROR: " << e << std::endl;
+    QByteArray data = _tcpSock.read(_welcoming ? 8 : 4);
+    if (_welcoming)
+    {
+        QString welcome = "WELCOME";
+        if (welcome.compare(data) == 0)
+        {
+            std::cout << "WELCOME OK" << std::endl;
+            _window->handleRequireAuth();
+        }
+    }
+    std::cout << "DATA: " << data[0] << data[1] << data[2] << data[3] << std::endl;
 }
