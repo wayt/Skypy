@@ -175,7 +175,7 @@ Make a call
     describes the total length of the message field, the message
     field and some 0 bits to fill the packet size (256 bits).
     A receiver MUST successfully read the full packet bits before
-    processing the RType message.
+    processing the Babel message.
 
     Babel Data Unit Format (one tick mark represents one bit position):
 
@@ -184,7 +184,7 @@ Make a call
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Total Length                        |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                         RType Message Instance                |
+    |                         Babel Message Instance                |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                         Bits stuffing                         |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -200,7 +200,7 @@ Make a call
     Bits stuffing: a bits field with a 0 value to fill the 256 bits
     message size.
 
-RFC 42              RType communication protocol            October 2013
+RFC 42              Babel communication protocol            October 2013
 
 
 

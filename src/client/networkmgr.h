@@ -25,6 +25,7 @@ public:
 
     void tcpConnect(QString const& addr, quint16 port);
     void tcpSendPacket(Packet const& pkt);
+    void makeCall(const std::string &userName, const std::string &userAdress, const std::string &contactName);
 
     void closeTcpConnection();
 

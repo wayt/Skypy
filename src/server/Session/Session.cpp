@@ -33,16 +33,43 @@ void Session::update(uint32 diff)
             delete pkt;
             continue;
         }
-
         if (opcodehandler->func)
             (this->*opcodehandler->func)(*pkt);
-
         delete pkt;
     }
 }
 
 void Session::handlePacketInput(Packet& pkt)
 {
-    Packet* newPacket = new Packet(pkt);
-    _packetQueue.add(newPacket);
+  Packet* newPacket = new Packet(pkt);
+  _packetQueue.add(newPacket);
+}
+
+void Session::handleSipPacket(Packet& pkt)
+{
+  std::string cmd;
+
+  pkt >> cmd;
+  std::cout << "SIP PACKET RECEIVED" << std::endl;
+
+  if (cmd == "RINVITE")
+    {
+      std::string user;
+      std::string adress;
+      std::string contact;
+      std::cout << "An User wanna talk" << std::endl;
+      pkt >> user;
+      pkt >> adress;
+      pkt >> contact;
+      std::cout << "Composition : " << std::endl << "CMD =" << cmd << std::endl << "USER =" << user << std::endl << "USER ADRESS =" << adress << std::endl << "CONTACT =" << contact << std::endl;
+      Packet rep(SMSG_SIP);
+      rep << "r";
+      rep << 100;
+      cmd.erase(0,1);
+      rep << cmd;
+      rep << user;
+      rep << adress;
+      rep << contact;
+      _socket->send(rep);
+    }
 }

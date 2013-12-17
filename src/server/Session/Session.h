@@ -18,7 +18,7 @@ public:
     void update(uint32 diff);
 
     void handlePacketInput(Packet& pkt);
-
+    void handleSipPacket(Packet& pkt);
 private:
     uint32 _id;
     SessionSocket* _socket;
