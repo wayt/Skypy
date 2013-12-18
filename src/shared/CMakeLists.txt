@@ -1,4 +1,5 @@
-find_package(Boost 1.46 COMPONENTS system thread-mt REQUIRED)
+set(Boost_USE_STATIC_LIBS   ON)
+find_package(Boost 1.46 COMPONENTS system thread REQUIRED)
 find_package(MySQL REQUIRED)
 
 set(LIBRARY_NAME "shared")
