@@ -13,6 +13,7 @@ public:
 
     tcp::socket& socket() { return _socket; }
     boost::asio::io_service& io_service() { return _socket.get_io_service(); }
+    std::string const& getRemoteAddress() const { return _address; }
 
     void init();
     virtual void onInit() {}
@@ -24,6 +25,7 @@ protected:
     void _handleWrite(boost::system::error_code const& error);
 
     tcp::socket _socket;
+    std::string _address;
 };
 
 #endif /* !TCPSOCKET_H_ */

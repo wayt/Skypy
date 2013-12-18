@@ -6,8 +6,9 @@ OpcodeMgr::OpcodeDefinition const* OpcodeMgr::getOpcodeDefinition(uint16 opcode)
     static OpcodeDefinition opcodes[] = {
         { SMSG_WELCOME, NULL },
         { CMSG_AUTH, NULL },
-        { SMSG_SIP , &Session::handleSipPacket },
+        //{ SMSG_SIP , &Session::handleSipPacket },
         { CMSG_SIP, &Session::handleSipPacket },
+        { CMSG_CHAT_TEXT, &Session::handleChatText },
         { MSG_MAX, NULL }
     };
 

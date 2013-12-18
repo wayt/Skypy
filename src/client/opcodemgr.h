@@ -12,6 +12,8 @@ enum Opcodes
     SMSG_SIP            = 5,
     SMSG_CONTACT_LOGIN  = 6,
     SMSG_CONTACT_LOGOUT = 7,
+    CMSG_CHAT_TEXT      = 8,
+    SMSG_CHAT_TEXT      = 9,
     MSG_MAX
 };
 

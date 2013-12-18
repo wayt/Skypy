@@ -20,6 +20,16 @@ WidgetLoginForm::WidgetLoginForm(QWidget *parent) :
 
 }
 
+void WidgetLoginForm::initialize()
+{
+
+}
+
+void WidgetLoginForm::unload()
+{
+
+}
+
 void WidgetLoginForm::_pbConnection_clicked()
 {
     if (_leMdp->text().isEmpty() || _leMail->text().isEmpty())

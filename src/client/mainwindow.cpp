@@ -18,6 +18,7 @@ MainWindow::MainWindow(QMainWindow *parent) :
     setCentralWidget(_widgets);
     _widgets->addWidget(_loginForm);
     _widgets->addWidget(_contactForm);
+    _loginForm->initialize();
     _widgets->setCurrentWidget(_loginForm);
 
     sNetworkMgr->setMainWindow(this);
@@ -46,6 +47,7 @@ bool MainWindow::handleAuthResult(Packet& pkt)
 
     if (result == 0)
     {
+        _loginForm->unload();
         _contactForm->initialize();
         _widgets->setCurrentWidget(_contactForm);
     }
@@ -58,6 +60,8 @@ bool MainWindow::handleAuthResult(Packet& pkt)
 void MainWindow::handleServerConnectionLost(QAbstractSocket::SocketError e, QString const& msg)
 {
     (void)e;
+    _contactForm->unload();
+    _loginForm->initialize();
     _widgets->setCurrentWidget(_loginForm);
     QMessageBox::information(this, "Connection error", "Error: " + msg);
 }
@@ -74,7 +78,7 @@ void MainWindow::handleContactLogin(Packet& pkt)
         pkt >> id;
         pkt >> name;
         pkt >> email;
-        WidgetContactsList::ContactInfo* info = new WidgetContactsList::ContactInfo(_contactForm->getContactListWidget(), id, name, email);
+        ContactInfo* info = new ContactInfo(_contactForm->getContactListWidget(), id, name, email);
         _contactForm->loginContact(info);
     }
 }
@@ -89,4 +93,14 @@ void MainWindow::handleContactLogout(Packet& pkt)
         pkt >> id;
         _contactForm->logoutContact(id);
     }
+}
+
+void MainWindow::handleChatText(Packet &pkt)
+{
+    quint32 from;
+    QString msg;
+    pkt >> from;
+    pkt >> msg;
+    std::cout << "RECEIV MSG FROM: " << from << " - " << msg.toStdString() << std::endl;
+    _contactForm->addMessageFrom(from, msg);
 }

@@ -12,6 +12,9 @@ class WidgetLoginForm : public QWidget
 public:
     explicit WidgetLoginForm(QWidget *parent = 0);
 
+    void initialize();
+    void unload();
+
     QString getEmailText() const { return _leMail->text(); }
     QString getPasswordText() const { return _leMdp->text(); }
 private:

@@ -14,15 +14,18 @@ public:
     std::string const& getName() const { return _name; }
     std::string const& getEmail() const { return _email; }
 
+    inline std::string const& getRemoteAddess() const;
+
     void logout();
     bool isLogout() const { return _logout; }
 
     void update(uint32 diff);
+    void send(Packet const& pkt);
 
     void handlePacketInput(Packet& pkt);
     void handleSipPacket(Packet& pkt);
+    void handleChatText(Packet& pkt);
 
-    void send(Packet const& pkt);
 
 private:
     uint32 _id;
