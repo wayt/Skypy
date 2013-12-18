@@ -25,6 +25,7 @@ public:
     // Network handlers
     void handleContactLogin(Packet& pkt);
     void handleContactLogout(Packet& pkt);
+    void handleChatText(Packet& pkt);
 private:
     QStackedWidget* _widgets;
 

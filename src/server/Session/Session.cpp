@@ -10,6 +10,11 @@ Session::Session(uint32 id, SessionSocket* sock, std::string const& email) : _id
         _name = _email.substr(0, found);
 }
 
+std::string const& Session::getRemoteAddess() const
+{
+    return _socket->getRemoteAddress();
+}
+
 void Session::logout()
 {
     delete _socket;
@@ -83,4 +88,20 @@ void Session::handleSipPacket(Packet& pkt)
       rep << contact;
       _socket->send(rep);
     }
+}
+
+void Session::handleChatText(Packet& pkt)
+{
+    uint32 peerId;
+    std::string msg;
+    pkt >> peerId >> msg;
+
+    Session* peer = sSkypy->findSession(peerId);
+    if (!peer)
+        return;
+
+    Packet data(SMSG_CHAT_TEXT);
+    data << uint32(getId());
+    data << msg;
+    peer->send(data);
 }

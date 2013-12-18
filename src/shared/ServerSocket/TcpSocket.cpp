@@ -12,6 +12,8 @@ void TcpSocket::init()
     boost::asio::ip::tcp::no_delay option(true);
     _socket.set_option(option);
 
+    _address = _socket.remote_endpoint().address().to_string();
+
     onInit();
 }
 

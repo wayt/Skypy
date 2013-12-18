@@ -114,3 +114,11 @@ void Skypy::_updateSessions(uint32 diff)
         if (!itr->second->isLogout())
             itr->second->update(diff);
 }
+
+Session* Skypy::findSession(uint32 id)
+{
+    std::map<uint32, Session*>::const_iterator itr = _sessionMap.find(id);
+    if (itr == _sessionMap.end())
+        return NULL;
+    return itr->second;
+}

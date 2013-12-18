@@ -16,7 +16,9 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     opcodemgr.cpp \
     widgetloginform.cpp \
-    widgetcontactslist.cpp
+    widgetcontactslist.cpp \
+    widgetchatwindow.cpp \
+    widgetchattab.cpp
 
 HEADERS  += \
     networkmgr.h \
@@ -25,7 +27,11 @@ HEADERS  += \
     opcodemgr.h \
     widgetloginform.h \
     widgetcontactslist.h \
-    Singleton.hpp
+    Singleton.hpp \
+    widgetchatwindow.h \
+    widgetchattab.h
 
 FORMS += \
-    widgetcontactslist.ui
+    widgetcontactslist.ui \
+    widgetchatwindow.ui \
+    widgetchattab.ui

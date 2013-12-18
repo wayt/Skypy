@@ -120,7 +120,9 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
     pkt >> email >> password;
     std::cout << "HANDLE AUTH: " << email << " - " << password << std::endl;
 
-    bool login_ok = (password == "titi");
+    std::size_t a_pos = email.find('@');
+
+    bool login_ok = (password == "titi") && a_pos != std::string::npos;
     if (login_ok)
     {
         _sockMgr->removeNewSock(this);

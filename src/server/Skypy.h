@@ -25,6 +25,8 @@ public:
 
     void addSession(Session* sess);
     void delSession(Session* sess);
+
+    Session* findSession(uint32 id);
 private:
     void _processAddSession();
     void _processDelSession();
