@@ -52,7 +52,7 @@ void NetworkMgr::_readInput()
 {
     std::cout << "CALL READ INPUT" << std::endl;
     bool welcoming = _connState == STATE_WELCOMING;
-    char buff[welcoming ? 8 : 4];
+    char buff[8];
     std::cout << "AVAILABLE: " << _tcpSock.bytesAvailable() << " _connState: " << quint32(_connState) << std::endl;
    _tcpSock.read(buff, welcoming ? 8 : 4);
 
@@ -82,10 +82,11 @@ void NetworkMgr::_readInput()
                closeTcpConnection();
                break;
            }
-
-           char data[size];
+           quint16 buffSize = (size == 0 ? 1 : size);
+           char* data = new char[buffSize];
            _tcpSock.read(data, size);
            Packet pkt(code, data, size);
+           delete data;
            if (_window->handleAuthResult(pkt))
                _connState = STATE_AUTHED;
            break;
@@ -96,10 +97,11 @@ void NetworkMgr::_readInput()
            quint16 code = qFromBigEndian<quint16>(*((quint16 const*)&buff[2]));
 
            std::cout << "RECEIV SIZE: " << size << " - CODE : " << code << std::endl;
-           char data[size];
+           quint16 buffSize = (size == 0 ? 1 : size);
+           char* data = new char[buffSize];
            _tcpSock.read(data, size);
            Packet pkt(code, data, size);
-
+           delete data;
            pkt.dumpHex();
 
            OpcodeMgr::OpcodeDefinition const* opcodedef = OpcodeMgr::getOpcodeDefinition(pkt.getOpcode());

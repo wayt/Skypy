@@ -291,8 +291,14 @@ private:
     T read(quint32 pos) const
     {
         T val = *((T const*)&_storage[pos]);
-        if (sizeof(T) > 1)
-            val = qFromBigEndian<T>(val);
+        val = qFromBigEndian<T>(val);
+        return val;
+    }
+
+    template<>
+    char read<char>(quint32 pos) const
+    {
+        char val = *((char const*)&_storage[pos]);
         return val;
     }
 
