@@ -35,6 +35,6 @@ add_library(${LIBRARY_NAME}
 )
 target_link_libraries(${LIBRARY_NAME}
     ${Boost_LIBRARIES}
-    ${MYSQL_LIBRARIES}
+    ${MYSQL_LIBRARY}
 )
 
