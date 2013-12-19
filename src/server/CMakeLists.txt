@@ -2,7 +2,7 @@
 find_package(Threads)
 find_package(MySQL REQUIRED)
 
-set(EXECUTABLE_NAME "server")
+set(EXECUTABLE_NAME "skypy-server")
 
 add_definitions(
     -std=c++0x
@@ -46,3 +46,6 @@ target_link_libraries(${EXECUTABLE_NAME}
 #    ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
 )
+
+install_targets(/bin ${EXECUTABLE_NAME})
+install_files(/etc ${EXECUTABLE_NAME}.conf.dist)
