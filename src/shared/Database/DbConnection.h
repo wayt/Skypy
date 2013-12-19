@@ -24,6 +24,7 @@ private:
 public:
     DbConnection(DbInfo const &info);
     bool hasError() const;
+    std::string const& getLastError() const;
     bool open();
     void close();
     bool execute(const char *sql);

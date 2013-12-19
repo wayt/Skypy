@@ -8,11 +8,15 @@ DbConnection::DbConnection(DbInfo const &info) : _info(info), _conn(NULL)
 bool DbConnection::hasError() const
 {
     if (*mysql_error(_conn))
-    {
-        std::cerr << mysql_error(_conn) << std::endl;
         return true;
-    }
     return false;
+}
+
+std::string const& DbConnection::getLastError() const
+{
+    static std::string str = "";
+    str = mysql_error(_conn);
+    return str;
 }
 
 bool DbConnection::open()

@@ -1,15 +1,31 @@
 #include "DbWorkerPool.h"
 
-DbWorkerPool::DbWorkerPool(DbInfo const &info, unsigned int nbWorker)
+DbWorkerPool::DbWorkerPool()
     : ThreadPool(), _queue(), _conns()
+{
+}
+
+bool DbWorkerPool::initialize(DbInfo const& info, unsigned int nbWorker)
 {
     for (int i = 0; i < nbWorker; ++i)
     {
         DbConnection *conn = new DbConnection(info);
-        conn->open();
+        if (!conn->open())
+            return false;
         create_thread(new DbWorker(&_queue, conn));
         _conns.push_back(conn);
     }
+    return true;
+}
+
+std::string const& DbWorkerPool::getLastError() const
+{
+    for (std::list<DbConnection*>::const_iterator itr = _conns.begin();
+            itr != _conns.end(); ++itr)
+        if ((*itr)->hasError())
+            return (*itr)->getLastError();
+    static std::string error = "";
+    return error;
 }
 
 void DbWorkerPool::execute(std::string const &sql)
