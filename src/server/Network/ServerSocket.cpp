@@ -24,7 +24,9 @@ void ServerSocket::handleAccept(SessionSocket* newSock, boost::system::error_cod
         _sockMgr->registerNewSock(newSock);
     else
     {
-        std::cerr << "ServerSocket::HandleAccept : " << error.message() << std::endl;
+        ON_NETWORK_DEBUG(
+                std::cerr << "Network: ServerSocket::HandleAccept : " << error.message() << std::endl;
+        );
         delete newSock;
     }
     startAccept();

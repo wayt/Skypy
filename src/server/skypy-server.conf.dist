@@ -1,0 +1,6 @@
+# Skypy config file
+#
+
+Network.ListenPort = 5000
+Network.ThreadCount = 1
+Network.Debug = no
