@@ -29,11 +29,9 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/shared/ServerSocket
     ${CMAKE_SOURCE_DIR}/src/shared/Threading
     ${MYSQL_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
 )
 
 link_directories(
-    ${Boost_LIBRARY_DIRS}
 )
 
 add_executable(${EXECUTABLE_NAME}
@@ -42,9 +40,7 @@ add_executable(${EXECUTABLE_NAME}
 
 target_link_libraries(${EXECUTABLE_NAME}
     shared
-    ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
-    ${MYSQL_LIBRARIES}
 )
 
 install_targets(/bin ${EXECUTABLE_NAME})
