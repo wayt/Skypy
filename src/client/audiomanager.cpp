@@ -43,13 +43,13 @@ bool AudioManager::setOutputDevice(int device, AudioSample::eChannel channel, Au
 
 bool AudioManager::start()
 {
-    if (!_input->start())
+    if (!_input->isStarted() && !_input->start())
     {
         _errText = _input->errorText();
         emit error(_errText);
         return false;
     }
-    if (!_output->start())
+    if (!_output->isStarted() && !_output->start())
     {
         _errText = _output->errorText();
         emit error(_errText);
@@ -108,4 +108,7 @@ void AudioManager::run()
                 _output->outputQueue().enqueue(sample);
         }
     }
+
+    _input->stop();
+    _output->stop();
 }
