@@ -295,17 +295,12 @@ private:
         return val;
     }
 
-    template<>
-    char read<char>(quint32 pos) const
-    {
-        char val = *((char const*)&_storage[pos]);
-        return val;
-    }
-
     std::vector<char> _storage;
     quint16 _rpos;
     quint16 _wpos;
 };
 
+template<>
+char Packet::read<char>(quint32 pos) const;
 
 #endif // PACKET_HPP
