@@ -5,7 +5,8 @@
 #include <QString>
 #include <QTcpSocket>
 #include "packet.hpp"
-#include "Singleton.hpp"
+#include "singleton.h"
+#include "audiosocket.h"
 
 class MainWindow;
 
@@ -31,6 +32,12 @@ public:
     void closeTcpConnection();
     void setMainWindow(MainWindow* window) { _window = window; }
 
+    void setCallHostAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { _audioSock.setHostAddr(addr, port); }
+    void setCallPeerAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { _audioSock.setPeerAddr(addr, port); }
+    void quitCall() { _audioSock.quit(); }
+    void terminateCall() { _audioSock.terminate(); }
+    void runCall() { _audioSock.start(); }
+
 private slots:
     void _readInput();
     void _handleTcpConnected();
@@ -41,6 +48,7 @@ private:
     QTcpSocket _tcpSock;
     MainWindow* _window;
     ConnectionState _connState;
+    AudioSocket _audioSock;
 };
 
 #define sNetworkMgr NetworkMgr::instance()

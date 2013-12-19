@@ -7,6 +7,8 @@
 #include "packet.hpp"
 #include "opcodemgr.h"
 
+#include "audiomanager.h"
+
 #include <iostream>
 
 MainWindow::MainWindow(QMainWindow *parent) :
@@ -22,6 +24,12 @@ MainWindow::MainWindow(QMainWindow *parent) :
     _widgets->setCurrentWidget(_loginForm);
 
     sNetworkMgr->setMainWindow(this);
+
+    // Init audio
+    if (!sAudioManager->setInputDevice(DEFAULT_DEVICE, AudioSample::MONO, AudioSample::FREQ_48000))
+        std::cout << "FAIL INIT AUDIO INPUT: " << sAudioManager->errorText().toStdString() << std::endl;
+    if (!sAudioManager->setOutputDevice(DEFAULT_DEVICE, AudioSample::MONO, AudioSample::FREQ_48000))
+        std::cout << "FAIL INIT AUDIO OUPUT: " << sAudioManager->errorText().toStdString() << std::endl;
 }
 
 MainWindow::~MainWindow()
