@@ -10,9 +10,7 @@
 #ifdef UNIX
 # include <sys/time.h>
 #else
-#ifndef NOMINMAX
 # define NOMINMAX
-#endif
 # include <time.h>
 # include <Winsock2.h>
 # include <sys/types.h>
