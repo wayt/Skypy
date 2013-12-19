@@ -13,7 +13,9 @@
 class DbWorkerPool : ThreadPool
 {
 public:
-    DbWorkerPool(DbInfo const &info, unsigned int nbWorker);
+    DbWorkerPool();
+    bool initialize(DbInfo const &info, unsigned int nbWorker);
+    std::string const& getLastError() const;
     void execute(std::string const &sql);
     pDbResult query(std::string const &sql);
     void waitAll();

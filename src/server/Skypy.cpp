@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Session.h"
 #include "ConfigMgr.h"
+#include "SkypyDatabase.h"
 
 Skypy::Skypy() : _stopEvent(false), _sessionAddMutex(), _sessionAddList(),
     _sessionDelMutex(), _sessionDelList(), _sessionMap(),
@@ -29,6 +30,14 @@ void Skypy::onStartup()
     if (!sConfig->loadConfig())
     {
         std::cerr << "Fail to load config file \"" << sConfig->getConfigFile() << "\"" << std::endl;
+        stopNow();
+        return;
+    }
+
+    std::cout << ">> Starting Database pool ..." << std::endl;
+    if (!sSkypyDb->initialize())
+    {
+        std::cerr << "Fail to init MySQL " << sSkypyDb->getLastError() << std::endl;
         stopNow();
         return;
     }
