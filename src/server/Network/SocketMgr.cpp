@@ -26,7 +26,9 @@ bool SocketMgr::startNetwork(unsigned short port, unsigned int threadCount)
 
 void SocketMgr::registerNewSock(SessionSocket* newSock)
 {
-    std::cout << "registerNewSock" << std::endl;
+    ON_NETWORK_DEBUG(
+            std::cerr << "Network: registerNewSock from " << newSock->getRemoteAddress() << std::endl;
+    );
     clearOldSock();
     addNewSock(newSock);
     newSock->init();
@@ -71,24 +73,32 @@ void SocketMgr::clearOldSock()
 
 void SocketMgr::handleHeaderError(SessionSocket* sock, std::error_code const& error)
 {
-    std::cout << "handleHeaderError" << std::endl;
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: handleHeaderError" << std::endl;
+    );
     sock->close();
 }
 
 void SocketMgr::handleBodyError(SessionSocket* sock, std::error_code const& error)
 {
-    std::cout << "handleBodyError" << std::endl;
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: handleBodyError" << std::endl;
+    );
     sock->close();
 }
 
 void SocketMgr::handleInvalidHeaderSize(SessionSocket* sock, uint16_t size)
 {
-    std::cout << "handleInvalidHeaderSize" << std::endl;
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: handleInvalidHeaderSize" << std::endl;
+    );
     sock->close();
 }
 
 void SocketMgr::handleWriteError(SessionSocket* sock, std::error_code const& error)
 {
-    std::cout << "handleWriteError" << std::endl;
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: handleWriteError" << std::endl;
+    );
     sock->close();
 }

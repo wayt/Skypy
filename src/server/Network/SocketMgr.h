@@ -5,8 +5,15 @@
 #include "ThreadPool.hpp"
 #include "ServerSocket.h"
 #include "Mutex.hpp"
+#include "ConfigMgr.h"
 
 class SessionSocket;
+
+#define ON_NETWORK_DEBUG(a) do { \
+    if (sConfig->getBoolDefault("Network.Debug", false)) { \
+        a; \
+    } \
+} while (0);
 
 class SocketMgr
 {

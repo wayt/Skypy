@@ -4,6 +4,7 @@
 #include "Skypy.h"
 #include "Thread.hpp"
 #include "Utils.hpp"
+#include "ConfigMgr.h"
 
 #define SERVER_SLEEP_TIME 50
 
@@ -40,6 +41,9 @@ public:
 
 int main(int ac, char** av)
 {
+
+    sSkypy->setAcAv(ac, av);
+
     SkypyRunnable runn;
     Thread t(&runn);
     t.join();
