@@ -49,7 +49,7 @@ bool DbConnection::execute(const char *sql)
     return !hasError();
 }
 
-pDbResult DbConnection::query(const char *sql)
+DbResultPtr DbConnection::query(const char *sql)
 {
     if (!execute(sql))
         return NULL;

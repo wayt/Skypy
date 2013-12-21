@@ -29,7 +29,7 @@ elseif ( WIN32 )
 endif()
 
 set(Boost_USE_STATIC_LIBS   ON)
-find_package(Boost 1.46 COMPONENTS system thread REQUIRED)
+find_package(Boost 1.46 COMPONENTS system thread regex REQUIRED)
 find_package(MySQL REQUIRED)
 find_package(Threads)
 

@@ -16,13 +16,6 @@ enum SocketStatus
     STATUS_AUTHED       = 1
 };
 
-enum AuthResults
-{
-    AUTHRESULT_OK           = 0,
-    AUTHRESULT_BAD_LOG      = 1,
-    AUTHRESULT_INTERAL_ERR  = 2,
-};
-
 class SessionSocket : public TcpSocket
 {
 public:

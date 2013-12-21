@@ -31,6 +31,6 @@ public:
     std::shared_ptr<DbResult> query(const char *sql);
 };
 
-typedef std::shared_ptr<DbResult> pDbResult;
+typedef std::shared_ptr<DbResult> DbResultPtr;
 
 #endif

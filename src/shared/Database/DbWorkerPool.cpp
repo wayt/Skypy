@@ -33,19 +33,41 @@ void DbWorkerPool::execute(std::string const &sql)
     _queue.enqueue(new DbQuery(QUERY_ASYNC, sql));
 }
 
-pDbResult DbWorkerPool::query(std::string const &sql)
+void DbWorkerPool::execute(const char* str, ...)
+{
+    char buff[512];
+    va_list args;
+    va_start(args, str);
+    vsprintf(buff, str, args);
+    va_end(args);
+
+    execute(std::string(buff));
+}
+
+DbResultPtr DbWorkerPool::query(std::string const &sql)
 {
     DbQuery* query = new DbQuery(QUERY_SYNC, sql);
 
     _queue.enqueue(query);
 
-    pDbResult result = query->getResult();
+    DbResultPtr result = query->getResult();
 
     query->wait();
 
     delete query;
 
     return result;
+}
+
+DbResultPtr DbWorkerPool::query(const char *str, ...)
+{
+    char buff[512];
+    va_list args;
+    va_start(args, str);
+    vsprintf(buff, str, args);
+    va_end(args);
+
+    return query(std::string(buff));
 }
 
 void DbWorkerPool::waitAll()

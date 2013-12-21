@@ -10,14 +10,17 @@
 #include <boost/thread/mutex.hpp>
 #include <list>
 
-class DbWorkerPool : ThreadPool
+class DbWorkerPool : public ThreadPool
 {
 public:
     DbWorkerPool();
     bool initialize(DbInfo const &info, unsigned int nbWorker);
     std::string const& getLastError() const;
     void execute(std::string const &sql);
-    pDbResult query(std::string const &sql);
+    void execute(const char* str, ...);
+    DbResultPtr query(std::string const &sql);
+    DbResultPtr query(const char* str, ...);
+
     void waitAll();
 private:
     DbQueue _queue;

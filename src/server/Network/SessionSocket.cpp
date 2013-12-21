@@ -5,6 +5,8 @@
 #include "SocketMgr.h"
 #include "Session.h"
 #include "Skypy.h"
+#include "AuthWorker.h"
+#include <stdexcept>
 
 SessionSocket::SessionSocket(SocketMgr* mgr) : TcpSocket(mgr->io_service()),
     _sockMgr(mgr), _status(STATUS_UNAUTHED), _session(NULL)
@@ -26,11 +28,12 @@ void SessionSocket::onInit()
 
 void SessionSocket::onClose()
 {
+    ON_NETWORK_DEBUG(
+            std::cout << "Netowkr: ON CLOSE" << std::endl;
+    );
+
     if (getStatus() == STATUS_UNAUTHED)
-    {
         _sockMgr->removeNewSock(this);
-        delete this;
-    }
     else if (_session)
         _session->logout();
 }
@@ -82,7 +85,16 @@ void SessionSocket::_handleBody(uint16_t code, boost::system::error_code const& 
     );
 
     Packet pkt(code, _body, uint16_t(inputSize));
-    handlePacketInput(pkt);
+    try
+    {
+        handlePacketInput(pkt);
+    }
+    catch (std::exception const& e)
+    {
+        close();
+        delete this;
+        return;
+    }
 
     _registerHeader();
 }
@@ -128,10 +140,9 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
             std::cout << "Network: HANDLE AUTH: " << email << " - " << password << std::endl;
     );
 
-    std::size_t a_pos = email.find('@');
+    AuthWorker auth(email, password);
 
-    bool login_ok = (password == "titi") && a_pos != std::string::npos;
-    if (login_ok)
+    if (auth.digest().result() == AUTHRESULT_OK)
     {
         _sockMgr->removeNewSock(this);
         _status = STATUS_AUTHED;
@@ -151,11 +162,11 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
     else
     {
         Packet data(SMSG_AUTH_RESULT);
-        data << uint8(AUTHRESULT_BAD_LOG);
+        data << uint8(auth.result());
         send(data);
         ON_NETWORK_DEBUG(
                 std::cout << "Network: SEND LOGIN PAS OK, CLOSING" << std::endl;
         );
-        close();
+        throw std::runtime_error("Auth fail");
     }
 }
