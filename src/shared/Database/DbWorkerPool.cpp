@@ -50,9 +50,9 @@ DbResultPtr DbWorkerPool::query(std::string const &sql)
 
     _queue.enqueue(query);
 
-    DbResultPtr result = query->getResult();
-
     query->wait();
+
+    DbResultPtr result = query->getResult();
 
     delete query;
 

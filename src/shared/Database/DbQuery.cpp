@@ -35,6 +35,8 @@ void DbQuery::wait()
 
 void DbQuery::notify()
 {
+    boost::unique_lock<boost::mutex> lock(_mutex);
+
     _done = true;
     _cond.notify_one();
 }

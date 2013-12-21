@@ -52,17 +52,17 @@ bool DbConnection::execute(const char *sql)
 DbResultPtr DbConnection::query(const char *sql)
 {
     if (!execute(sql))
-        return NULL;
+        return DbResultPtr(new DbResult(NULL, NULL, 0, 0));
 
     MYSQL_RES *result = mysql_store_result(_conn);
     if (hasError())
-        return NULL;
+        return DbResultPtr(new DbResult(NULL, NULL, 0, 0));
 
     int nbFields = mysql_num_fields(result);
     int nbRows = mysql_affected_rows(_conn);
     MYSQL_FIELD *fields = mysql_fetch_fields(result);
 
-    return std::shared_ptr<DbResult>(new DbResult(result, fields, nbFields, nbRows));
+    return DbResultPtr(new DbResult(result, fields, nbFields, nbRows));
 }
 
 void DbConnection::close()
