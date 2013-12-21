@@ -4,7 +4,8 @@
 DbResult::DbResult(MYSQL_RES *result, MYSQL_FIELD *fields, int nbFields, int nbRows)
     : _result(result), _fields(fields), _nbFields(nbFields), _nbRows(nbRows), _currentRow(NULL)
 {
-    _currentRow = new DbField[_nbFields];
+    if (_nbFields > 0)
+        _currentRow = new DbField[_nbFields];
 }
 
 DbResult::~DbResult()
@@ -16,6 +17,9 @@ DbResult::~DbResult()
 bool DbResult::fetch()
 {
     MYSQL_ROW row;
+
+    if (!_result)
+        return false;
 
     row = mysql_fetch_row(_result);
 
