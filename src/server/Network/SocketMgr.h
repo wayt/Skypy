@@ -25,7 +25,7 @@ public:
     bool startNetwork(unsigned short port, unsigned int threadCount = 1);
 
     boost::asio::io_service& io_service() { return _service; }
-    virtual void registerNewSock(SessionSocket *);
+    virtual void registerNewSock(SessionSocket*);
 
     void shutdown();
     void wait() { _serviceThreads.join_all(); }

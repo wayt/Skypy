@@ -4,3 +4,11 @@
 Network.ListenPort = 5000
 Network.ThreadCount = 1
 Network.Debug = no
+
+MySQL.host = "localhost"
+MySQL.user = "root"
+MySQL.password = "root"
+MySQL.database = "skypy"
+MySQL.port = 3306
+MySQL.ThreadCount = 2
+
