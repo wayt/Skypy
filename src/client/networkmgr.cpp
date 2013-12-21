@@ -108,7 +108,6 @@ void NetworkMgr::_readInput()
                std::cerr << "Error: receiv unknow opcode: " << pkt.getOpcode() << std::endl;
                return;
            }
-
            if (opcodedef->func)
                (_window->*opcodedef->func)(pkt);
            break;
@@ -116,7 +115,7 @@ void NetworkMgr::_readInput()
     }
 }
 
-void NetworkMgr::makeCall(const std::string &userName, const std::string &userAdress, const std::string &contactName)
+void NetworkMgr::makeCall(const std::string &userName, const std::string &contactName, const std::string &contactAdress, quint32 peerId)
 {
   Packet pkt(CMSG_SIP);
   const std::string cmd("RINVITE");
@@ -124,7 +123,8 @@ void NetworkMgr::makeCall(const std::string &userName, const std::string &userAd
 
   pkt << cmd;
   pkt << userName;
-  pkt << ((addr.toString()).toStdString());
   pkt << contactName;
+  pkt << contactAdress;
+  pkt << peerId;
   this->tcpSendPacket(pkt);
 }

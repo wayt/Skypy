@@ -1,6 +1,7 @@
 #include "Session.h"
 #include "SessionSocket.h"
 #include "Skypy.h"
+#include "SipManager.h"
 
 Session::Session(uint32 id, SessionSocket* sock, std::string const& email) : _id(id), _socket(sock), _packetQueue(),
     _logout(false), _name(email), _email(email)
@@ -64,29 +65,27 @@ void Session::send(Packet const& pkt)
 void Session::handleSipPacket(Packet& pkt)
 {
   std::string cmd;
+  uint32 peerId;
+  std::string user;
+  std::string adress;
+  std::string contact;
 
+  std::cout << "SIP REQUESTPACKET RECEIVED" << std::endl;
   pkt >> cmd;
-  std::cout << "SIP PACKET RECEIVED" << std::endl;
-
-  if (cmd == "RINVITE")
+  pkt >> user >> contact >> adress >> peerId;
+  sSipManager->sendSipResponse(this/*100, cmd, user, adress, contact*/);
+  Session* peer = sSkypy->findSession(peerId);
+  if (!peer)
     {
-      std::string user;
-      std::string adress;
-      std::string contact;
-      std::cout << "An User wanna talk" << std::endl;
-      pkt >> user;
-      pkt >> adress;
-      pkt >> contact;
-      std::cout << "Composition : " << std::endl << "CMD =" << cmd << std::endl << "USER =" << user << std::endl << "USER ADRESS =" << adress << std::endl << "CONTACT =" << contact << std::endl;
-      Packet rep(SMSG_SIP);
-      rep << "r";
-      rep << 100;
-      cmd.erase(0,1);
-      rep << cmd;
-      rep << user;
-      rep << adress;
-      rep << contact;
-      _socket->send(rep);
+      std::cout << "Peer not found" << std::endl;
+      sSipManager->sendSipResponse(this/*, 404, cmd, user, adress, contact*/);
+      return;
+    }
+  else
+    {
+      sSipManager->forwardSip(peer, pkt);
+      if (cmd == "INVITE") /*On separe le fait de sonner du fait d'attendre une reponse*/
+	sSipManager->sendSipResponse(this/*, 180, cmd, user, adress, contact*/);
     }
 }
 
