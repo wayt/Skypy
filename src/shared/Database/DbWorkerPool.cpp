@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-#include <stdarg.h>
-=======
->>>>>>> 719076b69c58529be495a48320ab87997e5fbf0e
 #include "DbWorkerPool.h"
+#include <stdarg.h>
 
 DbWorkerPool::DbWorkerPool()
     : ThreadPool(), _queue(), _conns()
