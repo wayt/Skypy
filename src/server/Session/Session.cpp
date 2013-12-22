@@ -1,7 +1,10 @@
 #include "Session.h"
 #include "SessionSocket.h"
 #include "Skypy.h"
+<<<<<<< HEAD
 #include "SipManager.h"
+=======
+>>>>>>> 719076b69c58529be495a48320ab87997e5fbf0e
 #include "SkypyDatabase.h"
 
 Session::Session(uint32 id, SessionSocket* sock, std::string const& email) : _id(id), _socket(sock), _packetQueue(),
@@ -66,6 +69,7 @@ void Session::send(Packet const& pkt)
 void Session::handleSipPacket(Packet& pkt)
 {
   std::string cmd;
+<<<<<<< HEAD
   uint32 peerId;
   std::string user;
   std::string adress;
@@ -87,6 +91,31 @@ void Session::handleSipPacket(Packet& pkt)
       sSipManager->forwardSip(peer, pkt);
       if (cmd == "INVITE") /*On separe le fait de sonner du fait d'attendre une reponse*/
 	sSipManager->sendSipResponse(this/*, 180, cmd, user, adress, contact*/);
+=======
+
+  pkt >> cmd;
+  std::cout << "SIP PACKET RECEIVED" << std::endl;
+
+  if (cmd == "RINVITE")
+    {
+      std::string user;
+      std::string adress;
+      std::string contact;
+      std::cout << "An User wanna talk" << std::endl;
+      pkt >> user;
+      pkt >> adress;
+      pkt >> contact;
+      std::cout << "Composition : " << std::endl << "CMD =" << cmd << std::endl << "USER =" << user << std::endl << "USER ADRESS =" << adress << std::endl << "CONTACT =" << contact << std::endl;
+      Packet rep(SMSG_SIP);
+      rep << "r";
+      rep << 100;
+      cmd.erase(0,1);
+      rep << cmd;
+      rep << user;
+      rep << adress;
+      rep << contact;
+      _socket->send(rep);
+>>>>>>> 719076b69c58529be495a48320ab87997e5fbf0e
     }
 }
 

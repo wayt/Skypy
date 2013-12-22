@@ -35,10 +35,10 @@ void WidgetChatTab::on__inputText_returnPressed()
   if (text.size() == 0)
     return;
 
-  Packet pkt(CMSG_CHAT_TEXT);
-  pkt << quint32(_peerId);
-  pkt << text;
-  sNetworkMgr->tcpSendPacket(pkt);
-  _inputText->setText("");
-  _chatTable->addItem("Moi: " + text);
+    Packet pkt(CMSG_CHAT_TEXT);
+    pkt << quint32(_peerId);
+    pkt << text;
+    sNetworkMgr->tcpSendPacket(pkt);
+    _inputText->setText("");
+    _chatTable->addItem("Moi: " + text);
 }
