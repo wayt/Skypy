@@ -5,8 +5,15 @@
 #include "ThreadPool.hpp"
 #include "ServerSocket.h"
 #include "Mutex.hpp"
+#include "ConfigMgr.h"
 
 class SessionSocket;
+
+#define ON_NETWORK_DEBUG(a) do { \
+    if (sConfig->getBoolDefault("Network.Debug", false)) { \
+        a; \
+    } \
+} while (0);
 
 class SocketMgr
 {
@@ -18,7 +25,7 @@ public:
     bool startNetwork(unsigned short port, unsigned int threadCount = 1);
 
     boost::asio::io_service& io_service() { return _service; }
-    virtual void registerNewSock(SessionSocket *);
+    virtual void registerNewSock(SessionSocket*);
 
     void shutdown();
     void wait() { _serviceThreads.join_all(); }

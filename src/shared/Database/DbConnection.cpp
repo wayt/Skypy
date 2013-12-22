@@ -8,11 +8,15 @@ DbConnection::DbConnection(DbInfo const &info) : _info(info), _conn(NULL)
 bool DbConnection::hasError() const
 {
     if (*mysql_error(_conn))
-    {
-        std::cerr << mysql_error(_conn) << std::endl;
         return true;
-    }
     return false;
+}
+
+std::string const& DbConnection::getLastError() const
+{
+    static std::string str = "";
+    str = mysql_error(_conn);
+    return str;
 }
 
 bool DbConnection::open()
@@ -45,20 +49,20 @@ bool DbConnection::execute(const char *sql)
     return !hasError();
 }
 
-pDbResult DbConnection::query(const char *sql)
+DbResultPtr DbConnection::query(const char *sql)
 {
     if (!execute(sql))
-        return NULL;
+        return DbResultPtr(new DbResult(NULL, NULL, 0, 0));
 
     MYSQL_RES *result = mysql_store_result(_conn);
     if (hasError())
-        return NULL;
+        return DbResultPtr(new DbResult(NULL, NULL, 0, 0));
 
     int nbFields = mysql_num_fields(result);
     int nbRows = mysql_affected_rows(_conn);
     MYSQL_FIELD *fields = mysql_fetch_fields(result);
 
-    return std::shared_ptr<DbResult>(new DbResult(result, fields, nbFields, nbRows));
+    return DbResultPtr(new DbResult(result, fields, nbFields, nbRows));
 }
 
 void DbConnection::close()

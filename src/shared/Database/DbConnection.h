@@ -24,12 +24,13 @@ private:
 public:
     DbConnection(DbInfo const &info);
     bool hasError() const;
+    std::string const& getLastError() const;
     bool open();
     void close();
     bool execute(const char *sql);
     std::shared_ptr<DbResult> query(const char *sql);
 };
 
-typedef std::shared_ptr<DbResult> pDbResult;
+typedef std::shared_ptr<DbResult> DbResultPtr;
 
 #endif

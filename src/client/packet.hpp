@@ -291,8 +291,7 @@ private:
     T read(quint32 pos) const
     {
         T val = *((T const*)&_storage[pos]);
-        if (sizeof(T) > 1)
-            val = qFromBigEndian<T>(val);
+        val = qFromBigEndian<T>(val);
         return val;
     }
 
@@ -301,5 +300,7 @@ private:
     quint16 _wpos;
 };
 
+template<>
+char Packet::read<char>(quint32 pos) const;
 
 #endif // PACKET_HPP

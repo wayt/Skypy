@@ -1,10 +1,12 @@
 #include "Skypy.h"
 #include <iostream>
 #include "Session.h"
+#include "ConfigMgr.h"
+#include "SkypyDatabase.h"
 
 Skypy::Skypy() : _stopEvent(false), _sessionAddMutex(), _sessionAddList(),
     _sessionDelMutex(), _sessionDelList(), _sessionMap(),
-    _networkMgr()
+    _networkMgr(), _ac(0), _av(NULL)
 {
 
 }
@@ -23,8 +25,32 @@ void Skypy::onStartup()
     std::cout << "*                        Coupyright <3  *" << std::endl;
     std::cout << "*****************************************" << std::endl << std::endl;
 
+    std::cout << ">> Load configuration ..." << std::endl;
+    sConfig->setConfigFile((_ac > 1 ? _av[1] : DEFAULT_CONFIG_FILE));
+    if (!sConfig->loadConfig())
+    {
+        std::cerr << "Fail to load config file \"" << sConfig->getConfigFile() << "\"" << std::endl;
+        stopNow();
+        return;
+    }
+
+    std::cout << ">> Starting Database pool ..." << std::endl;
+    if (!sSkypyDb->initialize())
+    {
+        std::cerr << "Fail to init MySQL " << sSkypyDb->getLastError() << std::endl;
+        stopNow();
+        return;
+    }
+
     std::cout << ">> Starting network ..." << std::endl;
-    _networkMgr.startNetwork(5000, 10);
+    if (!_networkMgr.startNetwork(
+                sConfig->getIntDefault("Network.ListenPort", 5000),
+                sConfig->getIntDefault("Network.ThreadCount", 1)
+                ))
+    {
+        stopNow();
+        return;
+    }
 }
 
 void Skypy::onShutdown()

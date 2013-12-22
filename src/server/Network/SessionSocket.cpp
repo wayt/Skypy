@@ -5,6 +5,8 @@
 #include "SocketMgr.h"
 #include "Session.h"
 #include "Skypy.h"
+#include "AuthWorker.h"
+#include <stdexcept>
 
 SessionSocket::SessionSocket(SocketMgr* mgr) : TcpSocket(mgr->io_service()),
     _sockMgr(mgr), _status(STATUS_UNAUTHED), _session(NULL)
@@ -17,18 +19,21 @@ void SessionSocket::onInit()
     uint8 buff[] = "WELCOME";
     _send(buff, 8);
 
-    std::cout << "SOCKET INIT" << std::endl;
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: SOCKET INIT" << std::endl;
+    );
 
     _registerHeader();
 }
 
 void SessionSocket::onClose()
 {
+    ON_NETWORK_DEBUG(
+            std::cout << "Netowkr: ON CLOSE" << std::endl;
+    );
+
     if (getStatus() == STATUS_UNAUTHED)
-    {
         _sockMgr->removeNewSock(this);
-        delete this;
-    }
     else if (_session)
         _session->logout();
 }
@@ -48,17 +53,14 @@ void SessionSocket::_handleHeader(boost::system::error_code const& error)
         return;
     }
 
-    std::cout << "RECV: " << int32(_header[0])
-       << " - " << int32(_header[1])
-       << " - " << int32(_header[2])
-       << " - " << int32(_header[3]) << std::endl;
-
     uint16_t size = (*((uint16_t const*)&_header[0]));
     Utils::endian::big_to_native<uint16_t>(size);
     uint16_t opcode = (*((uint16_t const*)&_header[2]));
     Utils::endian::big_to_native<uint16_t>(opcode);
 
-    std::cout << "HEADER INPUT " << size << " - " << opcode << std::endl;
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: HEADER INPUT " << size << " - " << opcode << std::endl;
+    );
     if (size > Packet::MaxBodySize)
     {
         _sockMgr->handleInvalidHeaderSize(this, size);
@@ -78,24 +80,39 @@ void SessionSocket::_handleBody(uint16_t code, boost::system::error_code const& 
         _sockMgr->handleBodyError(this, std::error_code(/*error.value()*/));
         return;
     }
-    std::cout << "BODY READED" << std::endl;
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: BODY READED" << std::endl;
+    );
 
     Packet pkt(code, _body, uint16_t(inputSize));
-    handlePacketInput(pkt);
+    try
+    {
+        handlePacketInput(pkt);
+    }
+    catch (std::exception const& e)
+    {
+        close();
+        delete this;
+        return;
+    }
 
     _registerHeader();
 }
 
 void SessionSocket::send(Packet const& pkt)
 {
-    std::cerr << "SEND: " << uint32(pkt.getOpcode()) << std::endl;
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: SEND OPCODE: " << uint32(pkt.getOpcode()) << std::endl;
+    );
     _send(pkt.content(), pkt.size());
 }
 
 void SessionSocket::handlePacketInput(Packet& pkt)
 {
-    std::cout << "RECEIV PACKET: " << pkt.getOpcode() << std::endl;
-    pkt.dumpHex();
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: RECEIV PACKET: " << pkt.getOpcode() << std::endl;
+            pkt.dumpHex();
+    );
     if (_status == STATUS_UNAUTHED) // Special cases
     {
         switch (pkt.getOpcode())
@@ -118,12 +135,14 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
     std::string email;
     std::string password;
     pkt >> email >> password;
-    std::cout << "HANDLE AUTH: " << email << " - " << password << std::endl;
 
-    std::size_t a_pos = email.find('@');
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: HANDLE AUTH: " << email << " - " << password << std::endl;
+    );
 
-    bool login_ok = (password == "titi") && a_pos != std::string::npos;
-    if (login_ok)
+    AuthWorker auth(email, password);
+
+    if (auth.digest().result() == AUTHRESULT_OK)
     {
         _sockMgr->removeNewSock(this);
         _status = STATUS_AUTHED;
@@ -136,14 +155,18 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
         Packet data(SMSG_AUTH_RESULT);
         data << uint8(AUTHRESULT_OK);
         send(data);
-        std::cout << "SEND LOGIN OK" << std::endl;
+        ON_NETWORK_DEBUG(
+                std::cout << "Network: SEND LOGIN OK" << std::endl;
+        );
     }
     else
     {
         Packet data(SMSG_AUTH_RESULT);
-        data << uint8(AUTHRESULT_BAD_LOG);
+        data << uint8(auth.result());
         send(data);
-        std::cout << "SEND LOGIN PAS OK, CLOSING" << std::endl;
-        close();
+        ON_NETWORK_DEBUG(
+                std::cout << "Network: SEND LOGIN PAS OK, CLOSING" << std::endl;
+        );
+        throw std::runtime_error("Auth fail");
     }
 }

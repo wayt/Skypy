@@ -16,4 +16,21 @@ else()
     message("-- Debug: no")
 endif()
 
+if ( APPLE )
+    set(CMAKE_CXX_FLAGS "-D OSX -D UNIX -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
+
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -stdlib=libc++")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
+elseif ( UNIX )
+    set(CMAKE_CXX_FLAGS "-D LINUX -D UNIX ${CMAKE_CXX_FLAGS}")
+elseif ( WIN32 )
+    set(CMAKE_CXX_FLAGS "-D WIN32 ${CMAKE_CXX_FLAGS}")
+endif()
+
+set(Boost_USE_STATIC_LIBS   ON)
+find_package(Boost 1.46 COMPONENTS system thread regex REQUIRED)
+find_package(MySQL REQUIRED)
+find_package(Threads)
+
 add_subdirectory(src)

@@ -10,7 +10,7 @@ QueryType DbQuery::getType() const
     return _type;
 }
 
-pDbResult DbQuery::getResult() const
+DbResultPtr DbQuery::getResult() const
 {
     return _result;
 }
@@ -20,7 +20,7 @@ char const *DbQuery::getSql() const
     return _sql.c_str();
 }
 
-void DbQuery::setResult(pDbResult const result)
+void DbQuery::setResult(DbResultPtr const result)
 {
     _result = result;
 }
@@ -35,6 +35,8 @@ void DbQuery::wait()
 
 void DbQuery::notify()
 {
+    boost::unique_lock<boost::mutex> lock(_mutex);
+
     _done = true;
     _cond.notify_one();
 }

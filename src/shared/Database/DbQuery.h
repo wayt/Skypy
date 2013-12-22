@@ -16,8 +16,8 @@ class DbQuery
 public:
     DbQuery(QueryType type, std::string const &sql);
     QueryType getType() const;
-    pDbResult getResult() const;
-    void setResult(pDbResult const result);
+    DbResultPtr getResult() const;
+    void setResult(DbResultPtr const result);
     char const *getSql() const;
     void wait();
     void notify();
@@ -25,7 +25,7 @@ private:
     boost::mutex _mutex;
     boost::condition_variable _cond;
     QueryType _type;
-    pDbResult _result;
+    DbResultPtr _result;
     std::string _sql;
     bool _done;
 };

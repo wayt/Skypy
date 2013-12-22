@@ -2,6 +2,7 @@
 #include "SessionSocket.h"
 #include "Skypy.h"
 #include "SipManager.h"
+#include "SkypyDatabase.h"
 
 Session::Session(uint32 id, SessionSocket* sock, std::string const& email) : _id(id), _socket(sock), _packetQueue(),
     _logout(false), _name(email), _email(email)

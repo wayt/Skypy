@@ -15,6 +15,7 @@ class Skypy : public Singleton<Skypy>
 {
 public:
     Skypy();
+    void setAcAv(int ac, char** av) { _ac = ac; _av = av; }
     void onStartup();
     void onShutdown();
 
@@ -39,6 +40,8 @@ private:
     std::list<Session*> _sessionDelList;
     std::map<uint32, Session*> _sessionMap;
     SocketMgr _networkMgr;
+    int _ac;
+    char** _av;
 };
 
 #define sSkypy Skypy::instance()

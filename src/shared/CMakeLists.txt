@@ -1,6 +1,3 @@
-find_package(Boost 1.46 COMPONENTS system thread-mt REQUIRED)
-find_package(MySQL REQUIRED)
-
 set(LIBRARY_NAME "shared")
 
 add_definitions(
@@ -24,8 +21,8 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/ServerSocket
     ${CMAKE_CURRENT_SOURCE_DIR}/Threading
     ${CMAKE_CURRENT_SOURCE_DIR}/Database
-    ${MYSQL_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
+    ${MYSQL_INCLUDE_DIR}
 )
 
 link_directories(
@@ -38,6 +35,6 @@ add_library(${LIBRARY_NAME}
 )
 target_link_libraries(${LIBRARY_NAME}
     ${Boost_LIBRARIES}
-    ${MYSQL_LIBRARIES}
+    ${MYSQL_LIBRARY}
 )
 
