@@ -112,3 +112,13 @@ void MainWindow::handleChatText(Packet &pkt)
     std::cout << "RECEIV MSG FROM: " << from << " - " << msg.toStdString() << std::endl;
     _contactForm->addMessageFrom(from, msg);
 }
+
+void MainWindow::handleSipRep(Packet &pkt)
+{
+  sNetworkMgr->handleSipRep(pkt);
+}
+
+void MainWindow::handleSipRequest(Packet &pkt)
+{
+  sNetworkMgr->handleSipRequest(pkt);
+}

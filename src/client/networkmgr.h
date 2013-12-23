@@ -2,12 +2,16 @@
 #define NETWORKMGR_H
 
 #include <cstdlib>
+#include <vector>
+#include <utility>
 #include <QString>
 #include <QTcpSocket>
 #include "packet.hpp"
 #include "singleton.h"
 #include "audiosocket.h"
 
+class sipRequest;
+class sipRespond;
 class MainWindow;
 
 class NetworkMgr : public QObject, public Singleton<NetworkMgr>
@@ -37,14 +41,15 @@ public:
     void quitCall() { _audioSock.quit(); }
     void terminateCall() { _audioSock.terminate(); }
     void runCall() { _audioSock.start(); }
-
+    void handleSipRequest(Packet &pkt);
+    void handleSipRep(Packet &pkt);
+    std::vector< std::pair< sipRequest*, sipRespond* > > getSipPool() { return (_sipPool); }
 private slots:
     void _readInput();
     void _handleTcpConnected();
     void _handleTcpError(QAbstractSocket::SocketError e);
-
 private:
-
+    std::vector< std::pair< sipRequest*, sipRespond* > > _sipPool;
     QTcpSocket _tcpSock;
     MainWindow* _window;
     ConnectionState _connState;

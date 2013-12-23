@@ -23,6 +23,8 @@ public:
     void handleServerConnectionLost(QAbstractSocket::SocketError e, QString const& msg);
 
     // Network handlers
+    void handleSipRep(Packet &);
+    void handleSipRequest(Packet &);
     void handleContactLogin(Packet& pkt);
     void handleContactLogout(Packet& pkt);
     void handleChatText(Packet& pkt);

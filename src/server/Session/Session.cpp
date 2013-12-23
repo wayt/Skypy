@@ -74,19 +74,19 @@ void Session::handleSipPacket(Packet& pkt)
   std::cout << "SIP REQUESTPACKET RECEIVED" << std::endl;
   pkt >> cmd;
   pkt >> user >> contact >> adress >> peerId;
-  sSipManager->sendSipResponse(this/*100, cmd, user, adress, contact*/);
+  sSipManager->sendSipResponse(this, 100, cmd, user, contact, adress, peerId);
   Session* peer = sSkypy->findSession(peerId);
   if (!peer)
     {
       std::cout << "Peer not found" << std::endl;
-      sSipManager->sendSipResponse(this/*, 404, cmd, user, adress, contact*/);
+      sSipManager->sendSipResponse(this, 404, cmd, user, contact, adress, peerId);
       return;
     }
   else
     {
       sSipManager->forwardSip(peer, pkt);
       if (cmd == "INVITE") /*On separe le fait de sonner du fait d'attendre une reponse*/
-	sSipManager->sendSipResponse(this/*, 180, cmd, user, adress, contact*/);
+	sSipManager->sendSipResponse(this, 180, cmd, user, contact, adress, peerId);
     }
 }
 
