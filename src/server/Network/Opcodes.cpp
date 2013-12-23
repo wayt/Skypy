@@ -7,7 +7,7 @@ OpcodeMgr::OpcodeDefinition const* OpcodeMgr::getOpcodeDefinition(uint16 opcode)
         { SMSG_WELCOME, NULL },
         { CMSG_AUTH, NULL },
         //{ SMSG_SIP , &Session::handleSipPacket },
-        { CMSG_SIP, &Session::handleSipPacket },
+        { RMSG_SIP, &Session::handleSipPacket },
         { CMSG_CHAT_TEXT, &Session::handleChatText },
         { CMSG_SEARCH_NEW_CONTACT, &Session::handleSearchNewContact },
         { CMSG_ADD_CONTACT_REQUEST, &Session::handleAddContactRequest },

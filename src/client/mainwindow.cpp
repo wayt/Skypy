@@ -147,5 +147,14 @@ void MainWindow::handleAddContactRequest(Packet &pkt)
 
     Notification* notif = new Notification(_contactForm->getNotificationWidget(), NOTIF_CONTACT_REQUEST, "New contact request from " + info->text(), info);
     _contactForm->getNotificationWidget()->addItem(notif);
+}
 
+void MainWindow::handleSipRep(Packet &pkt)
+{
+  sNetworkMgr->handleSipRep(pkt);
+}
+
+void MainWindow::handleSipRequest(Packet &pkt)
+{
+  sNetworkMgr->handleSipRequest(pkt);
 }

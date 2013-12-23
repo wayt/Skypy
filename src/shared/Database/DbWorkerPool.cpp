@@ -1,4 +1,5 @@
 #include "DbWorkerPool.h"
+#include <stdarg.h>
 
 DbWorkerPool::DbWorkerPool()
     : ThreadPool(), _queue(), _conns()

@@ -1,5 +1,6 @@
 #include "SkypyDatabase.h"
 #include "ConfigMgr.h"
+#include <iostream>
 
 SkypyDatabase::SkypyDatabase()
 {
