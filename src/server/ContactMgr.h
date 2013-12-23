@@ -5,6 +5,8 @@
 #include "SharedDefines.h"
 #include <map>
 #include <string>
+#include <iostream>
+#include <stdexcept>
 
 enum SaveStatus
 {
