@@ -16,7 +16,7 @@ public:
     WidgetChatTab* addChatTab(ContactInfo* info, bool selectIt = true);
     WidgetChatTab* getChatTab(QString const& tabName);
 
-    void addMessageFrom(ContactInfo* info, QString const& msg);
+    void addMessageFrom(ContactInfo* info, QString const& msg, bool notif = false);
 
 signals:
 

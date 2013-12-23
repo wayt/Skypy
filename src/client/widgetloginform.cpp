@@ -42,6 +42,5 @@ void WidgetLoginForm::_pbConnection_clicked()
      */
 
     sNetworkMgr->tcpConnect("localhost", 5000);
-    //_networkMgr.makeCall(((_leMail->text()).toStdString()), "192.168.1.11", "TOTO le blaireau");
 }
 

@@ -33,11 +33,14 @@ WidgetChatTab* WidgetChatWindow::addChatTab(ContactInfo* info, bool selectIt)
 }
 
 
-void WidgetChatWindow::addMessageFrom(ContactInfo* info, QString const& msg)
+void WidgetChatWindow::addMessageFrom(ContactInfo* info, QString const& msg, bool notif)
 {
     WidgetChatTab* tab = getChatTab(info->getName());
     if (!tab)
         tab = addChatTab(info, false);
     std::cout << "ADD TAB MSG FROM: " << info->getEmail().toStdString() << " - " << msg.toStdString() << std::endl;
-    tab->getChatTable()->addItem(QString(info->getName() + ": " + msg));
+    QString item = msg;
+    if (!notif)
+       item = info->getName() + ": " + msg;
+    tab->getChatTable()->addItem(item);
 }

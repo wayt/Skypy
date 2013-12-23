@@ -13,20 +13,23 @@ public:
     _pkt << contactAdress;
     _pkt << peerId;
   }
-  Packet const& getPacket() {
+  Packet const& getPacket() const {
     return _pkt;
   }
-  const std::string &getCmd() {
+  const std::string &getCmd() const {
     return (_cmd);
   }
-  const std::string &getUserName() {
+  const std::string &getUserName() const {
     return (_userName);
   }
-  const std::string &getContactName() {
+  const std::string &getContactName() const {
    return (_contactName);
   }
-  const std::string &getContactAdress() {
+  const std::string &getContactAdress() const {
    return (_contactAdress);
+  }
+  quint32 getContactId() const {
+      return _peerId;
   }
  private:
   Packet _pkt;
@@ -54,29 +57,32 @@ class sipRespond
     _pkt << peerId;
 
   }
-  Packet const& getPacket() {
+  Packet const& getPacket() const {
     return _pkt;
   }
-  int getCode() {
+  int getCode() const {
     return (_opCode);
   }
-  const std::string &getCmd() {
+  const std::string &getCmd() const {
     return (_cmd);
   }
-  const std::string &getUserName() {
+  const std::string &getUserName() const {
     return (_userName);
   }
-  const std::string &getContactName() {
+  const std::string &getContactName() const {
    return (_contactName);
   }
-  const std::string &getContactAdress() {
+  const std::string &getContactAdress() const {
    return (_contactAdress);
   }
-  const std::string &getUserAdress() {
+  const std::string &getUserAdress() const {
    return (_userAdress);
   }
-  int &getUserPort() {
+  int getUserPort() const {
    return (_port);
+  }
+  int getContactId() const {
+      return _peerId;
   }
  private:
   int _opCode;

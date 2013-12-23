@@ -68,7 +68,7 @@ public:
 
     QListWidget* getContactListWidget() { return _contactList; }
 
-    void addMessageFrom(quint32 id, QString const& msg);
+    void addMessageFrom(quint32 id, QString const& msg, bool notif = false);
 
     WidgetAddContactWindow* getContactWindow() { return _addContactWindow; }
     QListWidget* getNotificationWidget() { return _notificationList; }

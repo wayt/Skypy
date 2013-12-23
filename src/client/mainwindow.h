@@ -30,6 +30,9 @@ public:
     void handleChatText(Packet& pkt);
     void handleSearchContactResult(Packet& pkt);
     void handleAddContactRequest(Packet& pkt);
+
+    void handlesipResponse(sipRequest const* req, sipRespond const* resp);
+    void handleCallRequest(std::string const& userName, std::string const& contactName, std::string const& contactAddress, quint32 peerId);
 private:
     QStackedWidget* _widgets;
 

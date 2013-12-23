@@ -12,6 +12,8 @@
 
 #include <iostream>
 
+#include "sipPacket.hpp"
+
 MainWindow::MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
     _widgets(new QStackedWidget(this)),
@@ -157,4 +159,48 @@ void MainWindow::handleSipRep(Packet &pkt)
 void MainWindow::handleSipRequest(Packet &pkt)
 {
   sNetworkMgr->handleSipRequest(pkt);
+}
+
+void MainWindow::handlesipResponse(sipRequest const* req, sipRespond const* resp)
+{
+    if (req->getCmd() == "INVITE")
+    {
+        switch (resp->getCode())
+        {
+        case 100: // Forward de l'appel
+            _contactForm->addMessageFrom(req->getContactId(), "Send call request ...", true);
+            break;
+        case 404: // Contact non connecte
+            _contactForm->addMessageFrom(req->getContactId(), QString(req->getContactName().c_str()) + QString(" isn't online"), true);
+            break;
+        case 180: // Ca sonne
+            _contactForm->addMessageFrom(req->getContactId(), "Ringing ...", true);
+            break;
+        }
+    }
+}
+
+void MainWindow::handleCallRequest(std::string const& userName, std::string const& contactName, std::string const& contactAddress, quint32 peerId)
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Incomming call", "Accept call from " + QString(contactName.c_str()) + " ?",
+                              QMessageBox::Yes | QMessageBox::No);
+    switch (reply)
+    {
+        case QMessageBox::Yes:
+        case QMessageBox::No:
+        {
+            if (reply == QMessageBox::Yes)
+            {
+                sipRespond Rep(200, "INVITE", userName, contactName, contactAddress, "", 4242, peerId);
+                sNetworkMgr->tcpSendPacket(Rep.getPacket());
+            }
+            else
+            {
+                sipRespond Rep(603, "INVITE", userName, contactName, contactAddress, "", 0, peerId);
+                sNetworkMgr->tcpSendPacket(Rep.getPacket());
+            }
+            break;
+        }
+    }
 }

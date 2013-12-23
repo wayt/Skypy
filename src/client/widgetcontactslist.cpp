@@ -76,14 +76,14 @@ ContactInfo* WidgetContactsList::findContact(quint32 id)
 }
 
 
-void WidgetContactsList::addMessageFrom(quint32 id, QString const& msg)
+void WidgetContactsList::addMessageFrom(quint32 id, QString const& msg, bool notif)
 {
     ContactInfo* info = findContact(id);
     if (!info)
         return;
 
     std::cout << "MSG FROM: " << info->getEmail().toStdString() << " - " << msg.toStdString() << std::endl;
-    _chatWindow->addMessageFrom(info, msg);
+    _chatWindow->addMessageFrom(info, msg, notif);
 }
 
 void WidgetContactsList::on__addContactButton_clicked()
@@ -119,6 +119,7 @@ void WidgetContactsList::handleNotificationDoubleClick(QListWidgetItem* item)
                     sNetworkMgr->tcpSendPacket(data);
 
                     _notificationList->removeItemWidget(notif);
+                    delete notif;
                     break;
                 }
             }

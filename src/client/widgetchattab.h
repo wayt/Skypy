@@ -20,6 +20,8 @@ private slots:
 
     void on__inputText_returnPressed();
 
+    void on__sendButton_clicked();
+
 private:
     quint32 _peerId;
     QString _peerName;

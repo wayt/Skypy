@@ -179,28 +179,28 @@ void Session::friendLogin(Session* sess)
 
 void Session::handleSipPacket(Packet& pkt)
 {
-  std::string cmd;
-  uint32 peerId;
-  std::string user;
-  std::string adress;
-  std::string contact;
+    std::string cmd;
+    uint32 peerId;
+    std::string userName;
+    std::string peerName;
+    std::string peerEmail;
 
-  std::cout << "SIP REQUESTPACKET RECEIVED" << std::endl;
-  pkt >> cmd;
-  pkt >> user >> contact >> adress >> peerId;
-  sSipManager->sendSipResponse(this, 100, cmd, user, contact, adress, peerId);
-  Session* peer = sSkypy->findSession(peerId);
-  if (!peer)
+    std::cout << "SIP REQUESTPACKET RECEIVED" << std::endl;
+    pkt >> cmd;
+    pkt >> userName >> peerName >> peerEmail >> peerId;
+    sSipManager->sendSipResponse(this, 100, cmd, userName, peerName, peerEmail, peerId);
+    Session* peer = sSkypy->findSession(peerId);
+    if (!peer)
     {
-      std::cout << "Peer not found" << std::endl;
-      sSipManager->sendSipResponse(this, 404, cmd, user, contact, adress, peerId);
-      return;
+        std::cout << "Peer not found" << std::endl;
+        sSipManager->sendSipResponse(this, 404, cmd, user, contact, adress, peerId);
+        return;
     }
-  else
+    else
     {
-      sSipManager->forwardSip(peer, pkt);
-      if (cmd == "INVITE") /*On separe le fait de sonner du fait d'attendre une reponse*/
-	sSipManager->sendSipResponse(this, 180, cmd, user, contact, adress, peerId);
+        sSipManager->forwardSip(peer, pkt);
+        if (cmd == "INVITE") /*On separe le fait de sonner du fait d'attendre une reponse*/
+            sSipManager->sendSipResponse(this, 180, cmd, user, contact, adress, peerId);
     }
 }
 
