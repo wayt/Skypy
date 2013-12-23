@@ -8,6 +8,11 @@
 
 #define SERVER_SLEEP_TIME 50
 
+void handleSignal(boost::system::error_code const& error, int sig_num)
+{
+    sSkypy->stopNow();
+}
+
 class SkypyRunnable
 {
 public:
@@ -15,17 +20,13 @@ public:
     {
         _signals.add(SIGINT);
         _signals.add(SIGTERM);
-        _signalService.run();
-        _signals.async_wait(boost::bind(&SkypyRunnable::handleStop, this));
-    }
-
-    void handleStop()
-    {
-        sSkypy->stopNow();
     }
 
     void run()
     {
+        _signals.async_wait(&handleSignal);
+        Thread signalThread(&_signalService);
+
         sSkypy->onStartup();
 
         uint32 prevTime = Utils::getMSTime();
@@ -47,7 +48,9 @@ public:
             else
                 prevSleep = 0;
         }
+
         _signalService.stop();
+        signalThread.join();
 
         sSkypy->onShutdown();
     }
