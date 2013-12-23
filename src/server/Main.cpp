@@ -11,6 +11,19 @@
 class SkypyRunnable
 {
 public:
+    SkypyRunnable() : _signalService(), _signals(_signalService)
+    {
+        _signals.add(SIGINT);
+        _signals.add(SIGTERM);
+        _signalService.run();
+        _signals.async_wait(boost::bind(&SkypyRunnable::handleStop, this));
+    }
+
+    void handleStop()
+    {
+        sSkypy->stopNow();
+    }
+
     void run()
     {
         sSkypy->onStartup();
@@ -34,9 +47,14 @@ public:
             else
                 prevSleep = 0;
         }
+        _signalService.stop();
 
         sSkypy->onShutdown();
     }
+
+private:
+    boost::asio::io_service _signalService;
+    boost::asio::signal_set _signals;
 };
 
 int main(int ac, char** av)

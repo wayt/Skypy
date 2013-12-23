@@ -66,6 +66,8 @@ void Skypy::onStartup()
 void Skypy::onShutdown()
 {
     std::cout << "Stopping Skypy server..." << std::endl;
+    std::cout << ">> Saving ContactMgr ..." << std::endl;
+    sContactMgr->saveToDb();
 
     for (std::map<uint32, Utils::Timer*>::iterator itr = _timedActionMap.begin();
             itr != _timedActionMap.end(); ++itr)
