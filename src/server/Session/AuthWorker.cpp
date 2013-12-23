@@ -1,6 +1,7 @@
 #include "AuthWorker.h"
 #include "SkypyDatabase.h"
 #include <boost/regex.hpp>
+#include <iostream>
 
 AuthWorker::AuthWorker(std::string const& email, std::string const& pass) :
     _email(email), _pass(pass), _result(AUTHRESULT_INTERAL_ERR)
