@@ -12,3 +12,5 @@ MySQL.database = "skypy"
 MySQL.port = 3306
 MySQL.ThreadCount = 2
 
+Skypy.ContactMgr.SaveInterval = 60
+

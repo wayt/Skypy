@@ -9,10 +9,10 @@ AuthWorker::AuthWorker(std::string const& email, std::string const& pass) :
 
 AuthWorker const& AuthWorker::digest()
 {
-    boost::regex re("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,6}$");
-    if (!boost::regex_match(_email, re))
+    if (!AuthWorker::isValidEmail(_email))
     {
         _result = AUTHRESULT_BAD_USER;
+        std::cout << "INVALIDE EMAIL" << std::endl;
         return *this;
     }
 
@@ -38,5 +38,12 @@ AuthWorker const& AuthWorker::digest()
 
     _result = AUTHRESULT_OK;
     return *this;
+}
+
+bool AuthWorker::isValidEmail(std::string const& email)
+{
+    static boost::regex re("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,6}$");
+    return boost::regex_match(email, re);
+
 }
 

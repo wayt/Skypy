@@ -2,21 +2,31 @@
 #include <QtGlobal>
 #include <iostream>
 #include "widgetchatwindow.h"
+#include "widgetaddcontactwindow.h"
+#include <QMessageBox>
+#include "packet.hpp"
+#include "opcodemgr.h"
+#include "networkmgr.h"
 
 WidgetContactsList::WidgetContactsList(QWidget *parent) :
     QWidget(parent),
     Ui::WidgetContactsList(),
     _contactMap(),
-    _chatWindow(new WidgetChatWindow(this))
+    _chatWindow(new WidgetChatWindow(this)),
+    _addContactWindow(new WidgetAddContactWindow(this))
 {
     setupUi(this);
     QObject::connect(_contactList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(handleContactDoubleClick(QListWidgetItem*)));
+    QObject::connect(_notificationList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(handleNotificationDoubleClick(QListWidgetItem*)));
+
+    _addContactWindow->setModal(true);
 }
 
 void WidgetContactsList::initialize()
 {
     _contactMap.clear();
     _contactList->clear();
+    _notificationList->clear();
 }
 
 void WidgetContactsList::unload()
@@ -74,4 +84,45 @@ void WidgetContactsList::addMessageFrom(quint32 id, QString const& msg)
 
     std::cout << "MSG FROM: " << info->getEmail().toStdString() << " - " << msg.toStdString() << std::endl;
     _chatWindow->addMessageFrom(info, msg);
+}
+
+void WidgetContactsList::on__addContactButton_clicked()
+{
+    _addContactWindow->show();
+}
+
+void WidgetContactsList::handleNotificationDoubleClick(QListWidgetItem* item)
+{
+    Notification* notif = dynamic_cast<Notification*>(item);
+    if (!notif)
+    {
+        _notificationList->removeItemWidget(item);
+        return;
+    }
+
+    switch (notif->getNotificationType())
+    {
+        case NOTIF_CONTACT_REQUEST:
+        {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Contact request", "Accept contact request from " + notif->getSender()->text() + " ?",
+                                      QMessageBox::Yes | QMessageBox::No);
+            switch (reply)
+            {
+                case QMessageBox::Yes:
+                case QMessageBox::No:
+                {
+                    Packet data(CMSG_ADD_CONTACT_RESPONSE);
+                    data << quint32(notif->getSender()->getId()); // request id
+                    data << quint8(reply == QMessageBox::Yes ? 1 : 0);
+                    std::cout << (reply == QMessageBox::Yes ? "Accept" : "Refuse") << " contact request " << notif->getSender()->getId() << std::endl;
+                    sNetworkMgr->tcpSendPacket(data);
+
+                    _notificationList->removeItemWidget(notif);
+                    break;
+                }
+            }
+        }
+    }
+
 }

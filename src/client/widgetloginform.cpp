@@ -18,6 +18,8 @@ WidgetLoginForm::WidgetLoginForm(QWidget *parent) :
 
     QObject::connect(_pbConnection, SIGNAL(clicked()), this, SLOT(_pbConnection_clicked()));
 
+    _leMail->setText("test@gmail.com");
+    _leMdp->setText("titi");
 }
 
 void WidgetLoginForm::initialize()

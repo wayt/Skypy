@@ -56,7 +56,8 @@ SOURCES += main.cpp\
     audiosample.cpp \
     audiosocket.cpp \
     audiostream.cpp \
-    packet.cpp
+    packet.cpp \
+    widgetaddcontactwindow.cpp
 
 HEADERS  += \
     networkmgr.h \
@@ -73,9 +74,11 @@ HEADERS  += \
     audiomanager.h \
     audiosample.h \
     audiosocket.h \
-    audiostream.h
+    audiostream.h \
+    widgetaddcontactwindow.h
 
 FORMS += \
     widgetcontactslist.ui \
     widgetchatwindow.ui \
-    widgetchattab.ui
+    widgetchattab.ui \
+    widgetaddcontactwindow.ui

@@ -11,6 +11,11 @@
 
 class Session;
 
+enum TimedActions
+{
+    TM_ACTION_SAVE_CONTACTMGR       = 0,
+};
+
 class Skypy : public Singleton<Skypy>
 {
 public:
@@ -28,10 +33,17 @@ public:
     void delSession(Session* sess);
 
     Session* findSession(uint32 id);
+    Session* findSession(std::string const& email);
+
 private:
     void _processAddSession();
     void _processDelSession();
     void _updateSessions(uint32 diff);
+    void _handleSessionLogin(Session* sess);
+    void _handleSessionLogout(Session* sess);
+
+    void _loadTimedActions();
+    void _executeTimedAction(TimedActions action);
 
     std::atomic<bool> _stopEvent;
     Mutex _sessionAddMutex;
@@ -42,6 +54,7 @@ private:
     SocketMgr _networkMgr;
     int _ac;
     char** _av;
+    std::map<uint32, Utils::Timer*> _timedActionMap;
 };
 
 #define sSkypy Skypy::instance()

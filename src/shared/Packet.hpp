@@ -220,7 +220,7 @@ public:
     static const unsigned int HeaderSize = PACKET_HEADER_SIZE;
     static const unsigned int MaxBodySize = PACKET_DEFAULT_SIZE;
 
-    void dumpHex()
+    void dumpHex() const
     {
         uint64 size = _storage.size();
         for (uint64 i = 0; i < size; ++i)
@@ -230,6 +230,24 @@ public:
             std::cout << int32(_storage[i]) << " - ";
         }
         std::cout << std::endl;
+    }
+
+    template<class T>
+    uint16 insertPlaceholder()
+    {
+        uint16 pos = _wpos - 4;
+        _wpos += sizeof(T);
+        return pos;
+    }
+
+    template<class T>
+    void insert(T value, uint16 pos)
+    {
+        uint16 wpos = _wpos;
+        _wpos = 4 + pos;
+        *this << T(value);
+        _wpos = wpos;
+        updateSize();
     }
 
 private:

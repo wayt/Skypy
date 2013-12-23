@@ -144,11 +144,22 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
 
     if (auth.digest().result() == AUTHRESULT_OK)
     {
+        _session = new Session(this, email);
+        if (!_session->loadFromDb())
+        {
+            Packet data(SMSG_AUTH_RESULT);
+            data << uint8(AUTHRESULT_INTERAL_ERR);
+            send(data);
+            ON_NETWORK_DEBUG(
+                    std::cout << "Network: FAIL TO LOAD USER " << email << " AT LOGIN" << std::endl;
+            );
+            throw std::runtime_error("Fail to load user");
+        }
+
+
         _sockMgr->removeNewSock(this);
         _status = STATUS_AUTHED;
 
-        static uint32 titi = 1;
-        _session = new Session(titi++, this, email);
 
         sSkypy->addSession(_session);
 

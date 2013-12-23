@@ -15,6 +15,8 @@ OpcodeMgr::OpcodeDefinition const* OpcodeMgr::getOpcodeDefinition(quint16 opcode
         { SMSG_CONTACT_LOGIN, &MainWindow::handleContactLogin },
         { SMSG_CONTACT_LOGOUT, &MainWindow::handleContactLogout },
         { SMSG_CHAT_TEXT, &MainWindow::handleChatText },
+        { SMSG_SEARCH_CONTACT_RESULT, &MainWindow::handleSearchContactResult },
+        { SMSG_ADD_CONTACT_REQUEST, &MainWindow::handleAddContactRequest },
         { MSG_MAX, NULL}
     };
 

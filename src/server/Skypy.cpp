@@ -3,10 +3,11 @@
 #include "Session.h"
 #include "ConfigMgr.h"
 #include "SkypyDatabase.h"
+#include "ContactMgr.h"
 
 Skypy::Skypy() : _stopEvent(false), _sessionAddMutex(), _sessionAddList(),
     _sessionDelMutex(), _sessionDelList(), _sessionMap(),
-    _networkMgr(), _ac(0), _av(NULL)
+    _networkMgr(), _ac(0), _av(NULL), _timedActionMap()
 {
 
 }
@@ -42,6 +43,15 @@ void Skypy::onStartup()
         return;
     }
 
+    std::cout << ">> Loading ContactMgr ..." << std::endl;
+    sContactMgr->loadFromDb();
+
+    std::cout << ">> Clearing online account ..." << std::endl;
+    sSkypyDb->execute("UPDATE account SET online = 0");
+
+    std::cout << ">> Loading timed actions ..." << std::endl;
+    _loadTimedActions();
+
     std::cout << ">> Starting network ..." << std::endl;
     if (!_networkMgr.startNetwork(
                 sConfig->getIntDefault("Network.ListenPort", 5000),
@@ -56,12 +66,28 @@ void Skypy::onStartup()
 void Skypy::onShutdown()
 {
     std::cout << "Stopping Skypy server..." << std::endl;
+
+    for (std::map<uint32, Utils::Timer*>::iterator itr = _timedActionMap.begin();
+            itr != _timedActionMap.end(); ++itr)
+        delete itr->second;
 }
 
 void Skypy::update(uint32 diff)
 {
     _processAddSession();
     _updateSessions(diff);
+
+    for (std::map<uint32, Utils::Timer*>::iterator itr = _timedActionMap.begin();
+            itr != _timedActionMap.end(); ++itr)
+    {
+        itr->second->update(diff);
+        if (itr->second->passed())
+        {
+            _executeTimedAction(TimedActions(itr->first));
+            itr->second->reset();
+        }
+    }
+
     _processDelSession();
 }
 
@@ -84,28 +110,8 @@ void Skypy::_processAddSession()
     for (std::list<Session*>::const_iterator itr = _sessionAddList.begin();
             itr != _sessionAddList.end(); ++itr)
     {
-        Session* sess = *itr;
-
-        Packet selfData(SMSG_CONTACT_LOGIN);
-        selfData << uint32(1);
-        selfData << uint32(sess->getId());
-        selfData << sess->getName();
-        selfData << sess->getEmail();
-        for (std::map<uint32, Session*>::const_iterator itr2 = _sessionMap.begin();
-                itr2 != _sessionMap.end(); ++itr2)
-        {
-            Packet data(SMSG_CONTACT_LOGIN);
-            data << uint32(1);
-            data << uint32(itr2->second->getId());
-            data << itr2->second->getName();
-            data << itr2->second->getEmail();
-            sess->send(data);
-            itr2->second->send(selfData);
-        }
-
-
-
         _sessionMap[(*itr)->getId()] = *itr;
+        _handleSessionLogin(*itr);
     }
     _sessionAddList.clear();
 }
@@ -116,18 +122,8 @@ void Skypy::_processDelSession()
     for (std::list<Session*>::const_iterator itr = _sessionDelList.begin();
             itr != _sessionDelList.end(); ++itr)
     {
-        Session* sess = *itr;
-
-        Packet data(SMSG_CONTACT_LOGOUT);
-        data << uint32(1);
-        data << uint32(sess->getId());
-        for (std::map<uint32, Session*>::const_iterator itr2 = _sessionMap.begin();
-                itr2 != _sessionMap.end(); ++itr2)
-            itr2->second->send(data);
-
-
-
         _sessionMap.erase((*itr)->getId());
+        _handleSessionLogout(*itr);
         delete *itr;
     }
     _sessionDelList.clear();
@@ -147,4 +143,54 @@ Session* Skypy::findSession(uint32 id)
     if (itr == _sessionMap.end())
         return NULL;
     return itr->second;
+}
+
+Session* Skypy::findSession(std::string const& email)
+{
+    for (std::map<uint32, Session*>::const_iterator itr = _sessionMap.begin();
+            itr != _sessionMap.end(); ++itr)
+        if (itr->second->getEmail() == email)
+            return itr->second;
+    return NULL;
+}
+
+void Skypy::_handleSessionLogin(Session* sess)
+{
+    Packet selfData(SMSG_CONTACT_LOGIN);
+    selfData << uint32(1);
+    selfData << uint32(sess->getId());
+    selfData << sess->getName();
+    selfData << sess->getEmail();
+    sess->broadcastToFriend(selfData);
+
+    Packet peerData(SMSG_CONTACT_LOGIN);
+    sess->buildOnlineFriendPacket(peerData);
+    sess->send(peerData);
+
+    // Send new contact requests to client
+    sess->sendContactRequest();
+}
+
+void Skypy::_handleSessionLogout(Session* sess)
+{
+    Packet data(SMSG_CONTACT_LOGOUT);
+    data << uint32(1);
+    data << uint32(sess->getId());
+    sess->broadcastToFriend(data);
+}
+
+void Skypy::_loadTimedActions()
+{
+    _timedActionMap[TM_ACTION_SAVE_CONTACTMGR] = new Utils::Timer(sConfig->getIntDefault("Skypy.ContactMgr.SaveInterval", 60));
+}
+
+void Skypy::_executeTimedAction(TimedActions action)
+{
+    switch (action)
+    {
+        case TM_ACTION_SAVE_CONTACTMGR:
+            std::cout << "Saving ContactMgr ..." << std::endl;
+            sContactMgr->saveToDb();
+            break;
+    }
 }

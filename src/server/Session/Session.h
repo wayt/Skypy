@@ -3,13 +3,14 @@
 
 #include "Packet.hpp"
 #include "LockedQueue.hpp"
+#include "ContactMgr.h"
 
 class SessionSocket;
 
 class Session
 {
 public:
-    Session(uint32 id, SessionSocket* sock, std::string const& email);
+    Session(SessionSocket* sock, std::string const& email);
     uint32 getId() const { return _id; }
     std::string const& getName() const { return _name; }
     std::string const& getEmail() const { return _email; }
@@ -18,6 +19,8 @@ public:
 
     void logout();
     bool isLogout() const { return _logout; }
+    bool loadFromDb();
+    bool saveToDb() const;
 
     void update(uint32 diff);
     void send(Packet const& pkt);
@@ -25,9 +28,23 @@ public:
     void handlePacketInput(Packet& pkt);
     void handleSipPacket(Packet& pkt);
     void handleChatText(Packet& pkt);
+    void handleSearchNewContact(Packet& pkt);
+    void handleAddContactRequest(Packet& pkt);
+    void handleAddContactResponse(Packet& pkt);
+
+    bool hasFriend(Session const* sess) const { return hasFriend(sess->getId()); }
+    bool hasFriend(uint32 id) const;
+    void friendLogin(Session* sess);
+    void addFriend(ContactInfo* info);
+    void broadcastToFriend(Packet const& pkt) const;
+    void buildOnlineFriendPacket(Packet& pkt) const;
+
+    void sendContactRequest();
 
 
 private:
+    void _loadAccountInfo();
+
     uint32 _id;
     SessionSocket* _socket;
     LockedQueue<Packet> _packetQueue;

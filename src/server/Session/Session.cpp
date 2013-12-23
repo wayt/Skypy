@@ -2,8 +2,11 @@
 #include "SessionSocket.h"
 #include "Skypy.h"
 #include "SkypyDatabase.h"
+#include <algorithm>
+#include "AuthWorker.h"
+#include "ContactMgr.h"
 
-Session::Session(uint32 id, SessionSocket* sock, std::string const& email) : _id(id), _socket(sock), _packetQueue(),
+Session::Session(SessionSocket* sock, std::string const& email) : _id(0), _socket(sock), _packetQueue(),
     _logout(false), _name(email), _email(email)
 {
     std::size_t found = _email.find('@');
@@ -21,7 +24,83 @@ void Session::logout()
     delete _socket;
     _socket = NULL;
     _logout = true;
+    sSkypyDb->execute("UPDATE account SET online = 0 WHERE id = '%u'", getId());
     sSkypy->delSession(this);
+}
+
+bool Session::loadFromDb()
+{
+    _loadAccountInfo();
+
+    sSkypyDb->execute("UPDATE account SET online = 1 WHERE id = '%u'", getId());
+
+    return true;
+}
+
+void Session::_loadAccountInfo()
+{
+    DbResultPtr result = sSkypyDb->query("SELECT id, name FROM account WHERE email = '%s'", _email.c_str());
+    if (!result->fetch())
+        throw std::runtime_error("Fail to load account info");
+
+    _id = (*result)["id"]->getValue<uint32>();
+    _name = (*result)["name"]->getValue();
+}
+
+bool Session::hasFriend(uint32 id) const
+{
+    return sContactMgr->hasFriend(getId(), id);
+}
+
+void Session::addFriend(ContactInfo* info)
+{
+    sContactMgr->addFriend(getId(), info);
+}
+
+void Session::broadcastToFriend(Packet const& pkt) const
+{
+    try
+    {
+        std::map<uint32, ContactInfo*> const& contacts = sContactMgr->getContactMap(getId());
+        for (std::map<uint32, ContactInfo*>::const_iterator itr = contacts.begin();
+            itr != contacts.end(); ++itr)
+        if (Session* peer = sSkypy->findSession(itr->first))
+            if (peer->hasFriend(this))
+            {
+                std::cout << "BROAD TO FRIEND FROM " << getEmail() << " TO " << peer->getEmail() << std::endl;
+                peer->send(pkt);
+            }
+    }
+    catch (std::exception const&)
+    {
+    }
+}
+
+void Session::buildOnlineFriendPacket(Packet& pkt) const
+{
+    uint32 count = 0;
+    uint16 holder = pkt.insertPlaceholder<uint32>();
+
+    try
+    {
+        std::map<uint32, ContactInfo*> const& contacts = sContactMgr->getContactMap(getId());
+        for (std::map<uint32, ContactInfo*>::const_iterator itr = contacts.begin();
+            itr != contacts.end(); ++itr)
+        if (Session* peer = sSkypy->findSession(itr->first))
+            if (peer->hasFriend(this))
+            {
+                pkt << uint32(peer->getId());
+                pkt << peer->getName();
+                pkt << peer->getEmail();
+                ++count;
+                std::cout << "PEER: " << peer->getId() << std::endl << "NAME: " << peer->getName() << std::endl << "MAIL: " << peer->getEmail() << std::endl;
+            }
+    }
+    catch (std::exception const&)
+    {
+        count = 0;
+    }
+    pkt.insert<uint32>(count, holder);
 }
 
 void Session::update(uint32 diff)
@@ -52,14 +131,49 @@ void Session::update(uint32 diff)
 
 void Session::handlePacketInput(Packet& pkt)
 {
-  Packet* newPacket = new Packet(pkt);
-  _packetQueue.add(newPacket);
+    Packet* newPacket = new Packet(pkt);
+    _packetQueue.add(newPacket);
 }
 
 void Session::send(Packet const& pkt)
 {
+    ON_NETWORK_DEBUG(
+            std::cout << "Network: Session::Send" << std::endl;
+            pkt.dumpHex();
+    );
     if (_socket && !_logout)
         _socket->send(pkt);
+}
+
+void Session::sendContactRequest()
+{
+    try
+    {
+        std::map<uint32, ContactRequest*> const& requests = sContactMgr->getContactRequestFor(getId());
+
+        for (std::map<uint32, ContactRequest*>::const_iterator itr = requests.begin();
+                itr != requests.end(); ++itr)
+        {
+            Packet data(SMSG_ADD_CONTACT_REQUEST);
+            data << uint32(itr->second->requestId);
+            data << itr->second->fromName;
+            data << itr->second->fromEmail;
+            send(data);
+        }
+    }
+    catch (std::exception const&)
+    {
+    }
+}
+
+void Session::friendLogin(Session* sess)
+{
+    Packet data(SMSG_CONTACT_LOGIN);
+    data << uint32(1);
+    data << uint32(sess->getId());
+    data << sess->getName();
+    data << sess->getEmail();
+    send(data);
 }
 
 void Session::handleSipPacket(Packet& pkt)
@@ -105,4 +219,122 @@ void Session::handleChatText(Packet& pkt)
     data << uint32(getId());
     data << msg;
     peer->send(data);
+}
+
+void Session::handleSearchNewContact(Packet& pkt)
+{
+    std::string word;
+    pkt >> word;
+
+    std::replace(word.begin(), word.end(), '%', 'a');
+    std::replace(word.begin(), word.end(), '_', 'a');
+    if (word.length() < 2)
+        return;
+
+    DbResultPtr result = sSkypyDb->query("SELECT id, name, email, online FROM account WHERE email LIKE '%%%s%%' AND email != '%s' LIMIT 25", word.c_str(), _email.c_str());
+
+    Packet data(SMSG_SEARCH_CONTACT_RESULT);
+    uint32 count = 0;
+    uint16 holder = data.insertPlaceholder<uint32>();
+    while (result->fetch())
+    {
+        uint32 id = (*result)["id"]->getValue<uint32>();
+        std::string name = (*result)["name"]->getValue();
+        std::string email = (*result)["email"]->getValue();
+        bool online = (*result)["online"]->getValue<bool>();
+
+        if (hasFriend(id))
+        {
+            std::cout << _email << " has friend " << email << std::endl;
+            continue;
+        }
+
+        data << name;
+        data << email;
+        data << uint8(online);
+        std::cout << "NAME: " << email << " - " << uint32(online) << std::endl;
+        ++count;
+    }
+    data.insert<uint32>(count, holder);
+    send(data);
+}
+
+void Session::handleAddContactRequest(Packet& pkt)
+{
+    std::string email;
+    pkt >> email;
+
+    if (!AuthWorker::isValidEmail(email))
+        return;
+
+    Session* sess = sSkypy->findSession(email);
+    uint32 dest_id = (sess ? sess->getId() : 0);
+
+    if (!sess)
+    {
+        DbResultPtr result = sSkypyDb->query("SELECT id FROM account WHERE email = '%s'", email.c_str());
+        if (!result->fetch())
+            return;
+
+        dest_id = (*result)["id"]->getValue<uint32>();
+    }
+
+    bool hasFriend = sContactMgr->hasFriend(dest_id, getId());
+    if (hasFriend)
+    {
+        uint32 time = Utils::getTime();
+        addFriend(new ContactInfo(dest_id, time));
+        if (sess)
+        {
+            friendLogin(sess);
+            sess->friendLogin(this);
+        }
+    }
+    else
+    {
+        // Check existing request
+        ContactRequest* req = new ContactRequest(0, getId(), getName(), getEmail(), dest_id, Utils::getTime());
+        if (!sContactMgr->addContactRequest(req))
+            return;
+
+        if (sess)
+        {
+            Packet data(SMSG_ADD_CONTACT_REQUEST);
+            data << uint32(req->requestId);
+            data << getName();
+            data << getEmail();
+            sess->send(data);
+        }
+    }
+}
+
+void Session::handleAddContactResponse(Packet& pkt)
+{
+    uint32 reqId;
+    bool accept;
+    pkt >> reqId >> accept;
+
+    ContactRequest* request = sContactMgr->getContactRequest(reqId);
+    if (!request || request->destId != getId())
+        return;
+
+    if (accept)
+    {
+        uint32 time = Utils::getTime();
+
+        std::cout << getEmail() << " accept contact request " << reqId << " from " << request->fromId << " at " << time << std::endl;
+
+        addFriend(new ContactInfo(request->fromId, time));
+        sContactMgr->addFriend(request->fromId, new ContactInfo(request->destId, time));
+
+        if (Session* sess = sSkypy->findSession(request->fromId))
+        {
+            friendLogin(sess);
+            sess->friendLogin(this);
+        }
+    }
+    else
+        std::cout << getEmail() << " refuse contact request " << reqId << std::endl;
+
+    sContactMgr->deleteContactRequest(request);
 }

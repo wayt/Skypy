@@ -8,6 +8,7 @@
 #include "opcodemgr.h"
 
 #include "audiomanager.h"
+#include "widgetaddcontactwindow.h"
 
 #include <iostream>
 
@@ -57,6 +58,7 @@ bool MainWindow::handleAuthResult(Packet& pkt)
     {
         _loginForm->unload();
         _contactForm->initialize();
+        this->setWindowTitle(_loginForm->getEmailText());
         _widgets->setCurrentWidget(_contactForm);
     }
     else
@@ -70,6 +72,7 @@ void MainWindow::handleServerConnectionLost(QAbstractSocket::SocketError e, QStr
     (void)e;
     _contactForm->unload();
     _loginForm->initialize();
+    setWindowTitle("");
     _widgets->setCurrentWidget(_loginForm);
     QMessageBox::information(this, "Connection error", "Error: " + msg);
 }
@@ -78,6 +81,7 @@ void MainWindow::handleContactLogin(Packet& pkt)
 {
     quint32 count;
     pkt >> count;
+    std::cout << "RECEIV CONTACT COUNT: " << count << std::endl;
     for (quint32 i = 0; i < count; ++i)
     {
         quint32 id;
@@ -111,4 +115,37 @@ void MainWindow::handleChatText(Packet &pkt)
     pkt >> msg;
     std::cout << "RECEIV MSG FROM: " << from << " - " << msg.toStdString() << std::endl;
     _contactForm->addMessageFrom(from, msg);
+}
+
+void MainWindow::handleSearchContactResult(Packet &pkt)
+{
+    quint32 count;
+    pkt >> count;
+
+    _contactForm->getContactWindow()->getResultListWidget()->clear();
+    for (quint32 i = 0; i < count; ++i)
+    {
+        QString name;
+        QString email;
+        quint8 online;
+        pkt >> name >> email >> online;
+        ContactInfo* info = new ContactInfo(_contactForm->getContactWindow()->getResultListWidget(), 0, name, email, online != 0);
+        info->setText(name + " (" + email + ")");
+        _contactForm->getContactWindow()->addResult(info);
+    }
+}
+
+void MainWindow::handleAddContactRequest(Packet &pkt)
+{
+    quint32 reqId;
+    QString name;
+    QString email;
+    pkt >> reqId >> name >> email;
+
+    ContactInfo* info = new ContactInfo(NULL, reqId, name, email, false);
+    info->setText(name + " (" + email + ")");
+
+    Notification* notif = new Notification(_contactForm->getNotificationWidget(), NOTIF_CONTACT_REQUEST, "New contact request from " + info->text(), info);
+    _contactForm->getNotificationWidget()->addItem(notif);
+
 }

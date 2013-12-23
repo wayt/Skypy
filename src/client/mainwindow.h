@@ -26,6 +26,8 @@ public:
     void handleContactLogin(Packet& pkt);
     void handleContactLogout(Packet& pkt);
     void handleChatText(Packet& pkt);
+    void handleSearchContactResult(Packet& pkt);
+    void handleAddContactRequest(Packet& pkt);
 private:
     QStackedWidget* _widgets;
 

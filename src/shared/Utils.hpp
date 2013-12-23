@@ -39,6 +39,11 @@ namespace Utils
         return (time.tv_sec * 1000) + (time.tv_usec / 1000);
     }
 
+    inline uint32 getTime()
+    {
+        return time(NULL);
+    }
+
     inline uint32 getMSTimeDiff(uint32 prev, uint32 now)
     {
         return now - prev;
@@ -151,6 +156,25 @@ private:
 
         u = dst.u;
     }
+};
+
+class Timer
+{
+public:
+    Timer(uint32 interval) : _internalTimer(interval * IN_MILLISECONDS), _baseInterval(interval * IN_MILLISECONDS) {}
+    void update(uint32 const diff)
+    {
+        if (_internalTimer <= diff)
+            _internalTimer = 0;
+        else
+            _internalTimer -= diff;
+    }
+
+    void reset() { _internalTimer = _baseInterval; }
+    bool passed() const { return (_internalTimer == 0); }
+private:
+    uint32 _internalTimer;
+    uint32 _baseInterval;
 };
 
 }

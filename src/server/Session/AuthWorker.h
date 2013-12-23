@@ -18,6 +18,7 @@ public:
 
     AuthWorker const& digest();
     AuthResults result() const { return _result; }
+    static bool isValidEmail(std::string const& email);
 
 private:
     std::string const _email;
