@@ -18,8 +18,8 @@ TEMPLATE = app
 
 # Windows
 win32: {
-    INCLUDEPATH += $$_PRO_FILE_PWD_/../AudioPackage/include/portaudio/
-    INCLUDEPATH += $$_PRO_FILE_PWD_/../AudioPackage/include/
+    INCLUDEPATH += $$_PRO_FILE_PWD_/../../shared/WindowsPackage/include/portaudio/
+    INCLUDEPATH += $$_PRO_FILE_PWD_/../../shared/WindowsPackage/include/
 
     # Release config
     CONFIG(release, release|debug) {
@@ -30,29 +30,19 @@ win32: {
         CONFIG_PATH = Debug
     }
 
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/portaudio_x64.lib
+    LIBS += $$_PRO_FILE_PWD_/../../shared/WindowsPackage/$$CONFIG_PATH/portaudio_x64.lib
 
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/opus.lib
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/celt.lib
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/silk_common.lib
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/silk_fixed.lib
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/silk_float.lib
+    LIBS += $$_PRO_FILE_PWD_/../../shared/WindowsPackage/$$CONFIG_PATH/opus.lib
+    LIBS += $$_PRO_FILE_PWD_/../../shared/WindowsPackage/$$CONFIG_PATH/celt.lib
+    LIBS += $$_PRO_FILE_PWD_/../../shared/WindowsPackage/$$CONFIG_PATH/silk_common.lib
+    LIBS += $$_PRO_FILE_PWD_/../../shared/WindowsPackage/$$CONFIG_PATH/silk_fixed.lib
+    LIBS += $$_PRO_FILE_PWD_/../../shared/WindowsPackage/$$CONFIG_PATH/silk_float.lib
 }
 # Unix (Linux and OsX)
 unix: {
     LIBS += -lportaudio
     LIBS += -lopus
 }
-
-# Destination directory of the program
-DESTDIR = ./
-
-# Destination directory of all ressources necessary for compilation
-MOC_DIR = ../.moc/
-OBJECTS_DIR = ../.obj/
-UI_DIR = ../.ui/
-UI_HEADERS_DIR = ../.ui/header/
-UI_SOURCES_DIR = ../.ui/src/
 
 # #define
 DEFINES += AUDIO_USE_FLOAT
@@ -62,9 +52,7 @@ SOURCES += main.cpp\
     audiostream.cpp \
     audiosample.cpp \
     encodedsample.cpp \
-    audiosocket.cpp \
-    audiomanager.cpp \
-    audioencoder.cpp
+    audiosocket.cpp
 
 HEADERS  += mainwindow.h \
     qsynchronizedqueue.h \
@@ -72,6 +60,4 @@ HEADERS  += mainwindow.h \
     audiosample.h \
     singleton.h \
     encodedsample.h \
-    audiosocket.h \
-    audiomanager.h \
-    audioencoder.h
+    audiosocket.h
