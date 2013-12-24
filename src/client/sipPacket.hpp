@@ -1,99 +1,134 @@
 #ifndef SIPREQUEST_H
 #define SIPREQUEST_H
+
+#include "opcodemgr.h"
 #include "packet.hpp"
 
-class sipRequest
+class SipRequest
 {
 public:
-  explicit sipRequest(const std::string cmd, const std::string &userName, const std::string &contactName, const std::string &contactAdress, quint32 peerId): _pkt(RMSG_SIP), _cmd(cmd), _userName(userName), _contactName(contactName), _contactAdress(contactAdress) {
-    _peerId = peerId;
-    _pkt << cmd;
-    _pkt << userName;
-    _pkt << contactName;
-    _pkt << contactAdress;
-    _pkt << peerId;
-  }
-  Packet const& getPacket() const {
-    return _pkt;
-  }
-  const std::string &getCmd() const {
-    return (_cmd);
-  }
-  const std::string &getUserName() const {
-    return (_userName);
-  }
-  const std::string &getContactName() const {
-   return (_contactName);
-  }
-  const std::string &getContactAdress() const {
-   return (_contactAdress);
-  }
-  quint32 getContactId() const {
-      return _peerId;
-  }
- private:
-  Packet _pkt;
-  const std::string _cmd;
-  const std::string _userName;
-  const std::string _contactName;
-  const std::string _contactAdress;
-  quint32 _peerId;
+    explicit SipRequest(QString const& cmd, QString const& senderEmail, quint32 senderId, QString const& senderIp, quint32 senderPort, QString const& destEmail, quint32 destId, QString const& destIp, quint32 destPort) :
+        _pkt(RMSG_SIP), _cmd(cmd), _senderEmail(senderEmail), _senderId(senderId), _senderIp(senderIp), _senderPort(senderPort),
+        _destEmail(destEmail), _destId(destId), _destIp(destIp), _destPort(destPort)
+    {
+        _pkt << _cmd;
+        _pkt << _senderEmail;
+        _pkt << quint32(_senderId);
+        _pkt << _senderIp;
+        _pkt << quint32(_senderPort);
+        _pkt << _destEmail;
+        _pkt << quint32(_destId);
+        _pkt << _destIp;
+        _pkt << quint32(_destPort);
+    }
+    Packet const& getPacket() const {
+        return _pkt;
+    }
+    QString const& getCmd() const {
+        return _cmd;
+    }
+    QString const& getSenderEmail() const {
+        return _senderEmail;
+    }
+    quint32 getSenderId() const {
+        return _senderId;
+    }
+    QString const& getSenderIp() const {
+        return _senderIp;
+    }
+    quint32 getSenderPort() const {
+        return _senderPort;
+    }
+    QString const& getDestEmail() const {
+        return _destEmail;
+    }
+    quint32 getDestId() const {
+        return _destId;
+    }
+    QString const& getDestIp() const {
+        return _destIp;
+    }
+    quint32 getDestPort() const {
+        return _destPort;
+    }
+private:
+    Packet _pkt;
+    QString const _cmd;
+    QString const _senderEmail;
+    quint32 _senderId;
+    QString const _senderIp;
+    quint32 _senderPort;
+    QString const _destEmail;
+    quint32 _destId;
+    QString const _destIp;
+    quint32 _destPort;
 };
 
-class sipRespond
+class SipRespond
 {
- public:
-  explicit sipRespond(int opCode, const std::string cmd, const std::string &userName, const std::string &contactName, const std::string &contactAdress, const std::string userAdress, int port, quint32 peerId): _pkt(rMSG_SIP), _cmd(cmd), _userName(userName), _contactName(contactName), _contactAdress(contactAdress), _userAdress(userAdress) {
-    _opCode = opCode;
-    _peerId = peerId;
-    _port = port;
-    _pkt << opCode;
-    _pkt << cmd;
-    _pkt << userName;
-    _pkt << contactName;
-    _pkt << contactAdress;
-    _pkt << userAdress;
-    _pkt << port;
-    _pkt << peerId;
+public:
+    explicit SipRespond(quint32 code, QString const& cmd, QString const& senderEmail, quint32 senderId, QString const& senderIp, quint32 senderPort, QString const& destEmail, quint32 destId, QString const& destIp, quint32 destPort) :
+        _pkt(rMSG_SIP), _code(code), _cmd(cmd),
+        _senderEmail(senderEmail), _senderId(senderId), _senderIp(senderIp), _senderPort(senderPort),
+        _destEmail(destEmail), _destId(destId), _destIp(destIp), _destPort(destPort)
+    {
+        _pkt << _code;
+        _pkt << _cmd;
+        _pkt << _senderEmail;
+        _pkt << quint32(_senderId);
+        _pkt << _senderIp;
+        _pkt << quint32(_senderPort);
+        _pkt << _destEmail;
+        _pkt << _destId;
+        _pkt << _destIp;
+        _pkt << _destPort;
 
-  }
-  Packet const& getPacket() const {
-    return _pkt;
-  }
-  int getCode() const {
-    return (_opCode);
-  }
-  const std::string &getCmd() const {
-    return (_cmd);
-  }
-  const std::string &getUserName() const {
-    return (_userName);
-  }
-  const std::string &getContactName() const {
-   return (_contactName);
-  }
-  const std::string &getContactAdress() const {
-   return (_contactAdress);
-  }
-  const std::string &getUserAdress() const {
-   return (_userAdress);
-  }
-  int getUserPort() const {
-   return (_port);
-  }
-  int getContactId() const {
-      return _peerId;
-  }
- private:
-  int _opCode;
-  Packet _pkt;
-  const std::string _cmd;
-  const std::string _userName;
-  const std::string _contactName;
-  const std::string _contactAdress;
-  const std::string _userAdress;
-  int _port;
-  quint32 _peerId;
+    }
+    Packet const& getPacket() const {
+        return _pkt;
+    }
+    quint32 getCode() const {
+        return _code;
+    }
+    QString const& getCmd() const {
+        return _cmd;
+    }
+    QString const& getSenderEmail() const {
+        return _senderEmail;
+    }
+    quint32 getSenderId() const {
+        return _senderId;
+    }
+    QString const& getSenderIp() const {
+        return _senderIp;
+    }
+    quint32 getSenderPort() const {
+        return _senderPort;
+    }
+    QString const& getDestEmail() const {
+        return _destEmail;
+    }
+    quint32 getDestId() const {
+        return _destId;
+    }
+    QString const& getDestIp() const {
+        return _destIp;
+    }
+    quint32 getDestPort() const {
+        return _destPort;
+    }
+private:
+    Packet _pkt;
+    quint32 _code;
+    QString const _cmd;
+    QString const _senderEmail;
+    quint32 _senderId;
+    QString const _senderIp;
+    quint32 _senderPort;
+    QString const _destEmail;
+    quint32 _destId;
+    QString const _destIp;
+    quint32 _destPort;
 };
 
 #endif

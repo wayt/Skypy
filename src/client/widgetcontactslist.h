@@ -77,6 +77,9 @@ private:
     std::map<quint32, ContactInfo*> _contactMap;
     WidgetChatWindow* _chatWindow;
     WidgetAddContactWindow* _addContactWindow;
+    quint32 _accountId;
+    QString _name;
+    QString _email;
 
 private slots:
     void handleContactDoubleClick(QListWidgetItem* contact);

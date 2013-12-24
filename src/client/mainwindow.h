@@ -8,6 +8,7 @@
 #include "widgetloginform.h"
 #include "widgetcontactslist.h"
 #include "networkmgr.h"
+#include "sipPacket.hpp"
 
 class MainWindow : public QMainWindow
 {
@@ -30,9 +31,10 @@ public:
     void handleChatText(Packet& pkt);
     void handleSearchContactResult(Packet& pkt);
     void handleAddContactRequest(Packet& pkt);
+    void handleAccountInfo(Packet& pkt);
 
-    void handlesipResponse(sipRequest const* req, sipRespond const* resp);
-    void handleCallRequest(std::string const& userName, std::string const& contactName, std::string const& contactAddress, quint32 peerId);
+    void handlesipResponse(SipRequest const* req, SipRespond const* resp);
+    void handleCallRequest(SipRequest const& request);
 private:
     QStackedWidget* _widgets;
 

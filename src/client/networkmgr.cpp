@@ -6,6 +6,7 @@
 #include <iostream>
 #include "opcodemgr.h"
 #include <QtEndian>
+#include "clientmgr.h"
 
 NetworkMgr::NetworkMgr() : _tcpSock(), _window(NULL), _connState(STATE_DISCONNECTED),
     _audioSock(this)
@@ -119,35 +120,37 @@ void NetworkMgr::_readInput()
     }
 }
 
-void NetworkMgr::makeCall(const std::string &userName, const std::string &contactName, const std::string &contactAdress, quint32 peerId)
+void NetworkMgr::makeCall(QString const& destEmail, quint32 destId, quint32 port)
 {
-    Packet pkt(RMSG_SIP);
-    const std::string cmd("INVITE");
-    sipRequest *Rqst = new sipRequest(cmd, userName, contactName, contactAdress, peerId);
-    _sipPool.push_back(std::make_pair(Rqst, (sipRespond *) NULL));
-    this->tcpSendPacket(Rqst->getPacket());
+    SipRequest *Rqst = new SipRequest("INVITE", sClientMgr->getEmail(), sClientMgr->getAccountId(),"", port, destEmail, destId, "", 0);
+    _sipPool.push_back(std::make_pair(Rqst, (SipRespond *) NULL));
+    tcpSendPacket(Rqst->getPacket());
 }
 
 void  NetworkMgr::handleSipRep(Packet &pkt)
 {
-    int code;
-    std::string cmd;
-    quint32 peerId;
-    std::string user;
-    std::string adress;
-    std::string name;
-    std::string myaddr;
-    int port;
-    bool accept =true;
+    quint32 code;
+    QString cmd;
+    QString senderEmail;
+    quint32 senderId;
+    QString senderIp;
+    quint32 senderPort;
+    QString destEmail;
+    quint32 destId;
+    QString destIp;
+    quint32 destPort;
 
     std::cout << "SIP RESPOND RECEIVED" << std::endl;
-    pkt >> code >> cmd >> user >> name >> adress >> myaddr >> port >> peerId;
-    for (std::vector< std::pair<sipRequest*, sipRespond*> >::iterator it = _sipPool.begin() ; it != _sipPool.end(); ++it)
+    pkt >> code >> cmd;
+    pkt >> senderEmail >> senderId >> senderIp >> senderPort;
+    pkt >> destEmail >> destId >> destIp >> destPort;
+    for (std::vector< std::pair<SipRequest*, SipRespond*> >::iterator itr = _sipPool.begin() ; itr != _sipPool.end(); ++itr)
     {
-        if (((*it).first)->getCmd() == cmd && ((*it).first)->getUserName() == user && ((*it).first)->getContactName() == name)
+        if (itr->first->getCmd() == cmd && itr->first->getSenderEmail() == sClientMgr->getEmail() &&
+                itr->first->getSenderId() == sClientMgr->getAccountId())
         {
-            (*it).second = new sipRespond(code, cmd, user, name, adress, myaddr, port, peerId);
-            _window->handlesipResponse(it->first, it->second);
+            itr->second = new SipRespond(code, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+            _window->handlesipResponse(itr->first, itr->second);
             return;
         }
     }
@@ -155,20 +158,25 @@ void  NetworkMgr::handleSipRep(Packet &pkt)
 
 void NetworkMgr::handleSipRequest(Packet &pkt)
 {
-    std::string cmd;
-    quint32 peerId;
-    std::string userName;
-    std::string contactAdress;
-    std::string contactName;
-    bool accept =true;
+    QString cmd;
+    QString senderEmail;
+    quint32 senderId;
+    QString senderIp;
+    quint32 senderPort;
+    QString destEmail;
+    quint32 destId;
+    QString destIp;
+    quint32 destPort;
 
     std::cout << "SIP REQUESTPACKET RECEIVED" << std::endl;
     pkt >> cmd;
-    pkt >> userName >> contactName >> contactAdress >> peerId;
+    pkt >> senderEmail >> senderId >> senderIp >> senderPort;
+    pkt >> destEmail >> destId >> destIp >> destPort;
     if (cmd == "INVITE")
     {
-        std::cout << userName << " wanna start a vocal conversation with you" << std::endl;
-        _window->handleCallRequest(userName, contactName, contactAdress, peerId);
+        std::cout << senderEmail.toStdString() << " wanna start a vocal conversation with you" << std::endl;
+        SipRequest request(cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+        _window->handleCallRequest(request);
        /*
         if (accept == true)
         {

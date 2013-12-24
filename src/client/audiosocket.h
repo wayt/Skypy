@@ -19,7 +19,7 @@ public:
     virtual ~AudioSocket();
 
 public slots:
-    void setHostAddr(const QHostAddress &addr, quint16 port = AUDIO_PORT);
+    bool setHostAddr(const QHostAddress &addr, quint16 port = AUDIO_PORT);
     void setPeerAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT);
 
     void quit();

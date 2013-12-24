@@ -10,8 +10,8 @@
 #include "singleton.h"
 #include "audiosocket.h"
 
-class sipRequest;
-class sipRespond;
+class SipRequest;
+class SipRespond;
 class MainWindow;
 
 class NetworkMgr : public QObject, public Singleton<NetworkMgr>
@@ -31,25 +31,25 @@ public:
 
     void tcpConnect(QString const& addr, quint16 port);
     void tcpSendPacket(Packet const& pkt);
-    void makeCall(const std::string &userName, const std::string &userAdress, const std::string &contactName, quint32 peerId);
 
     void closeTcpConnection();
     void setMainWindow(MainWindow* window) { _window = window; }
 
-    void setCallHostAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { _audioSock.setHostAddr(addr, port); }
+    void makeCall(QString const& destEmail, quint32 destId, quint32 port);
+    bool setCallHostAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { return _audioSock.setHostAddr(addr, port); }
     void setCallPeerAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { _audioSock.setPeerAddr(addr, port); }
     void quitCall() { _audioSock.quit(); }
     void terminateCall() { _audioSock.terminate(); }
     void runCall() { _audioSock.start(); }
     void handleSipRequest(Packet &pkt);
     void handleSipRep(Packet &pkt);
-    std::vector< std::pair< sipRequest*, sipRespond* > > getSipPool() { return (_sipPool); }
+    std::vector< std::pair< SipRequest*, SipRespond* > > getSipPool() { return (_sipPool); }
 private slots:
     void _readInput();
     void _handleTcpConnected();
     void _handleTcpError(QAbstractSocket::SocketError e);
 private:
-    std::vector< std::pair< sipRequest*, sipRespond* > > _sipPool;
+    std::vector< std::pair< SipRequest*, SipRespond* > > _sipPool;
     QTcpSocket _tcpSock;
     MainWindow* _window;
     ConnectionState _connState;

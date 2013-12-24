@@ -16,12 +16,12 @@ AudioSocket::~AudioSocket()
 {
 }
 
-void AudioSocket::setHostAddr(const QHostAddress &addr, quint16 port)
+bool AudioSocket::setHostAddr(const QHostAddress &addr, quint16 port)
 {
     _hostAddr = addr;
     _hostPort = port;
     std::cout << "HOSTADDR: " << addr.toString().toStdString() << " - PORT: " << port << std::endl;
-    _socket->bind(addr, port);
+    return _socket->bind(addr, port);
 }
 
 void AudioSocket::setPeerAddr(const QHostAddress& addr, quint16 port)

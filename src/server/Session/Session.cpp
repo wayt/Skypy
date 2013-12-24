@@ -146,6 +146,11 @@ void Session::send(Packet const& pkt)
         _socket->send(pkt);
 }
 
+std::string const& Session::getHostAddress() const
+{
+    return _socket->getRemoteAddress();
+}
+
 void Session::sendContactRequest()
 {
     try
@@ -180,28 +185,60 @@ void Session::friendLogin(Session* sess)
 void Session::handleSipPacket(Packet& pkt)
 {
     std::string cmd;
-    uint32 peerId;
-    std::string userName;
-    std::string peerName;
-    std::string peerEmail;
+    std::string senderEmail;
+    uint32 senderId;
+    std::string senderIp;
+    uint32 senderPort;
+    std::string destEmail;
+    uint32 destId;
+    std::string destIp;
+    uint32 destPort;
 
     std::cout << "SIP REQUESTPACKET RECEIVED" << std::endl;
     pkt >> cmd;
-    pkt >> userName >> peerName >> peerEmail >> peerId;
-    sSipManager->sendSipResponse(this, 100, cmd, userName, peerName, peerEmail, peerId);
-    Session* peer = sSkypy->findSession(peerId);
+    pkt >> senderEmail >> senderId >> senderIp >> senderPort;
+    pkt >> destEmail >> destId >> destIp >> destPort;
+    sSipManager->sendSipResponse(this, 100, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+    Session* peer = sSkypy->findSession(destId);
     if (!peer)
     {
         std::cout << "Peer not found" << std::endl;
-        sSipManager->sendSipResponse(this, 404, cmd, user, contact, adress, peerId);
+        sSipManager->sendSipResponse(this, 404, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
         return;
     }
     else
     {
+        Packet data(RMSG_SIP);
+        data << cmd;
+        data << getEmail() << uint32(getId()) << getHostAddress() << uint32(senderPort);
+        data << peer->getEmail() << uint32(peer->getId()) << peer->getHostAddress() << uint32(destPort);
         sSipManager->forwardSip(peer, pkt);
+
         if (cmd == "INVITE") /*On separe le fait de sonner du fait d'attendre une reponse*/
-            sSipManager->sendSipResponse(this, 180, cmd, user, contact, adress, peerId);
+            sSipManager->sendSipResponse(this, 180, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
     }
+}
+
+void Session::handleSipRespond(Packet& pkt)
+{
+    uint32 code;
+    std::string cmd;
+    std::string senderEmail;
+    uint32 senderId;
+    std::string senderIp;
+    uint32 senderPort;
+    std::string destEmail;
+    uint32 destId;
+    std::string destIp;
+    uint32 destPort;
+
+    std::cout << "SIP REQUESTPACKET RECEIVED" << std::endl;
+    pkt >> code >> cmd;
+    pkt >> senderEmail >> senderId >> senderIp >> senderPort;
+    pkt >> destEmail >> destId >> destIp >> destPort;
+
+    if (Session* sess = sSkypy->findSession(senderId))
+        sSipManager->forwardSip(sess, pkt);
 }
 
 void Session::handleChatText(Packet& pkt)

@@ -7,6 +7,7 @@
 #include "packet.hpp"
 #include "opcodemgr.h"
 #include "networkmgr.h"
+#include "clientmgr.h"
 
 WidgetContactsList::WidgetContactsList(QWidget *parent) :
     QWidget(parent),
@@ -27,6 +28,7 @@ void WidgetContactsList::initialize()
     _contactMap.clear();
     _contactList->clear();
     _notificationList->clear();
+    sClientMgr->setAccountInfo(0, "", "");
 }
 
 void WidgetContactsList::unload()

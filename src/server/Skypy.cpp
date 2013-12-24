@@ -158,6 +158,12 @@ Session* Skypy::findSession(std::string const& email)
 
 void Skypy::_handleSessionLogin(Session* sess)
 {
+    Packet info(SMSG_ACCOUNT_INFO);
+    info << uint32(sess->getId());
+    info << sess->getName();
+    info << sess->getEmail();
+    sess->send(info);
+
     Packet selfData(SMSG_CONTACT_LOGIN);
     selfData << uint32(1);
     selfData << uint32(sess->getId());

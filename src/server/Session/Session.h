@@ -27,6 +27,7 @@ public:
 
     void handlePacketInput(Packet& pkt);
     void handleSipPacket(Packet& pkt);
+    void handleSipRespond(Packet& pkt);
     void handleChatText(Packet& pkt);
     void handleSearchNewContact(Packet& pkt);
     void handleAddContactRequest(Packet& pkt);
@@ -41,6 +42,7 @@ public:
 
     void sendContactRequest();
 
+    std::string const& getHostAddress() const;
 
 private:
     void _loadAccountInfo();

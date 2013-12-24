@@ -19,6 +19,7 @@ OpcodeMgr::OpcodeDefinition const* OpcodeMgr::getOpcodeDefinition(quint16 opcode
         { SMSG_ADD_CONTACT_REQUEST, &MainWindow::handleAddContactRequest },
         { rMSG_SIP, &MainWindow::handleSipRep},
         { RMSG_SIP, &MainWindow::handleSipRequest},
+        { SMSG_ACCOUNT_INFO, &MainWindow::handleAccountInfo },
         { MSG_MAX, NULL}
     };
 

@@ -1,5 +1,6 @@
 #include <QMessageBox>
 #include <QRegExpValidator>
+#include <QHostInfo>
 
 #include "mainwindow.h"
 #include "networkmgr.h"
@@ -13,6 +14,7 @@
 #include <iostream>
 
 #include "sipPacket.hpp"
+#include "clientmgr.h"
 
 MainWindow::MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
@@ -60,7 +62,6 @@ bool MainWindow::handleAuthResult(Packet& pkt)
     {
         _loginForm->unload();
         _contactForm->initialize();
-        this->setWindowTitle(_loginForm->getEmailText());
         _widgets->setCurrentWidget(_contactForm);
     }
     else
@@ -161,46 +162,95 @@ void MainWindow::handleSipRequest(Packet &pkt)
   sNetworkMgr->handleSipRequest(pkt);
 }
 
-void MainWindow::handlesipResponse(sipRequest const* req, sipRespond const* resp)
+void MainWindow::handlesipResponse(SipRequest const* req, SipRespond const* resp)
 {
     if (req->getCmd() == "INVITE")
     {
         switch (resp->getCode())
         {
         case 100: // Forward de l'appel
-            _contactForm->addMessageFrom(req->getContactId(), "Send call request ...", true);
+            _contactForm->addMessageFrom(req->getDestId(), "Send call request ...", true);
             break;
         case 404: // Contact non connecte
-            _contactForm->addMessageFrom(req->getContactId(), QString(req->getContactName().c_str()) + QString(" isn't online"), true);
+            _contactForm->addMessageFrom(req->getDestId(), req->getDestEmail() + " isn't online", true);
             break;
         case 180: // Ca sonne
-            _contactForm->addMessageFrom(req->getContactId(), "Ringing ...", true);
+            _contactForm->addMessageFrom(req->getDestId(), "Ringing ...", true);
+            break;
+        case 200: // Ca a decrocher
+            _contactForm->addMessageFrom(req->getDestId(), "Call accepted", true);
+            if (sAudioManager->start())
+            {
+                sNetworkMgr->setCallPeerAddr(QHostAddress(resp->getDestIp()), resp->getDestPort());
+                sNetworkMgr->runCall();
+            }
+            break;
+        case 603: // Refuse
+            _contactForm->addMessageFrom(req->getDestId(), "Call refused", true);
             break;
         }
     }
 }
 
-void MainWindow::handleCallRequest(std::string const& userName, std::string const& contactName, std::string const& contactAddress, quint32 peerId)
+void MainWindow::handleCallRequest(SipRequest const& request)
 {
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Incomming call", "Accept call from " + QString(contactName.c_str()) + " ?",
+    reply = QMessageBox::question(this, "Incomming call", "Accept call from " + request.getSenderEmail() + " ?",
                               QMessageBox::Yes | QMessageBox::No);
     switch (reply)
     {
         case QMessageBox::Yes:
         case QMessageBox::No:
         {
-            if (reply == QMessageBox::Yes)
+            QHostInfo info = QHostInfo::fromName( QHostInfo::localHostName()  );
+            QList<QHostAddress> ips = info.addresses();
+            if (reply == QMessageBox::Yes && ips.size() > 0)
             {
-                sipRespond Rep(200, "INVITE", userName, contactName, contactAddress, "", 4242, peerId);
-                sNetworkMgr->tcpSendPacket(Rep.getPacket());
+                for (quint32 selfPort = AUDIO_PORT; selfPort < AUDIO_PORT + 200; ++selfPort)
+                    if (sNetworkMgr->setCallHostAddr(ips[0], selfPort))
+                    {
+                        if (sAudioManager->start())
+                        {
+                            sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
+                            sNetworkMgr->runCall();
+                            std::cout << "CALL ACCEPTED, LISTEN ON " << ips[0].toString().toStdString() << ":" << selfPort << std::endl;
+                            SipRespond Rep(200, "INVITE", request.getSenderEmail(), request.getSenderId(), request.getSenderIp(), request.getSenderPort(),
+                                           request.getDestEmail(), request.getDestId(), request.getDestIp(), selfPort);
+                            sNetworkMgr->tcpSendPacket(Rep.getPacket());
+                        }
+                        else // Should send error
+                            std::cout << "FAIL TO START AUDIO" << std::endl;
+                        break;
+                    }
+
+                //if (sAudioManager->start())
+                  //{
+                    //sNetworkMgr->setCallPeerAddr(QHostAddress(host), AUDIO_PORT + ((_peerId % 2) == 0 ? 1 : 0));
+                    //sNetworkMgr->runCall);
+                    //std::cout << "RUN CALL" << std::endl;
+
+                  //}
+                //else
+                  //std::cerr << "FAIL START: " << sAudioManager->errorText().toStdString() << std::endl;
             }
             else
             {
-                sipRespond Rep(603, "INVITE", userName, contactName, contactAddress, "", 0, peerId);
+                SipRespond Rep(603, "INVITE", request.getSenderEmail(), request.getSenderId(), request.getSenderIp(), request.getSenderPort(),
+                                           request.getDestEmail(), request.getDestId(), request.getDestIp(), 0);
                 sNetworkMgr->tcpSendPacket(Rep.getPacket());
+                std::cout << "SEND CALL REFUSED" << std::endl;
             }
             break;
         }
     }
+}
+
+void MainWindow::handleAccountInfo(Packet& pkt)
+{
+    quint32 id;
+    QString name, email;
+    pkt >> id >> name >> email;
+    setWindowTitle(name + " (" + email + ")");
+    sClientMgr->setAccountInfo(id, name, email);
+
 }
