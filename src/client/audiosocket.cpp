@@ -23,9 +23,9 @@ bool AudioSocket::setHostAddr(const QHostAddress &addr, quint16 port)
     std::cout << "HOSTADDR: " << addr.toString().toStdString() << " - PORT: " << port << std::endl;
     if (_socket->isOpen())
         _socket->close();
-    if (!_socket->bind(addr, port))
+    if (!_socket->bind(QHostAddress::Any, port, QUdpSocket::ShareAddress))
     {
-        std::cout << "setHostAddr: " << _socket->errorString().toStdString() << std::endl;
+        std::cout << "setHostAddr: " << _socket->errorString().toStdString() << " (" << _socket->error() << ")" << std::endl;
         return false;
     }
     return true;
@@ -71,7 +71,7 @@ void AudioSocket::run()
             break;
 
         EncodedSample encodedSample = sAudioManager->inputQueue().dequeue();
-        //std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
+        std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
         _socket->writeDatagram(encodedSample.encodedSample(), _peerAddr, _peerPort);
     }
     if (_socket->isOpen())
@@ -86,7 +86,12 @@ void AudioSocket::_socket_readyRead()
     {
         data.resize(_socket->pendingDatagramSize());
 
-        _socket->readDatagram(data.data(), data.size(), &_hostAddr, &_hostPort);
-        sAudioManager->push(EncodedSample(data));
+        QHostAddress fromAddr;
+        quint16 fromPort;
+
+        _socket->readDatagram(data.data(), data.size(), &fromAddr, &fromPort);
+        std::cout << "AUDIO READ FROM: " << fromAddr.toString().toStdString() << ":" << fromPort << std::endl;
+        if (fromAddr == _peerAddr && fromPort == _peerPort)
+            sAudioManager->push(EncodedSample(data));
     }
 }

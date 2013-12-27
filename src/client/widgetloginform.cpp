@@ -41,6 +41,6 @@ void WidgetLoginForm::_pbConnection_clicked()
      * Insert your code here
      */
 
-    sNetworkMgr->tcpConnect("localhost", 5000);
+    sNetworkMgr->tcpConnect("wayt.me", 5000);
 }
 
