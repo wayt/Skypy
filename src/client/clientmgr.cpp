@@ -9,16 +9,11 @@ ClientMgr::ClientMgr()
 
 void ClientMgr::makeCall(const QString &destEmail, quint32 destId)
 {
-    QHostInfo info = QHostInfo::fromName(QHostInfo::localHostName());
-    QList<QHostAddress> ips = info.addresses();
-    if (ips.size() > 0)
-    {
-        for (quint32 selfPort = AUDIO_PORT; selfPort < AUDIO_PORT + 200; ++selfPort)
-            if (sNetworkMgr->setCallHostAddr(ips[0], selfPort))
-            {
-                sNetworkMgr->makeCall(destEmail, destId, ips[0].toString(), selfPort);
-                break;
-            }
-    }
-
+    QHostAddress host(_publicIp);
+    for (quint32 selfPort = AUDIO_PORT; selfPort < AUDIO_PORT + 200; ++selfPort)
+        if (sNetworkMgr->setCallHostAddr(host, selfPort))
+        {
+            sNetworkMgr->makeCall(destEmail, destId, host.toString(), selfPort);
+            break;
+        }
 }

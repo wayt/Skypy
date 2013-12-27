@@ -15,6 +15,8 @@ public:
     quint32 getAccountId() const { return _accountId; }
     QString const& getUserName() const { return _username; }
     QString const& getEmail() const { return _email; }
+    QString const& getPublicIp() const { return _publicIp; }
+    void setPublicIp(QString const& ip) { _publicIp = ip; }
 
     void makeCall(QString const& destEmail, quint32 destId);
 
@@ -22,6 +24,7 @@ private:
     quint32 _accountId;
     QString _username;
     QString _email;
+    QString _publicIp;
 };
 
 #define sClientMgr ClientMgr::instance()

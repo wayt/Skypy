@@ -205,12 +205,11 @@ void MainWindow::handleCallRequest(SipRequest const& request)
         case QMessageBox::Yes:
         case QMessageBox::No:
         {
-            QHostInfo info = QHostInfo::fromName( QHostInfo::localHostName()  );
-            QList<QHostAddress> ips = info.addresses();
-            if (reply == QMessageBox::Yes && ips.size() > 0)
+            QHostAddress host(sClientMgr->getPublicIp());
+            if (reply == QMessageBox::Yes)
             {
                 for (quint32 selfPort = AUDIO_PORT; selfPort < AUDIO_PORT + 200; ++selfPort)
-                    if (sNetworkMgr->setCallHostAddr(ips[0], selfPort))
+                    if (sNetworkMgr->setCallHostAddr(host, selfPort))
                     {
                         if (sAudioManager->start())
                         {
@@ -218,9 +217,9 @@ void MainWindow::handleCallRequest(SipRequest const& request)
                             sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
                             sNetworkMgr->runCall();
 
-                            std::cout << "CALL ACCEPTED, LISTEN ON " << ips[0].toString().toStdString() << ":" << selfPort << std::endl;
+                            std::cout << "CALL ACCEPTED, LISTEN ON " << host.toString().toStdString() << ":" << selfPort << std::endl;
                             SipRespond Rep(200, "INVITE", request.getSenderEmail(), request.getSenderId(), request.getSenderIp(), request.getSenderPort(),
-                                           request.getDestEmail(), request.getDestId(), ips[0].toString(), selfPort);
+                                           request.getDestEmail(), request.getDestId(), host.toString(), selfPort);
                             sNetworkMgr->tcpSendPacket(Rep.getPacket());
                         }
                         else // Should send error
@@ -253,10 +252,11 @@ void MainWindow::handleCallRequest(SipRequest const& request)
 void MainWindow::handleAccountInfo(Packet& pkt)
 {
     quint32 id;
-    QString name, email;
-    pkt >> id >> name >> email;
-    std::cout << "RECEIV id: " << id << " - name: " << name.toStdString() << " - email: " << email.toStdString() << std::endl;
+    QString name, email, publicIp;
+    pkt >> id >> name >> email >> publicIp;
+    std::cout << "RECEIV id: " << id << " - name: " << name.toStdString() << " - email: " << email.toStdString() << " - publicIp: " << publicIp.toStdString() << std::endl;
     setWindowTitle(name + " (" + email + ")");
     sClientMgr->setAccountInfo(id, name, email);
+    sClientMgr->setPublicIp(publicIp);
 
 }

@@ -208,11 +208,7 @@ void Session::handleSipPacket(Packet& pkt)
     }
     else
     {
-        Packet data(RMSG_SIP);
-        data << cmd;
-        data << getEmail() << uint32(getId()) << getHostAddress() << uint32(senderPort);
-        data << peer->getEmail() << uint32(peer->getId()) << peer->getHostAddress() << uint32(destPort);
-        sSipManager->forwardSip(peer, data);
+        sSipManager->forwardSip(peer, pkt);
 
         if (cmd == "INVITE") /*On separe le fait de sonner du fait d'attendre une reponse*/
             sSipManager->sendSipResponse(this, 180, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
@@ -382,5 +378,6 @@ void Session::handleGetAccountInfo(Packet& pkt)
     info << uint32(getId());
     info << getName();
     info << getEmail();
+    info << getRemoteAddess();
     send(info);
 }
