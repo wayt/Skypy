@@ -21,7 +21,14 @@ bool AudioSocket::setHostAddr(const QHostAddress &addr, quint16 port)
     _hostAddr = addr;
     _hostPort = port;
     std::cout << "HOSTADDR: " << addr.toString().toStdString() << " - PORT: " << port << std::endl;
-    return _socket->bind(addr, port);
+    if (_socket->isOpen())
+        _socket->close();
+    if (!_socket->bind(addr, port))
+    {
+        std::cout << "setHostAddr: " << _socket->errorString().toStdString() << std::endl;
+        return false;
+    }
+    return true;
 }
 
 void AudioSocket::setPeerAddr(const QHostAddress& addr, quint16 port)
@@ -35,6 +42,8 @@ void AudioSocket::quit()
 {
     _run = false;
     QThread::quit();
+    if (_socket->isOpen())
+        _socket->close();
 }
 
 void AudioSocket::terminate()
@@ -65,6 +74,8 @@ void AudioSocket::run()
         //std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
         _socket->writeDatagram(encodedSample.encodedSample(), _peerAddr, _peerPort);
     }
+    if (_socket->isOpen())
+        _socket->close();
 }
 
 void AudioSocket::_socket_readyRead()

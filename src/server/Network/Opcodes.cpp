@@ -12,6 +12,7 @@ OpcodeMgr::OpcodeDefinition const* OpcodeMgr::getOpcodeDefinition(uint16 opcode)
         { CMSG_SEARCH_NEW_CONTACT, &Session::handleSearchNewContact },
         { CMSG_ADD_CONTACT_REQUEST, &Session::handleAddContactRequest },
         { CMSG_ADD_CONTACT_RESPONSE, &Session::handleAddContactResponse },
+        { CMSG_GET_ACCOUNT_INFO, &Session::handleGetAccountInfo },
         { MSG_MAX, NULL }
     };
 

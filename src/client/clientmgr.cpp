@@ -16,7 +16,7 @@ void ClientMgr::makeCall(const QString &destEmail, quint32 destId)
         for (quint32 selfPort = AUDIO_PORT; selfPort < AUDIO_PORT + 200; ++selfPort)
             if (sNetworkMgr->setCallHostAddr(ips[0], selfPort))
             {
-                sNetworkMgr->makeCall(destEmail, destId, selfPort);
+                sNetworkMgr->makeCall(destEmail, destId, ips[0].toString(), selfPort);
                 break;
             }
     }

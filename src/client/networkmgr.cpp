@@ -53,76 +53,98 @@ void NetworkMgr::closeTcpConnection()
 
 void NetworkMgr::_readInput()
 {
-    std::cout << "CALL READ INPUT" << std::endl;
-    bool welcoming = _connState == STATE_WELCOMING;
-    char buff[8];
-    std::cout << "AVAILABLE: " << _tcpSock.bytesAvailable() << " _connState: " << quint32(_connState) << std::endl;
-   _tcpSock.read(buff, welcoming ? 8 : 4);
+    while (_tcpSock.bytesAvailable() > 0)
+    {
+        std::cout << "CALL READ INPUT" << std::endl;
+        bool welcoming = _connState == STATE_WELCOMING;
+        char buff[8];
+        std::cout << "AVAILABLE: " << _tcpSock.bytesAvailable() << " _connState: " << quint32(_connState) << std::endl;
+        _tcpSock.read(buff, welcoming ? 8 : 4);
 
-   switch (_connState)
-   {
-       case STATE_DISCONNECTED:
-           break;
-       case STATE_WELCOMING:
-       {
-           QString welcome = "WELCOME";
-            if (welcome.compare(buff) == 0)
+        switch (_connState)
+        {
+            case STATE_DISCONNECTED:
+                break;
+            case STATE_WELCOMING:
             {
-                std::cout << "WELCOME OK" << std::endl;
-                _window->handleRequireAuth();
-                _connState = STATE_WAITING_AUTH;
+                QString welcome = "WELCOME";
+                if (welcome.compare(buff) == 0)
+                {
+                    std::cout << "WELCOME OK" << std::endl;
+                    _window->handleRequireAuth();
+                    _connState = STATE_WAITING_AUTH;
+                }
+                else
+                    closeTcpConnection();
+                break;
             }
-            else
-                closeTcpConnection();
-           break;
-       }
-       case STATE_WAITING_AUTH:
-       {
-           quint16 size = qFromBigEndian<quint16>(*((quint16 const*)&buff[0]));
-           quint16 code = qFromBigEndian<quint16>(*((quint16 const*)&buff[2]));
-           if (size != 1 || code != SMSG_AUTH_RESULT)
-           {
-               closeTcpConnection();
-               break;
-           }
-           quint16 buffSize = (size == 0 ? 1 : size);
-           char* data = new char[buffSize];
-           _tcpSock.read(data, size);
-           Packet pkt(code, data, size);
-           delete data;
-           if (_window->handleAuthResult(pkt))
-               _connState = STATE_AUTHED;
-           break;
-       }
-       case STATE_AUTHED:
-       {
-           quint16 size = qFromBigEndian<quint16>(*((quint16 const*)&buff[0]));
-           quint16 code = qFromBigEndian<quint16>(*((quint16 const*)&buff[2]));
+            case STATE_WAITING_AUTH:
+            {
+                quint16 size = qFromBigEndian<quint16>(*((quint16 const*)&buff[0]));
+                quint16 code = qFromBigEndian<quint16>(*((quint16 const*)&buff[2]));
+                if (size != 1 || code != SMSG_AUTH_RESULT)
+                {
+                    closeTcpConnection();
+                    break;
+                }
+                char data[Packet::MaxBodySize];
+                if (size > 0)
+                    _tcpSock.read(data, size);
+                Packet pkt(code, data, size);
+                if (_window->handleAuthResult(pkt))
+                    _connState = STATE_AUTHED;
+                break;
+            }
+            case STATE_AUTHED:
+            {
+                quint16 size = qFromBigEndian<quint16>(*((quint16 const*)&buff[0]));
+                quint16 code = qFromBigEndian<quint16>(*((quint16 const*)&buff[2]));
 
-           std::cout << "RECEIV SIZE: " << size << " - CODE : " << code << std::endl;
-           quint16 buffSize = (size == 0 ? 1 : size);
-           char* data = new char[buffSize];
-           _tcpSock.read(data, size);
-           Packet pkt(code, data, size);
-           delete data;
-           pkt.dumpHex();
+                std::cout << "RECEIV SIZE: " << size << " - CODE : " << code << std::endl;
+                char data[Packet::MaxBodySize];
+                if (size > 0)
+                {
+                    std::cout << "START READ" << std::endl;
+                    _tcpSock.read(data, size);
+                    std::cout << "END READ" << std::endl;
+                }
+                Packet pkt(code, data, size);
+                pkt.dumpHex();
 
-           OpcodeMgr::OpcodeDefinition const* opcodedef = OpcodeMgr::getOpcodeDefinition(pkt.getOpcode());
-           if (!opcodedef)
-           {
-               std::cerr << "Error: receiv unknow opcode: " << pkt.getOpcode() << std::endl;
-               return;
-           }
-           if (opcodedef->func)
-               (_window->*opcodedef->func)(pkt);
-           break;
-       }
+                OpcodeMgr::OpcodeDefinition const* opcodedef = OpcodeMgr::getOpcodeDefinition(pkt.getOpcode());
+                if (!opcodedef)
+                {
+                    std::cerr << "Error: receiv unknow opcode: " << pkt.getOpcode() << std::endl;
+                    return;
+                }
+                if (opcodedef->func)
+                    (_window->*opcodedef->func)(pkt);
+                break;
+            }
+        }
     }
 }
 
-void NetworkMgr::makeCall(QString const& destEmail, quint32 destId, quint32 port)
+void NetworkMgr::debugInput()
 {
-    SipRequest *Rqst = new SipRequest("INVITE", sClientMgr->getEmail(), sClientMgr->getAccountId(),"", port, destEmail, destId, "", 0);
+    qint64 size = _tcpSock.bytesAvailable();
+    std::cout << "DEBUG INPUT SIZE: " << size << std::endl;
+    if (size > 0)
+    {
+        char buff[Packet::MaxBodySize];
+        _tcpSock.read(buff, size);
+        for (qint64 i = 0; i < size; ++i)
+        {
+            std::cout << " - " << std::hex << qint32(buff[i]);
+            if (i % 4 == 0)
+                std::cout << std::endl;
+        }
+    }
+}
+
+void NetworkMgr::makeCall(QString const& destEmail, quint32 destId, QString const& addr, quint32 port)
+{
+    SipRequest *Rqst = new SipRequest("INVITE", sClientMgr->getEmail(), sClientMgr->getAccountId(), addr, port, destEmail, destId, "", 0);
     _sipPool.push_back(std::make_pair(Rqst, (SipRespond *) NULL));
     tcpSendPacket(Rqst->getPacket());
 }

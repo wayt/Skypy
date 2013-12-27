@@ -32,6 +32,7 @@ public:
     void handleSearchNewContact(Packet& pkt);
     void handleAddContactRequest(Packet& pkt);
     void handleAddContactResponse(Packet& pkt);
+    void handleGetAccountInfo(Packet& pkt);
 
     bool hasFriend(Session const* sess) const { return hasFriend(sess->getId()); }
     bool hasFriend(uint32 id) const;

@@ -20,6 +20,7 @@ enum Opcodes
     SMSG_ADD_CONTACT_REQUEST    = 13,
     CMSG_ADD_CONTACT_RESPONSE   = 14,
     SMSG_ACCOUNT_INFO           = 15,
+    CMSG_GET_ACCOUNT_INFO       = 16,
     MSG_MAX
 };
 

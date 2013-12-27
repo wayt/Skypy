@@ -35,7 +35,7 @@ public:
     void closeTcpConnection();
     void setMainWindow(MainWindow* window) { _window = window; }
 
-    void makeCall(QString const& destEmail, quint32 destId, quint32 port);
+    void makeCall(QString const& destEmail, quint32 destId, QString const& addr, quint32 port);
     bool setCallHostAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { return _audioSock.setHostAddr(addr, port); }
     void setCallPeerAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { _audioSock.setPeerAddr(addr, port); }
     void quitCall() { _audioSock.quit(); }
@@ -44,6 +44,8 @@ public:
     void handleSipRequest(Packet &pkt);
     void handleSipRep(Packet &pkt);
     std::vector< std::pair< SipRequest*, SipRespond* > > getSipPool() { return (_sipPool); }
+
+    void debugInput();
 private slots:
     void _readInput();
     void _handleTcpConnected();

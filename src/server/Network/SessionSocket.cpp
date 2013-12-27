@@ -102,7 +102,7 @@ void SessionSocket::_handleBody(uint16_t code, boost::system::error_code const& 
 void SessionSocket::send(Packet const& pkt)
 {
     ON_NETWORK_DEBUG(
-            std::cout << "Network: SEND OPCODE: " << uint32(pkt.getOpcode()) << std::endl;
+            std::cout << "Network: SEND OPCODE: " << uint32(pkt.getOpcode()) << " - size: " << pkt.size() << std::endl;
     );
     _send(pkt.content(), pkt.size());
 }

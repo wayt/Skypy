@@ -181,12 +181,14 @@ void MainWindow::handlesipResponse(SipRequest const* req, SipRespond const* resp
             _contactForm->addMessageFrom(req->getDestId(), "Call accepted", true);
             if (sAudioManager->start())
             {
+                std::cout << "RECEIV PEER ADDR: " << resp->getDestIp().toStdString() << std::endl;
                 sNetworkMgr->setCallPeerAddr(QHostAddress(resp->getDestIp()), resp->getDestPort());
                 sNetworkMgr->runCall();
             }
             break;
         case 603: // Refuse
             _contactForm->addMessageFrom(req->getDestId(), "Call refused", true);
+            sNetworkMgr->quitCall();
             break;
         }
     }
@@ -194,6 +196,7 @@ void MainWindow::handlesipResponse(SipRequest const* req, SipRespond const* resp
 
 void MainWindow::handleCallRequest(SipRequest const& request)
 {
+    _contactForm->addMessageFrom(request.getSenderId(), "Incomming call...", true);
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Incomming call", "Accept call from " + request.getSenderEmail() + " ?",
                               QMessageBox::Yes | QMessageBox::No);
@@ -211,11 +214,13 @@ void MainWindow::handleCallRequest(SipRequest const& request)
                     {
                         if (sAudioManager->start())
                         {
+                            std::cout << "SET PEER ADDR: " << request.getSenderIp().toStdString() << std::endl;
                             sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
                             sNetworkMgr->runCall();
+
                             std::cout << "CALL ACCEPTED, LISTEN ON " << ips[0].toString().toStdString() << ":" << selfPort << std::endl;
                             SipRespond Rep(200, "INVITE", request.getSenderEmail(), request.getSenderId(), request.getSenderIp(), request.getSenderPort(),
-                                           request.getDestEmail(), request.getDestId(), request.getDestIp(), selfPort);
+                                           request.getDestEmail(), request.getDestId(), ips[0].toString(), selfPort);
                             sNetworkMgr->tcpSendPacket(Rep.getPacket());
                         }
                         else // Should send error
@@ -250,6 +255,7 @@ void MainWindow::handleAccountInfo(Packet& pkt)
     quint32 id;
     QString name, email;
     pkt >> id >> name >> email;
+    std::cout << "RECEIV id: " << id << " - name: " << name.toStdString() << " - email: " << email.toStdString() << std::endl;
     setWindowTitle(name + " (" + email + ")");
     sClientMgr->setAccountInfo(id, name, email);
 

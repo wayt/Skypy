@@ -208,10 +208,10 @@ void Session::handleSipPacket(Packet& pkt)
     }
     else
     {
-        Packet data(RMSG_SIP);
-        data << cmd;
-        data << getEmail() << uint32(getId()) << getHostAddress() << uint32(senderPort);
-        data << peer->getEmail() << uint32(peer->getId()) << peer->getHostAddress() << uint32(destPort);
+        //Packet data(RMSG_SIP);
+        //data << cmd;
+        //data << getEmail() << uint32(getId()) << getHostAddress() << uint32(senderPort);
+        //data << peer->getEmail() << uint32(peer->getId()) << peer->getHostAddress() << uint32(destPort);
         sSipManager->forwardSip(peer, pkt);
 
         if (cmd == "INVITE") /*On separe le fait de sonner du fait d'attendre une reponse*/
@@ -373,4 +373,14 @@ void Session::handleAddContactResponse(Packet& pkt)
         std::cout << getEmail() << " refuse contact request " << reqId << std::endl;
 
     sContactMgr->deleteContactRequest(request);
+}
+
+void Session::handleGetAccountInfo(Packet& pkt)
+{
+    std::cout << " CLient " << getEmail() << " request account info" << std::endl;
+    Packet info(SMSG_ACCOUNT_INFO);
+    info << uint32(getId());
+    info << getName();
+    info << getEmail();
+    send(info);
 }

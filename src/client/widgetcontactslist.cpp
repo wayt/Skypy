@@ -29,6 +29,9 @@ void WidgetContactsList::initialize()
     _contactList->clear();
     _notificationList->clear();
     sClientMgr->setAccountInfo(0, "", "");
+
+    Packet data(CMSG_GET_ACCOUNT_INFO);
+    sNetworkMgr->tcpSendPacket(data);
 }
 
 void WidgetContactsList::unload()
@@ -128,4 +131,9 @@ void WidgetContactsList::handleNotificationDoubleClick(QListWidgetItem* item)
         }
     }
 
+}
+
+void WidgetContactsList::on__debugButton_clicked()
+{
+    sNetworkMgr->debugInput();
 }
