@@ -205,7 +205,7 @@ void MainWindow::handleCallRequest(SipRequest const& request)
         case QMessageBox::Yes:
         case QMessageBox::No:
         {
-            QHostAddress host(sClientMgr->getPublicIp());
+            QHostAddress host("0.0.0.0");
             if (reply == QMessageBox::Yes)
             {
                 for (quint32 selfPort = AUDIO_PORT; selfPort < AUDIO_PORT + 200; ++selfPort)
@@ -219,7 +219,7 @@ void MainWindow::handleCallRequest(SipRequest const& request)
 
                             std::cout << "CALL ACCEPTED, LISTEN ON " << host.toString().toStdString() << ":" << selfPort << std::endl;
                             SipRespond Rep(200, "INVITE", request.getSenderEmail(), request.getSenderId(), request.getSenderIp(), request.getSenderPort(),
-                                           request.getDestEmail(), request.getDestId(), host.toString(), selfPort);
+                                           request.getDestEmail(), request.getDestId(), sClientMgr->getPublicIp(), selfPort);
                             sNetworkMgr->tcpSendPacket(Rep.getPacket());
                         }
                         else // Should send error
