@@ -28,7 +28,8 @@ win32: {
     LIBS += $$_PRO_FILE_PWD_/../../shared/WindowsPackage/$$CONFIG_PATH/opencv_imgproc246.lib
 }
 unix: {
-    LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
+    LIBS += -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc
+    INCLUDEPATH += /usr/local/lib/
 }
 
 SOURCES += main.cpp\
