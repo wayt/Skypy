@@ -58,6 +58,7 @@ void WidgetContactsList::logoutContact(quint32 id)
 
     if (sClientMgr->getCallRequestPeerId() == id || sClientMgr->getActiveCallPeerId() == id)
     {
+        std::cout << "PEER " << id << " LOGOUT, STOPPING CALL" << std::endl;
         sClientMgr->setCallRequestPeerId(0);
         sClientMgr->setActiveCallPeerId(0);
         sAudioManager->quit();
