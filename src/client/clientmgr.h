@@ -30,6 +30,7 @@ public:
 
 
     void makeCall(QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp);
+    void stopCall(QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp) {}
 
 private:
     quint32 _accountId;

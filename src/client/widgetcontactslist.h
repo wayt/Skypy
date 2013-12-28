@@ -5,6 +5,7 @@
 #include "ui_widgetcontactslist.h"
 #include <map>
 #include "widgetchatwindow.h"
+#include "sipPacket.hpp"
 
 class WidgetAddContactWindow;
 
@@ -73,6 +74,8 @@ public:
     QListWidget* getContactListWidget() { return _contactList; }
 
     void addMessageFrom(quint32 id, QString const& msg, bool notif = false);
+    void handleCallResponse(SipRespond const& resp) { _chatWindow->handleCallResponse(resp); }
+    void handleCallRequest(ContactInfo const* info, SipRequest const& req) { _chatWindow->handleCallRequest(info, req); }
 
     WidgetAddContactWindow* getContactWindow() { return _addContactWindow; }
     QListWidget* getNotificationWidget() { return _notificationList; }
