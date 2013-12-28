@@ -11,12 +11,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Skypy
 TEMPLATE = app
 
-INCLUDEPATH += /usr/local/include
-
 # Windows
 win32: {
-    INCLUDEPATH += $$_PRO_FILE_PWD_/../AudioPackage/include/portaudio/
-    INCLUDEPATH += $$_PRO_FILE_PWD_/../AudioPackage/include/
+    INCLUDEPATH += $$_PRO_FILE_PWD_/../shared/WindowsPackage/include/portaudio/
+    INCLUDEPATH += $$_PRO_FILE_PWD_/../shared/WindowsPackage/include/
 
     # Release config
     CONFIG(release, release|debug) {
@@ -27,16 +25,17 @@ win32: {
         CONFIG_PATH = Debug
     }
 
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/portaudio_x64.lib
+    LIBS += $$_PRO_FILE_PWD_/../shared//WindowsPackage/$$CONFIG_PATH/portaudio_x64.lib
 
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/opus.lib
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/celt.lib
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/silk_common.lib
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/silk_fixed.lib
-    LIBS += $$_PRO_FILE_PWD_/../AudioPackage/$$CONFIG_PATH/silk_float.lib
+    LIBS += $$_PRO_FILE_PWD_/../shared/WindowsPackage/$$CONFIG_PATH/opus.lib
+    LIBS += $$_PRO_FILE_PWD_/../shared/WindowsPackage/$$CONFIG_PATH/celt.lib
+    LIBS += $$_PRO_FILE_PWD_/../shared/WindowsPackage/$$CONFIG_PATH/silk_common.lib
+    LIBS += $$_PRO_FILE_PWD_/../shared/WindowsPackage/$$CONFIG_PATH/silk_fixed.lib
+    LIBS += $$_PRO_FILE_PWD_/../shared/WindowsPackage/$$CONFIG_PATH/silk_float.lib
 }
 # Unix (Linux and OsX)
 unix: {
+    INCLUDEPATH += /usr/local/include
     LIBS += -L/usr/local/lib
     LIBS += -lportaudio
     LIBS += -lopus
