@@ -75,12 +75,19 @@ void AudioManager::quit()
     if (!_run)
         return;
 
+    _input->stop();
+    _output->stop();
     _run = false;
     QThread::quit();
 }
 
 void AudioManager::terminate()
 {
+    if (!_run)
+        return ;
+
+    _input->stop();
+    _output->stop();
     _run = false;
     QThread::terminate();
 }
@@ -111,7 +118,4 @@ void AudioManager::run()
                 _output->outputQueue().enqueue(sample);
         }
     }
-
-    _input->stop();
-    _output->stop();
 }
