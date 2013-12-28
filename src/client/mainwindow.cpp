@@ -49,8 +49,14 @@ void MainWindow::handleRequireAuth()
     pkt << _loginForm->getEmailText();
     pkt << _loginForm->getPasswordText();
     QList<QHostAddress> ips = QNetworkInterface::allAddresses();
-    if (ips.size() > 0)
-        pkt << ips[0].toString();
+    for (QList<QHostAddress>::Iterator it = ips.begin(); it != ips.end(); ++it)
+    {
+        if (!it->isLoopback() && it->protocol() == QAbstractSocket::IPv4Protocol)
+        {
+            std::cout << "LOCAL IP: " << it->toString().toStdString() << std::endl;
+            pkt << it->toString();
+        }
+    }
     sNetworkMgr->tcpSendPacket(pkt);
     std::cout << "AUTH SENDED" << std::endl;
     pkt.dumpHex();
