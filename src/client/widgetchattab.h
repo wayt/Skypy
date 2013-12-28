@@ -26,6 +26,8 @@ private:
     quint32 _peerId;
     QString _peerName;
     QString _peerEmail;
+    QString _peerPublicIp;
+    QString _peerPrivateIp;
 };
 
 #endif // WIDGETCHATTAB_H

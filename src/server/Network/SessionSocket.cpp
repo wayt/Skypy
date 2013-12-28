@@ -144,7 +144,10 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
 
     if (auth.digest().result() == AUTHRESULT_OK)
     {
-        _session = new Session(this, email);
+        std::string privateIp = "127.0.0.1";
+        if (pkt.available() > 0)
+            pkt >> privateIp;
+        _session = new Session(this, email, privateIp);
         if (!_session->loadFromDb())
         {
             Packet data(SMSG_AUTH_RESULT);

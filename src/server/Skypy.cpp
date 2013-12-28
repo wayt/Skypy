@@ -164,12 +164,23 @@ void Skypy::_handleSessionLogin(Session* sess)
     //info << sess->getEmail();
     //sess->send(info);
 
-    Packet selfData(SMSG_CONTACT_LOGIN);
-    selfData << uint32(1);
-    selfData << uint32(sess->getId());
-    selfData << sess->getName();
-    selfData << sess->getEmail();
-    sess->broadcastToFriend(selfData);
+    try
+    {
+        std::map<uint32, ContactInfo*> const& contacts = sContactMgr->getContactMap(sess->getId());
+        for (std::map<uint32, ContactInfo*>::const_iterator itr = contacts.begin();
+            itr != contacts.end(); ++itr)
+        if (Session* peer = sSkypy->findSession(itr->first))
+            if (peer->hasFriend(sess))
+            {
+                Packet data(SMSG_CONTACT_LOGIN);
+                data << uint32(1);
+                sess->buildLoginPacket(data, peer);
+                peer->send(data);
+            }
+    }
+    catch (std::exception const&)
+    {
+    }
 
     Packet peerData(SMSG_CONTACT_LOGIN);
     sess->buildOnlineFriendPacket(peerData);

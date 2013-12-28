@@ -16,6 +16,8 @@
 #include "sipPacket.hpp"
 #include "clientmgr.h"
 
+#include <QNetworkInterface>
+
 MainWindow::MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
     _widgets(new QStackedWidget(this)),
@@ -46,6 +48,9 @@ void MainWindow::handleRequireAuth()
     Packet pkt(CMSG_AUTH);
     pkt << _loginForm->getEmailText();
     pkt << _loginForm->getPasswordText();
+    QList<QHostAddress> ips = QNetworkInterface::allAddresses();
+    if (ips.size() > 0)
+        pkt << ips[0].toString();
     sNetworkMgr->tcpSendPacket(pkt);
     std::cout << "AUTH SENDED" << std::endl;
     pkt.dumpHex();
@@ -90,10 +95,14 @@ void MainWindow::handleContactLogin(Packet& pkt)
         quint32 id;
         QString name;
         QString email;
+        QString ipPublic, ipPrivate;
         pkt >> id;
         pkt >> name;
         pkt >> email;
-        ContactInfo* info = new ContactInfo(_contactForm->getContactListWidget(), id, name, email);
+        pkt >> ipPublic;
+        pkt >> ipPrivate;
+
+        ContactInfo* info = new ContactInfo(_contactForm->getContactListWidget(), id, name, email, true, ipPublic, ipPrivate);
         _contactForm->loginContact(info);
     }
 }
@@ -205,27 +214,29 @@ void MainWindow::handleCallRequest(SipRequest const& request)
         case QMessageBox::Yes:
         case QMessageBox::No:
         {
-            QHostAddress host(sClientMgr->getPublicIp());
+            QHostAddress host(request.getDestIp());
             if (reply == QMessageBox::Yes)
             {
-                for (quint32 selfPort = AUDIO_PORT; selfPort < AUDIO_PORT + 200; ++selfPort)
-                    if (sNetworkMgr->setCallHostAddr(host, selfPort))
+                if (sNetworkMgr->setCallHostAddr(host, request.getDestPort()))
+                {
+                    if (sAudioManager->start())
                     {
-                        if (sAudioManager->start())
-                        {
-                            std::cout << "SET PEER ADDR: " << request.getSenderIp().toStdString() << std::endl;
-                            sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
-                            sNetworkMgr->runCall();
+                        std::cout << "SET PEER ADDR: " << request.getSenderIp().toStdString() << std::endl;
+                        sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
+                        sNetworkMgr->runCall();
 
-                            std::cout << "CALL ACCEPTED, LISTEN ON " << host.toString().toStdString() << ":" << selfPort << std::endl;
-                            SipRespond Rep(200, "INVITE", request.getSenderEmail(), request.getSenderId(), request.getSenderIp(), request.getSenderPort(),
-                                           request.getDestEmail(), request.getDestId(), host.toString(), selfPort);
-                            sNetworkMgr->tcpSendPacket(Rep.getPacket());
-                        }
-                        else // Should send error
-                            std::cout << "FAIL TO START AUDIO" << std::endl;
-                        break;
+                        std::cout << "CALL ACCEPTED, LISTEN ON " << request.getDestIp().toStdString() << ":" << request.getDestPort() << std::endl;
+                        SipRespond Rep(200, "INVITE", request.getSenderEmail(), request.getSenderId(), request.getSenderIp(), request.getSenderPort(),
+                                       request.getDestEmail(), request.getDestId(), request.getDestIp(), request.getDestPort());
+                        sNetworkMgr->tcpSendPacket(Rep.getPacket());
                     }
+                    else // Should send error
+                        std::cout << "FAIL TO START AUDIO" << std::endl;
+
+                    break;
+                }
+                else
+                    std::cout << "FAIL TO OPEN NETWORK: " << request.getDestIp().toStdString() << ":" << request.getDestPort() << std::endl;
 
                 //if (sAudioManager->start())
                   //{
@@ -259,4 +270,7 @@ void MainWindow::handleAccountInfo(Packet& pkt)
     sClientMgr->setAccountInfo(id, name, email);
     sClientMgr->setPublicIp(publicIp);
 
+    QList<QHostAddress> ips = QNetworkInterface::allAddresses();
+    if (ips.size() > 0)
+        sClientMgr->setPrivateIp(ips[0].toString());
 }

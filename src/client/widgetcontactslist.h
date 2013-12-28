@@ -11,21 +11,25 @@ class WidgetAddContactWindow;
 class ContactInfo : public QListWidgetItem
 {
 public:
-    ContactInfo(QListWidget* parent, quint32 id, QString const& name, QString const& email, bool online = true) :
+    ContactInfo(QListWidget* parent, quint32 id, QString const& name, QString const& email, bool online = true, QString const& ipPublic = "", QString const& ipPrivate = "") :
         QListWidgetItem(QString(name + " (" + email + ") - " + (online ? "Online" : "Offline")), parent),
-        _id(id), _name(name), _email(email), _online(online)
+        _id(id), _name(name), _email(email), _online(online), _publicIp(ipPublic), _privateIp(ipPrivate)
     {}
 
     quint32 getId() const { return _id; }
     QString const& getName() const { return _name; }
     QString const& getEmail() const { return _email; }
     bool isOnline() const { return _online; }
+    QString const& getPublicIp() const { return _publicIp; }
+    QString const& getPrivateIp() const { return _privateIp; }
 
 private:
     quint32 _id;
     QString _name;
     QString _email;
     bool _online;
+    QString _publicIp;
+    QString _privateIp;
 };
 
 enum NotificationTypes

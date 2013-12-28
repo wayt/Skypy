@@ -10,7 +10,7 @@ class SessionSocket;
 class Session
 {
 public:
-    Session(SessionSocket* sock, std::string const& email);
+    Session(SessionSocket* sock, std::string const& email, std::string const& privateIp);
     uint32 getId() const { return _id; }
     std::string const& getName() const { return _name; }
     std::string const& getEmail() const { return _email; }
@@ -40,10 +40,12 @@ public:
     void addFriend(ContactInfo* info);
     void broadcastToFriend(Packet const& pkt) const;
     void buildOnlineFriendPacket(Packet& pkt) const;
+    void buildLoginPacket(Packet& pkt, Session const* to = NULL) const;
 
     void sendContactRequest();
 
     std::string const& getHostAddress() const;
+    std::string const& getPrivateAddress() const { return _privateIp; }
 
 private:
     void _loadAccountInfo();
@@ -54,6 +56,7 @@ private:
     bool _logout;
     std::string _name;
     std::string _email;
+    std::string _privateIp;
 };
 
 #endif /* !SESSION_H_ */

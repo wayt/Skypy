@@ -10,7 +10,7 @@
 WidgetChatTab::WidgetChatTab(ContactInfo* info, QWidget *parent) :
     QWidget(parent),
     Ui::WidgetChatTab(),
-    _peerId(info->getId()), _peerName(info->getName()), _peerEmail(info->getEmail())
+    _peerId(info->getId()), _peerName(info->getName()), _peerEmail(info->getEmail()), _peerPublicIp(info->getPublicIp()), _peerPrivateIp(info->getPrivateIp())
 {
     setupUi(this);
 }
@@ -18,7 +18,7 @@ WidgetChatTab::WidgetChatTab(ContactInfo* info, QWidget *parent) :
 void WidgetChatTab::on__callButon_clicked()
 {
     std::cout << "CLICKED CALL BUTTON" << std::endl;
-    sClientMgr->makeCall(_peerEmail, _peerId);
+    sClientMgr->makeCall(_peerEmail, _peerId, _peerPublicIp, _peerPrivateIp);
     /*std::vector< std::pair<sipRequest*, sipRespond*> >sipPool = sNetworkMgr->getSipPool();
 
     for (std::vector< std::pair<sipRequest*, sipRespond*> >::iterator it = sipPool.begin() ; it != sipPool.end(); ++it)

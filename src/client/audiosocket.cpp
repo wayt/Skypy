@@ -71,7 +71,7 @@ void AudioSocket::run()
             break;
 
         EncodedSample encodedSample = sAudioManager->inputQueue().dequeue();
-        std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
+        //std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
         _socket->writeDatagram(encodedSample.encodedSample(), _peerAddr, _peerPort);
     }
     if (_socket->isOpen())
@@ -90,7 +90,7 @@ void AudioSocket::_socket_readyRead()
         quint16 fromPort;
 
         _socket->readDatagram(data.data(), data.size(), &fromAddr, &fromPort);
-        std::cout << "AUDIO READ FROM: " << fromAddr.toString().toStdString() << ":" << fromPort << std::endl;
+        //std::cout << "AUDIO READ FROM: " << fromAddr.toString().toStdString() << ":" << fromPort << std::endl;
         if (fromAddr == _peerAddr && fromPort == _peerPort)
             sAudioManager->push(EncodedSample(data));
     }

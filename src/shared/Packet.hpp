@@ -250,6 +250,8 @@ public:
         updateSize();
     }
 
+    uint16 available() const { return _wpos - _rpos; }
+
 private:
     template<class T>
     void append(T value)

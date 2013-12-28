@@ -17,14 +17,18 @@ public:
     QString const& getEmail() const { return _email; }
     QString const& getPublicIp() const { return _publicIp; }
     void setPublicIp(QString const& ip) { _publicIp = ip; }
+    QString const& getPrivateIp() const { return _privateIp; }
+    void setPrivateIp(QString const& ip) { _privateIp = ip; }
 
-    void makeCall(QString const& destEmail, quint32 destId);
+
+    void makeCall(QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp);
 
 private:
     quint32 _accountId;
     QString _username;
     QString _email;
     QString _publicIp;
+    QString _privateIp;
 };
 
 #define sClientMgr ClientMgr::instance()

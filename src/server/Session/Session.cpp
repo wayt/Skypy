@@ -7,8 +7,8 @@
 #include "AuthWorker.h"
 #include "ContactMgr.h"
 
-Session::Session(SessionSocket* sock, std::string const& email) : _id(0), _socket(sock), _packetQueue(),
-    _logout(false), _name(email), _email(email)
+Session::Session(SessionSocket* sock, std::string const& email, std::string const& privateIp) : _id(0), _socket(sock), _packetQueue(),
+    _logout(false), _name(email), _email(email), _privateIp(privateIp)
 {
     std::size_t found = _email.find('@');
     if (found != std::string::npos)
@@ -90,9 +90,7 @@ void Session::buildOnlineFriendPacket(Packet& pkt) const
         if (Session* peer = sSkypy->findSession(itr->first))
             if (peer->hasFriend(this))
             {
-                pkt << uint32(peer->getId());
-                pkt << peer->getName();
-                pkt << peer->getEmail();
+                peer->buildLoginPacket(pkt, this);
                 ++count;
                 std::cout << "PEER: " << peer->getId() << std::endl << "NAME: " << peer->getName() << std::endl << "MAIL: " << peer->getEmail() << std::endl;
             }
@@ -102,6 +100,15 @@ void Session::buildOnlineFriendPacket(Packet& pkt) const
         count = 0;
     }
     pkt.insert<uint32>(count, holder);
+}
+
+void Session::buildLoginPacket(Packet& pkt, Session const* to) const
+{
+    pkt << uint32(getId());
+    pkt << getName();
+    pkt << getEmail();
+    pkt << getHostAddress();
+    pkt << getPrivateAddress();
 }
 
 void Session::update(uint32 diff)
@@ -176,9 +183,7 @@ void Session::friendLogin(Session* sess)
 {
     Packet data(SMSG_CONTACT_LOGIN);
     data << uint32(1);
-    data << uint32(sess->getId());
-    data << sess->getName();
-    data << sess->getEmail();
+    sess->buildLoginPacket(data, this);
     send(data);
 }
 
