@@ -55,6 +55,8 @@ void MainWindow::handleRequireAuth()
         {
             std::cout << "LOCAL IP: " << it->toString().toStdString() << std::endl;
             pkt << it->toString();
+            sClientMgr->setPrivateIp(it->toString());
+            break;
         }
     }
     sNetworkMgr->tcpSendPacket(pkt);
@@ -275,8 +277,4 @@ void MainWindow::handleAccountInfo(Packet& pkt)
     setWindowTitle(name + " (" + email + ")");
     sClientMgr->setAccountInfo(id, name, email);
     sClientMgr->setPublicIp(publicIp);
-
-    QList<QHostAddress> ips = QNetworkInterface::allAddresses();
-    if (ips.size() > 0)
-        sClientMgr->setPrivateIp(ips[0].toString());
 }
