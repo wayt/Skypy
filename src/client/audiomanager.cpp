@@ -72,6 +72,9 @@ bool AudioManager::start()
 
 void AudioManager::quit()
 {
+    if (!_run)
+        return;
+
     _run = false;
     QThread::quit();
 }

@@ -3,12 +3,16 @@
 #include "networkmgr.h"
 #include <iostream>>
 
-ClientMgr::ClientMgr()
+ClientMgr::ClientMgr() : _accountId(0), _username(""), _email(""),
+    _publicIp(""), _privateIp(""), _activeCallPeerId(0), _requestCallPeerId(0)
 {
 }
 
 void ClientMgr::makeCall(const QString &destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp)
 {
+    if (hasCallRequest() || hasActiveCall())
+        return;
+
     QHostAddress host;
     QString destIp = destPublicIp;
     if (_publicIp == destPublicIp)
@@ -24,6 +28,7 @@ void ClientMgr::makeCall(const QString &destEmail, quint32 destId, QString const
         if (sNetworkMgr->setCallHostAddr(host, selfPort))
         {
             sNetworkMgr->makeCall(host.toString(), selfPort, destEmail, destId, destIp, selfPort);
+            setCallRequestPeerId(destId);
             break;
         }
 }

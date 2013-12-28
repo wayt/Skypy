@@ -33,7 +33,7 @@ public:
     void handleAddContactRequest(Packet& pkt);
     void handleAccountInfo(Packet& pkt);
 
-    void handlesipResponse(SipRequest const* req, SipRespond const* resp);
+    void handlesipResponse(SipRespond const& resp);
     void handleCallRequest(SipRequest const& request);
 private:
     QStackedWidget* _widgets;

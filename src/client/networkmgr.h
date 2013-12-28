@@ -43,7 +43,6 @@ public:
     void runCall() { _audioSock.start(); }
     void handleSipRequest(Packet &pkt);
     void handleSipRep(Packet &pkt);
-    std::vector< std::pair< SipRequest*, SipRespond* > > getSipPool() { return (_sipPool); }
 
     void debugInput();
 private slots:
@@ -51,7 +50,6 @@ private slots:
     void _handleTcpConnected();
     void _handleTcpError(QAbstractSocket::SocketError e);
 private:
-    std::vector< std::pair< SipRequest*, SipRespond* > > _sipPool;
     QTcpSocket _tcpSock;
     MainWindow* _window;
     ConnectionState _connState;

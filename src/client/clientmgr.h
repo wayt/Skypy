@@ -20,6 +20,14 @@ public:
     QString const& getPrivateIp() const { return _privateIp; }
     void setPrivateIp(QString const& ip) { _privateIp = ip; }
 
+    bool hasActiveCall() const { return _activeCallPeerId > 0; }
+    quint32 getActiveCallPeerId() const { return _activeCallPeerId; }
+    void setActiveCallPeerId(quint32 id) { _activeCallPeerId = id; }
+
+    bool hasCallRequest() const { return _requestCallPeerId > 0; }
+    quint32 getCallRequestPeerId() const { return _requestCallPeerId; }
+    void setCallRequestPeerId(quint32 id) { _requestCallPeerId = id; }
+
 
     void makeCall(QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp);
 
@@ -29,6 +37,9 @@ private:
     QString _email;
     QString _publicIp;
     QString _privateIp;
+
+    quint32 _activeCallPeerId;
+    quint32 _requestCallPeerId;
 };
 
 #define sClientMgr ClientMgr::instance()

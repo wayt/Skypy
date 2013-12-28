@@ -8,6 +8,7 @@
 #include "opcodemgr.h"
 #include "networkmgr.h"
 #include "clientmgr.h"
+#include "audiomanager.h"
 
 WidgetContactsList::WidgetContactsList(QWidget *parent) :
     QWidget(parent),
@@ -54,6 +55,14 @@ void WidgetContactsList::logoutContact(quint32 id)
     _contactList->removeItemWidget(info);
     _contactMap.erase(id);
     delete info;
+
+    if (sClientMgr->getCallRequestPeerId() == id || sClientMgr->getActiveCallPeerId() == id)
+    {
+        sClientMgr->setCallRequestPeerId(0);
+        sClientMgr->setActiveCallPeerId(0);
+        sAudioManager->quit();
+        sNetworkMgr->quitCall();
+    }
 }
 
 void WidgetContactsList::handleContactDoubleClick(QListWidgetItem* item)

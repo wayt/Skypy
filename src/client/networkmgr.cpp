@@ -88,7 +88,7 @@ void NetworkMgr::_readInput()
                     break;
                 }
                 char data[Packet::MaxBodySize];
-                if (size > 0)
+                if (size > 0 && size < Packet::MaxBodySize)
                     _tcpSock.read(data, size);
                 Packet pkt(code, data, size);
                 if (_window->handleAuthResult(pkt))
@@ -105,12 +105,8 @@ void NetworkMgr::_readInput()
 
                 std::cout << "RECEIV SIZE: " << size << " - CODE : " << code << std::endl;
                 char data[Packet::MaxBodySize];
-                if (size > 0)
-                {
-                    std::cout << "START READ" << std::endl;
+                if (size > 0 && size << Packet::MaxBodySize)
                     _tcpSock.read(data, size);
-                    std::cout << "END READ" << std::endl;
-                }
                 Packet pkt(code, data, size);
                 pkt.dumpHex();
 
@@ -147,9 +143,8 @@ void NetworkMgr::debugInput()
 
 void NetworkMgr::makeCall(QString const& srcAddr, quint32 srcPort, QString const& destEmail, quint32 destId, QString const& destAddr, quint32 destPort)
 {
-    SipRequest *Rqst = new SipRequest("INVITE", sClientMgr->getEmail(), sClientMgr->getAccountId(), srcAddr, srcPort, destEmail, destId, destAddr, destPort);
-    _sipPool.push_back(std::make_pair(Rqst, (SipRespond *) NULL));
-    tcpSendPacket(Rqst->getPacket());
+    SipRequest Rqst("INVITE", sClientMgr->getEmail(), sClientMgr->getAccountId(), srcAddr, srcPort, destEmail, destId, destAddr, destPort);
+    tcpSendPacket(Rqst.getPacket());
 }
 
 void  NetworkMgr::handleSipRep(Packet &pkt)
@@ -169,16 +164,8 @@ void  NetworkMgr::handleSipRep(Packet &pkt)
     pkt >> code >> cmd;
     pkt >> senderEmail >> senderId >> senderIp >> senderPort;
     pkt >> destEmail >> destId >> destIp >> destPort;
-    for (std::vector< std::pair<SipRequest*, SipRespond*> >::iterator itr = _sipPool.begin() ; itr != _sipPool.end(); ++itr)
-    {
-        if (itr->first->getCmd() == cmd && itr->first->getSenderEmail() == sClientMgr->getEmail() &&
-                itr->first->getSenderId() == sClientMgr->getAccountId())
-        {
-            itr->second = new SipRespond(code, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
-            _window->handlesipResponse(itr->first, itr->second);
-            return;
-        }
-    }
+    SipRespond resp(code, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+    _window->handlesipResponse(resp);
 }
 
 void NetworkMgr::handleSipRequest(Packet &pkt)
@@ -202,17 +189,5 @@ void NetworkMgr::handleSipRequest(Packet &pkt)
         std::cout << senderEmail.toStdString() << " wanna start a vocal conversation with you" << std::endl;
         SipRequest request(cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
         _window->handleCallRequest(request);
-       /*
-        if (accept == true)
-        {
-            sipRespond *Rep = new sipRespond(200, cmd, userName, contactName, contactAdress, "my adress", 4242, peerId);
-            sNetworkMgr->tcpSendPacket(Rep->getPacket());
-        }
-        else
-        {
-            sipRespond *Rep = new sipRespond(603, cmd, userName, contactName, contactAdress, NULL, 0, peerId);
-            sNetworkMgr->tcpSendPacket(Rep->getPacket());
-        }
-        */
     }
 }

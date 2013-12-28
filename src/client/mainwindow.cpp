@@ -170,40 +170,72 @@ void MainWindow::handleSipRequest(Packet &pkt)
   sNetworkMgr->handleSipRequest(pkt);
 }
 
-void MainWindow::handlesipResponse(SipRequest const* req, SipRespond const* resp)
+void MainWindow::handlesipResponse(SipRespond const& resp)
 {
-    if (req->getCmd() == "INVITE")
+    if (resp.getCmd() == "INVITE")
     {
-        switch (resp->getCode())
+        switch (resp.getCode())
         {
         case 100: // Forward de l'appel
-            _contactForm->addMessageFrom(req->getDestId(), "Send call request ...", true);
+            _contactForm->addMessageFrom(resp.getDestId(), "Send call request ...", true);
             break;
         case 404: // Contact non connecte
-            _contactForm->addMessageFrom(req->getDestId(), req->getDestEmail() + " isn't online", true);
-            break;
-        case 180: // Ca sonne
-            _contactForm->addMessageFrom(req->getDestId(), "Ringing ...", true);
-            break;
-        case 200: // Ca a decrocher
-            _contactForm->addMessageFrom(req->getDestId(), "Call accepted", true);
-            if (sAudioManager->start())
-            {
-                std::cout << "RECEIV PEER ADDR: " << resp->getDestIp().toStdString() << std::endl;
-                sNetworkMgr->setCallPeerAddr(QHostAddress(resp->getDestIp()), resp->getDestPort());
-                sNetworkMgr->runCall();
-            }
-            break;
-        case 603: // Refuse
-            _contactForm->addMessageFrom(req->getDestId(), "Call refused", true);
+            _contactForm->addMessageFrom(resp.getDestId(), resp.getDestEmail() + " isn't online", true);
+            sClientMgr->setCallRequestPeerId(0);
             sNetworkMgr->quitCall();
             break;
+        case 180: // Ca sonne
+            _contactForm->addMessageFrom(resp.getDestId(), "Ringing ...", true);
+            break;
+        case 200: // Ca a decrocher
+            _contactForm->addMessageFrom(resp.getDestId(), "Call accepted", true);
+            sClientMgr->setCallRequestPeerId(0);
+            if (sAudioManager->start())
+            {
+                std::cout << "RECEIV PEER ADDR: " << resp.getDestIp().toStdString() << std::endl;
+                sNetworkMgr->setCallPeerAddr(QHostAddress(resp.getDestIp()), resp.getDestPort());
+                sNetworkMgr->runCall();
+                sClientMgr->setActiveCallPeerId(resp.getDestId());
+            }
+            else
+                std::cout << "FAIL TO START AUDIO" << std::endl;
+            break;
+        case 603: // Refuse
+            _contactForm->addMessageFrom(resp.getDestId(), "Call refused", true);
+            sClientMgr->setCallRequestPeerId(0);
+            sNetworkMgr->quitCall();
+            break;
+        case 604: // Occuped
+            _contactForm->addMessageFrom(resp.getDestId(), "Occuped", true);
+            sClientMgr->setCallRequestPeerId(0);
+            sNetworkMgr->quitCall();
+            break;
+        case 605: // Peer fail to open network
+            _contactForm->addMessageFrom(resp.getDestId(), "Peer's network issue", true);
+            sClientMgr->setCallRequestPeerId(0);
+            sNetworkMgr->quitCall();
+            break;
+        case 606: // Peer fail to start audio
+            _contactForm->addMessageFrom(resp.getDestId(), "Peer's audio issue", true);
+            sClientMgr->setCallRequestPeerId(0);
+            sNetworkMgr->quitCall();
+            break;
+
+
         }
     }
 }
 
 void MainWindow::handleCallRequest(SipRequest const& request)
 {
+    if (sClientMgr->hasActiveCall() || sClientMgr->hasCallRequest())
+    {
+
+        SipRespond Rep(604, request);
+        sNetworkMgr->tcpSendPacket(Rep.getPacket());
+        return;
+    }
+
     _contactForm->addMessageFrom(request.getSenderId(), "Incomming call...", true);
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Incomming call", "Accept call from " + request.getSenderEmail() + " ?",
@@ -225,32 +257,30 @@ void MainWindow::handleCallRequest(SipRequest const& request)
                         sNetworkMgr->runCall();
 
                         std::cout << "CALL ACCEPTED, LISTEN ON " << request.getDestIp().toStdString() << ":" << request.getDestPort() << std::endl;
-                        SipRespond Rep(200, "INVITE", request.getSenderEmail(), request.getSenderId(), request.getSenderIp(), request.getSenderPort(),
-                                       request.getDestEmail(), request.getDestId(), request.getDestIp(), request.getDestPort());
+                        SipRespond Rep(200, request);
                         sNetworkMgr->tcpSendPacket(Rep.getPacket());
+                        sClientMgr->setActiveCallPeerId(request.getSenderId());
+                        return;
                     }
                     else // Should send error
+                    {
                         std::cout << "FAIL TO START AUDIO" << std::endl;
 
-                    break;
+                        SipRespond Rep(606, request);
+                        sNetworkMgr->tcpSendPacket(Rep.getPacket());
+                    }
                 }
                 else
+                {
                     std::cout << "FAIL TO OPEN NETWORK: " << request.getDestIp().toStdString() << ":" << request.getDestPort() << std::endl;
 
-                //if (sAudioManager->start())
-                  //{
-                    //sNetworkMgr->setCallPeerAddr(QHostAddress(host), AUDIO_PORT + ((_peerId % 2) == 0 ? 1 : 0));
-                    //sNetworkMgr->runCall);
-                    //std::cout << "RUN CALL" << std::endl;
-
-                  //}
-                //else
-                  //std::cerr << "FAIL START: " << sAudioManager->errorText().toStdString() << std::endl;
+                    SipRespond Rep(605, request);
+                    sNetworkMgr->tcpSendPacket(Rep.getPacket());
+                }
             }
             else
             {
-                SipRespond Rep(603, "INVITE", request.getSenderEmail(), request.getSenderId(), request.getSenderIp(), request.getSenderPort(),
-                                           request.getDestEmail(), request.getDestId(), request.getDestIp(), 0);
+                SipRespond Rep(603, request);
                 sNetworkMgr->tcpSendPacket(Rep.getPacket());
                 std::cout << "SEND CALL REFUSED" << std::endl;
             }
