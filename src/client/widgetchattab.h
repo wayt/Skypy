@@ -25,6 +25,7 @@ public:
     void addMessage(QString const& msg, bool notif);
     void handleCallResponse(SipRespond const& resp);
     void handleCallRequest(SipRequest const& req);
+    void handleByeRequest(SipRequest const& req);
 
 private slots:
     void on__callButon_clicked();

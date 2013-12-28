@@ -2,6 +2,9 @@
 #include "widgetcontactslist.h"
 #include "widgetchattab.h"
 #include <iostream>
+#include "clientmgr.h"
+#include "audiomanager.h"
+#include "networkmgr.h"
 
 WidgetChatWindow::WidgetChatWindow(QWidget *parent) :
     QDialog(parent),
@@ -63,6 +66,16 @@ void WidgetChatWindow::logoutContact(quint32 id)
 {
     if (WidgetChatTab* tab = getChatTab(id))
         tab->logoutContact();
+
+    if (sClientMgr->getCallRequestPeerId() == id ||
+            sClientMgr->getActiveCallPeerId() == id)
+    {
+        sClientMgr->setCallRequestPeerId(0);
+        sClientMgr->setActiveCallPeerId(0);
+        sAudioManager->quit();
+        sNetworkMgr->quitCall();
+    }
+
 }
 
 void WidgetChatWindow::handleCallResponse(SipRespond const& resp)
@@ -77,4 +90,26 @@ void WidgetChatWindow::handleCallRequest(ContactInfo const* info, SipRequest con
     if (!tab)
         tab = addChatTab(info, false);
     tab->handleCallRequest(req);
+}
+
+void WidgetChatWindow::handleByeResponse(SipRespond const& resp)
+{
+
+}
+
+void WidgetChatWindow::handleByeRequest(ContactInfo const* info, SipRequest const& req)
+{
+    sClientMgr->setCallRequestPeerId(0);
+    sClientMgr->setActiveCallPeerId(0);
+    sAudioManager->quit();
+    sNetworkMgr->quitCall();
+
+    WidgetChatTab* tab = getChatTab(info->getId());
+    if (!tab)
+        tab = addChatTab(info, false);
+    tab->handleByeRequest(req);
+
+
+    SipRespond Rep(200, req);
+    sNetworkMgr->tcpSendPacket(Rep.getPacket());
 }

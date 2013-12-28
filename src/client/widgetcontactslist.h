@@ -76,6 +76,8 @@ public:
     void addMessageFrom(quint32 id, QString const& msg, bool notif = false);
     void handleCallResponse(SipRespond const& resp) { _chatWindow->handleCallResponse(resp); }
     void handleCallRequest(ContactInfo const* info, SipRequest const& req) { _chatWindow->handleCallRequest(info, req); }
+    void handleByeResponse(SipRespond const& resp) { _chatWindow->handleByeResponse(resp); }
+    void handleByeRequest(ContactInfo const* info, SipRequest const& req) { _chatWindow->handleByeRequest(info, req); }
 
     WidgetAddContactWindow* getContactWindow() { return _addContactWindow; }
     QListWidget* getNotificationWidget() { return _notificationList; }

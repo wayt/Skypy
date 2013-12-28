@@ -176,6 +176,8 @@ void MainWindow::handlesipResponse(SipRespond const& resp)
     {
         _contactForm->handleCallResponse(resp);
     }
+    else if (resp.getCmd() == "BYE")
+        _contactForm->handleByeResponse(resp);
 }
 
 void MainWindow::handleCallRequest(SipRequest const& request)
@@ -190,6 +192,21 @@ void MainWindow::handleCallRequest(SipRequest const& request)
     }
 
     _contactForm->handleCallRequest(sender, request);
+}
+
+void MainWindow::handleByeRequest(const SipRequest &request)
+{
+    ContactInfo* sender = _contactForm->findContact(request.getSenderId());
+    if (!sender || sClientMgr->getActiveCallPeerId() != request.getSenderId())
+    {
+
+        SipRespond Rep(604, request);
+        sNetworkMgr->tcpSendPacket(Rep.getPacket());
+        return;
+    }
+
+    _contactForm->handleByeRequest(sender, request);
+
 }
 
 void MainWindow::handleAccountInfo(Packet& pkt)

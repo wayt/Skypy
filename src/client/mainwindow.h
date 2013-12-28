@@ -35,6 +35,8 @@ public:
 
     void handlesipResponse(SipRespond const& resp);
     void handleCallRequest(SipRequest const& request);
+    void handleByeRequest(SipRequest const& request);
+
 private:
     QStackedWidget* _widgets;
 

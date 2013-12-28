@@ -141,12 +141,6 @@ void NetworkMgr::debugInput()
     }
 }
 
-void NetworkMgr::makeCall(QString const& srcAddr, quint32 srcPort, QString const& destEmail, quint32 destId, QString const& destAddr, quint32 destPort)
-{
-    SipRequest Rqst("INVITE", sClientMgr->getEmail(), sClientMgr->getAccountId(), srcAddr, srcPort, destEmail, destId, destAddr, destPort);
-    tcpSendPacket(Rqst.getPacket());
-}
-
 void  NetworkMgr::handleSipRep(Packet &pkt)
 {
     quint32 code;
@@ -184,10 +178,15 @@ void NetworkMgr::handleSipRequest(Packet &pkt)
     pkt >> cmd;
     pkt >> senderEmail >> senderId >> senderIp >> senderPort;
     pkt >> destEmail >> destId >> destIp >> destPort;
+    SipRequest request(cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+
     if (cmd == "INVITE")
     {
         std::cout << senderEmail.toStdString() << " wanna start a vocal conversation with you" << std::endl;
-        SipRequest request(cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
         _window->handleCallRequest(request);
+    }
+    else if (cmd == "BYE")
+    {
+        _window->handleByeRequest(request);
     }
 }

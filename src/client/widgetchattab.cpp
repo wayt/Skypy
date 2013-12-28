@@ -24,7 +24,10 @@ void WidgetChatTab::on__callButon_clicked()
         return;
     std::cout << "CLICKED CALL BUTTON" << std::endl;
     if (sClientMgr->getActiveCallPeerId() == _peerId || sClientMgr->getCallRequestPeerId() == _peerId)
+    {
         sClientMgr->stopCall(_peerEmail, _peerId, _peerPublicIp, _peerPrivateIp);
+        _callButon->setText("Call");
+    }
     else
         sClientMgr->makeCall(_peerEmail, _peerId, _peerPublicIp, _peerPrivateIp);
 }
@@ -195,4 +198,10 @@ void WidgetChatTab::handleCallRequest(SipRequest const& request)
             sClientMgr->setCallRequestPeerId(0);
             break;
     }
+}
+
+void WidgetChatTab::handleByeRequest(SipRequest const& req)
+{
+    _callButon->setText("Call");
+    addMessage(_peerName + " close call", true);
 }

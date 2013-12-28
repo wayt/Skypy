@@ -25,6 +25,8 @@ public:
 
     void handleCallResponse(SipRespond const& resp);
     void handleCallRequest(ContactInfo const* info, SipRequest const& req);
+    void handleByeResponse(SipRespond const& resp);
+    void handleByeRequest(ContactInfo const* info, SipRequest const& req);
 
 signals:
 
