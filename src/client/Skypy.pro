@@ -42,6 +42,8 @@ unix: {
     LIBS += -lopus
 }
 
+DEFINES += AUDIO_USE_FLOAT
+
 SOURCES += main.cpp\
     networkmgr.cpp \
     mainwindow.cpp \

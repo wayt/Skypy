@@ -221,7 +221,7 @@ int AudioStream::_callback(const void *input, void *output, unsigned long frameC
     if (!(t->_streamType & OUTPUT_STREAM) || !output || t->_outputQueue.size() == 0)
     {
         if (output)
-            memset(output, 0, sizeof(float) * frameCount);
+            memset(output, 0, sizeof(SAMPLE) * frameCount);
         return paContinue;
     }
 
