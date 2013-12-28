@@ -33,6 +33,7 @@ void WidgetChatTab::on__inputText_returnPressed()
     sNetworkMgr->tcpSendPacket(pkt);
     _inputText->setText("");
     _chatTable->addItem("Moi: " + text);
+    _chatTable->scrollToBottom();
 }
 
 void WidgetChatTab::on__sendButton_clicked()

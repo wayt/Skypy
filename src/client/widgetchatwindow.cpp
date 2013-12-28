@@ -43,4 +43,5 @@ void WidgetChatWindow::addMessageFrom(ContactInfo* info, QString const& msg, boo
     if (!notif)
        item = info->getName() + ": " + msg;
     tab->getChatTable()->addItem(item);
+    tab->getChatTable()->scrollToBottom();
 }
