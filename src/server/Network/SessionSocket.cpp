@@ -134,7 +134,8 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
 {
     std::string email;
     std::string password;
-    pkt >> email >> password;
+    std::string privateIp;
+    pkt >> email >> password >> privateIp;
 
     ON_NETWORK_DEBUG(
             std::cout << "Network: HANDLE AUTH: " << email << " - " << password << std::endl;
@@ -144,9 +145,6 @@ void SessionSocket::_handleAuthRequest(Packet& pkt)
 
     if (auth.digest().result() == AUTHRESULT_OK)
     {
-        std::string privateIp = "127.0.0.1";
-        if (pkt.available() > 0)
-            pkt >> privateIp;
         _session = new Session(this, email, privateIp);
         if (!_session->loadFromDb())
         {

@@ -71,7 +71,7 @@ void NetworkMgr::_readInput()
                 if (welcome.compare(buff) == 0)
                 {
                     std::cout << "WELCOME OK" << std::endl;
-                    _window->handleRequireAuth();
+                    _window->handleRequireAuth(_tcpSock.localAddress().toString());
                     _connState = STATE_WAITING_AUTH;
                 }
                 else
@@ -92,7 +92,10 @@ void NetworkMgr::_readInput()
                     _tcpSock.read(data, size);
                 Packet pkt(code, data, size);
                 if (_window->handleAuthResult(pkt))
+                {
+                    sClientMgr->setPrivateIp(_tcpSock.localAddress().toString());
                     _connState = STATE_AUTHED;
+                }
                 break;
             }
             case STATE_AUTHED:

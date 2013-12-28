@@ -43,24 +43,15 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::handleRequireAuth()
+void MainWindow::handleRequireAuth(QString const& localAddr)
 {
     Packet pkt(CMSG_AUTH);
     pkt << _loginForm->getEmailText();
     pkt << _loginForm->getPasswordText();
-    QList<QHostAddress> ips = QNetworkInterface::allAddresses();
-    for (QList<QHostAddress>::Iterator it = ips.begin(); it != ips.end(); ++it)
-    {
-        if (!it->isLoopback() && it->protocol() == QAbstractSocket::IPv4Protocol)
-        {
-            std::cout << "LOCAL IP: " << it->toString().toStdString() << std::endl;
-            pkt << it->toString();
-            sClientMgr->setPrivateIp(it->toString());
-            break;
-        }
-    }
+    pkt << localAddr;
     sNetworkMgr->tcpSendPacket(pkt);
     std::cout << "AUTH SENDED" << std::endl;
+    std::cout << "LOCAL IP: " << localAddr.toStdString() << std::endl;
     pkt.dumpHex();
 }
 

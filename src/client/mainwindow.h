@@ -18,7 +18,7 @@ public:
     MainWindow(QMainWindow *parent = 0);
     virtual ~MainWindow();
 
-    void handleRequireAuth(); // When network layout receive a WELCOME msg
+    void handleRequireAuth(QString const& localAddr); // When network layout receive a WELCOME msg
 
     bool handleAuthResult(Packet& pkt);
     void handleServerConnectionLost(QAbstractSocket::SocketError e, QString const& msg);
