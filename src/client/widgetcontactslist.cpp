@@ -42,6 +42,7 @@ void WidgetContactsList::unload()
 
 void WidgetContactsList::loginContact(ContactInfo* info)
 {
+    _chatWindow->loginContact(info->getId());
     _contactList->addItem(info);
     _contactMap[info->getId()] = info;
 }
@@ -52,12 +53,14 @@ void WidgetContactsList::logoutContact(quint32 id)
     if (!info)
         return;
 
+    _chatWindow->logoutContact(id);
     _contactList->removeItemWidget(info);
     _contactMap.erase(id);
     delete info;
 
     if (sClientMgr->getCallRequestPeerId() == id || sClientMgr->getActiveCallPeerId() == id)
     {
+        std::cout << "PEER " << id << " LOGOUT, STOPPING CALL" << std::endl;
         sClientMgr->setCallRequestPeerId(0);
         sClientMgr->setActiveCallPeerId(0);
         sAudioManager->quit();

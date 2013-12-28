@@ -2,6 +2,9 @@
 #include "widgetcontactslist.h"
 #include "widgetchattab.h"
 #include <iostream>
+#include "clientmgr.h"
+#include "audiomanager.h"
+#include "networkmgr.h"
 
 WidgetChatWindow::WidgetChatWindow(QWidget *parent) :
     QDialog(parent),
@@ -10,18 +13,30 @@ WidgetChatWindow::WidgetChatWindow(QWidget *parent) :
     setupUi(this);
 }
 
-WidgetChatTab* WidgetChatWindow::getChatTab(QString const& tabName)
+WidgetChatTab* WidgetChatWindow::getChatTab(QString const& email)
 {
     int size = _chatTab->count();
     for (int i = 0; i < size; ++i)
-        if (_chatTab->tabText(i) == tabName)
-            return dynamic_cast<WidgetChatTab*>(_chatTab->widget(i));
+        if (WidgetChatTab* tab = dynamic_cast<WidgetChatTab*>(_chatTab->widget(i)))
+            if (tab->getPeerEmail() == email)
+                return tab;
     return NULL;
 }
 
-WidgetChatTab* WidgetChatWindow::addChatTab(ContactInfo* info, bool selectIt)
+WidgetChatTab* WidgetChatWindow::getChatTab(quint32 id)
 {
-    WidgetChatTab* tab = getChatTab(info->getName());
+    int size = _chatTab->count();
+    for (int i = 0; i < size; ++i)
+        if (WidgetChatTab* tab = dynamic_cast<WidgetChatTab*>(_chatTab->widget(i)))
+            if (tab->getPeerId() == id)
+                return tab;
+    return NULL;
+}
+
+
+WidgetChatTab* WidgetChatWindow::addChatTab(ContactInfo const* info, bool selectIt)
+{
+    WidgetChatTab* tab = getChatTab(info->getEmail());
     if (!tab)
     {
         tab = new WidgetChatTab(info, this);
@@ -33,15 +48,68 @@ WidgetChatTab* WidgetChatWindow::addChatTab(ContactInfo* info, bool selectIt)
 }
 
 
-void WidgetChatWindow::addMessageFrom(ContactInfo* info, QString const& msg, bool notif)
+void WidgetChatWindow::addMessageFrom(ContactInfo const* info, QString const& msg, bool notif)
 {
-    WidgetChatTab* tab = getChatTab(info->getName());
+    WidgetChatTab* tab = getChatTab(info->getEmail());
     if (!tab)
         tab = addChatTab(info, false);
-    std::cout << "ADD TAB MSG FROM: " << info->getEmail().toStdString() << " - " << msg.toStdString() << std::endl;
-    QString item = msg;
-    if (!notif)
-       item = info->getName() + ": " + msg;
-    tab->getChatTable()->addItem(item);
-    tab->getChatTable()->scrollToBottom();
+    tab->addMessage(msg, notif);
+}
+
+void WidgetChatWindow::loginContact(quint32 id)
+{
+    if (WidgetChatTab* tab = getChatTab(id))
+        tab->loginContact();
+}
+
+void WidgetChatWindow::logoutContact(quint32 id)
+{
+    if (WidgetChatTab* tab = getChatTab(id))
+        tab->logoutContact();
+
+    if (sClientMgr->getCallRequestPeerId() == id ||
+            sClientMgr->getActiveCallPeerId() == id)
+    {
+        sClientMgr->setCallRequestPeerId(0);
+        sClientMgr->setActiveCallPeerId(0);
+        sAudioManager->quit();
+        sNetworkMgr->quitCall();
+    }
+
+}
+
+void WidgetChatWindow::handleCallResponse(SipRespond const& resp)
+{
+    if (WidgetChatTab* tab = getChatTab(resp.getDestId()))
+        tab->handleCallResponse(resp);
+}
+
+void WidgetChatWindow::handleCallRequest(ContactInfo const* info, SipRequest const& req)
+{
+    WidgetChatTab* tab = getChatTab(info->getId());
+    if (!tab)
+        tab = addChatTab(info, false);
+    tab->handleCallRequest(req);
+}
+
+void WidgetChatWindow::handleByeResponse(SipRespond const& resp)
+{
+
+}
+
+void WidgetChatWindow::handleByeRequest(ContactInfo const* info, SipRequest const& req)
+{
+    sClientMgr->setCallRequestPeerId(0);
+    sClientMgr->setActiveCallPeerId(0);
+    sAudioManager->quit();
+    sNetworkMgr->quitCall();
+
+    WidgetChatTab* tab = getChatTab(info->getId());
+    if (!tab)
+        tab = addChatTab(info, false);
+    tab->handleByeRequest(req);
+
+
+    SipRespond Rep(200, req);
+    sNetworkMgr->tcpSendPacket(Rep.getPacket());
 }

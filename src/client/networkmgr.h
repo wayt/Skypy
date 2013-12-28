@@ -35,7 +35,6 @@ public:
     void closeTcpConnection();
     void setMainWindow(MainWindow* window) { _window = window; }
 
-    void makeCall(QString const& srcAddr, quint32 srcPort, QString const& destEmail, quint32 destId, QString const& destAddr, quint32 destPort);
     bool setCallHostAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { return _audioSock.setHostAddr(addr, port); }
     void setCallPeerAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { _audioSock.setPeerAddr(addr, port); }
     void quitCall() { _audioSock.quit(); }
