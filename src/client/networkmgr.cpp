@@ -212,7 +212,6 @@ void NetworkMgr::handleAudioNoInput()
     _audioSock.getPeerInfo(peerAddr, peerPort);
 
     quint32 selfPort = hostPort + 1;
-    //_audioSock.changeHostAddr(hostAddr, selfPort);
     SipRequest Rqst("INFO", sClientMgr->getEmail(), sClientMgr->getAccountId(), hostAddr.toString(), selfPort, info->getEmail(), info->getId(), peerAddr.toString(), peerPort);
     sNetworkMgr->tcpSendPacket(Rqst.getPacket());
     std::cout << "NEW HOST PORT: " << selfPort << std::endl;
@@ -232,6 +231,6 @@ void NetworkMgr::handleSipInfo(SipRequest const& request)
 
 void NetworkMgr::handleSipInfoResponse(SipRespond const& resp)
 {
-    if (resp.getCode() == 100)
+    if (resp.getCode() == 180)
         sNetworkMgr->setCallHostAddr(QHostAddress(resp.getSenderIp()), resp.getSenderPort());
 }

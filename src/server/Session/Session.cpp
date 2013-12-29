@@ -214,9 +214,7 @@ void Session::handleSipPacket(Packet& pkt)
     else
     {
         sSipManager->forwardSip(peer, pkt);
-
-        if (cmd == "INVITE") /*On separe le fait de sonner du fait d'attendre une reponse*/
-            sSipManager->sendSipResponse(this, 180, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+        sSipManager->sendSipResponse(this, 180, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
     }
 }
 
