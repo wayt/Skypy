@@ -72,8 +72,8 @@ void AudioSocket::run()
 
     while (_run)
     {
-        while ((!sAudioManager->input()->isStarted() || !sAudioManager->output()->isStarted()) && _run ||
-               (_firstSend && !_firstRecv && _run))
+        while ((!sAudioManager->input()->isStarted() || !sAudioManager->output()->isStarted()) && _run &&
+               (_firstSend && !_firstRecv))
             QThread::msleep(100);
 
         if (!_run)
