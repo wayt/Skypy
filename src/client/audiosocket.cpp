@@ -27,7 +27,7 @@ bool AudioSocket::setHostAddr(const QHostAddress &addr, quint16 port)
         _socket->abort();
         _socket->close();
     }
-    if (!_socket->bind(QHostAddress::Any, port, QUdpSocket::ShareAddress))
+    if (!_socket->bind(QHostAddress::Any, port))
     {
         std::cout << "setHostAddr: " << _socket->errorString().toStdString() << " (" << _socket->error() << ")" << std::endl;
         return false;
