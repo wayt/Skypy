@@ -11,37 +11,57 @@
 WidgetChatTab::WidgetChatTab(ContactInfo const* info, QWidget *parent) :
     QWidget(parent),
     Ui::WidgetChatTab(),
-    _peerId(info->getId()), _peerName(info->getName()), _peerEmail(info->getEmail()),
-    _peerPublicIp(info->getPublicIp()), _peerPrivateIp(info->getPrivateIp()),
-    _online(true)
+    _tabId(info->getId()),
+    _peersMap(),
+    _tabType(CHAT_TAB_SINGLE)
+    //_peerId(info->getId()), _peerName(info->getName()), _peerEmail(info->getEmail()),
+    //_peerPublicIp(info->getPublicIp()), _peerPrivateIp(info->getPrivateIp()),
+    //_online(true)
 {
     setupUi(this);
+
+    PeerInfo* peer = new PeerInfo();
+    peer->peerId = info->getId();
+    peer->peerEmail = info->getEmail();
+    peer->peerName = info->getName();
+    peer->peerPublicIp = info->getPublicIp();
+    peer->peerPrivateIp = info->getPrivateIp();
+    peer->online = true;
+    _peersMap[peer->peerId] = peer;
 }
 
 void WidgetChatTab::on__callButon_clicked()
 {
-    if (!_online)
+    if (!_getOnlinePeerCount() > 0)
         return;
-    std::cout << "CLICKED CALL BUTTON" << std::endl;
-    if (sClientMgr->getActiveCallPeerId() == _peerId || sClientMgr->getCallRequestPeerId() == _peerId)
+    if (_tabType == CHAT_TAB_SINGLE)
     {
-        sClientMgr->stopCall(_peerEmail, _peerId, _peerPublicIp, _peerPrivateIp);
-        _callButon->setText("Call");
+        PeerInfo const* peer = _peersMap.first();
+        std::cout << "CLICKED CALL BUTTON" << std::endl;
+        if (sClientMgr->getActiveCallPeerId() == peer->peerId || sClientMgr->getCallRequestPeerId() == peer->peerId)
+        {
+            sClientMgr->stopCall(peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
+            _callButon->setText("Call");
+        }
+        else
+            sClientMgr->makeCall(peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
     }
-    else
-        sClientMgr->makeCall(_peerEmail, _peerId, _peerPublicIp, _peerPrivateIp);
 }
 
 void WidgetChatTab::on__inputText_returnPressed()
 {
     QString text = _inputText->text().trimmed();
-    if (text.size() == 0 || !_online)
+    if (text.size() == 0)
         return;
 
-    Packet pkt(CMSG_CHAT_TEXT);
-    pkt << quint32(_peerId);
-    pkt << text;
-    sNetworkMgr->tcpSendPacket(pkt);
+    if (_tabType == CHAT_TAB_SINGLE)
+    {
+        Packet pkt(CMSG_CHAT_TEXT);
+        pkt << quint32(_peersMap.first()->peerId);
+        pkt << text;
+        sNetworkMgr->tcpSendPacket(pkt);
+    }
+
     _inputText->setText("");
     _chatTable->addItem(sClientMgr->getUserName() + ": " + text);
     _chatTable->scrollToBottom();
@@ -52,30 +72,74 @@ void WidgetChatTab::on__sendButton_clicked()
     on__inputText_returnPressed();
 }
 
-void WidgetChatTab::loginContact()
+quint32 WidgetChatTab::_getOnlinePeerCount() const
 {
-    _online = true;
+    quint32 count = 0;
+    for (QMap<quint32, PeerInfo*>::ConstIterator itr = _peersMap.begin(); itr != _peersMap.end(); ++itr)
+        if (itr.value()->online)
+            ++count;
+    return count;
+}
+
+WidgetChatTab::PeerInfo* WidgetChatTab::_getPeerInfo(quint32 id)
+{
+    QMap<quint32, PeerInfo*>::Iterator itr = _peersMap.find(id);
+    if (itr == _peersMap.end())
+        return NULL;
+    return itr.value();
+}
+
+WidgetChatTab::PeerInfo const* WidgetChatTab::_getPeerInfo(quint32 id) const
+{
+    QMap<quint32, PeerInfo*>::ConstIterator itr = _peersMap.find(id);
+    if (itr == _peersMap.end())
+        return NULL;
+    return itr.value();
+}
+
+void WidgetChatTab::loginContact(quint32 id)
+{
+    PeerInfo* peer = _getPeerInfo(id);
+    if (!peer)
+        return;
+    peer->online = true;
+
     _callButon->setEnabled(true);
     _sendButton->setEnabled(true);
 
-    addMessage(_peerName + " logged in !", true);
+    addMessage(peer->peerName + " logged in !");
 }
 
-void WidgetChatTab::logoutContact()
+void WidgetChatTab::logoutContact(quint32 id)
 {
-    _online = false;
-    _callButon->setEnabled(false);
-    _callButon->setText("Call");
-    _sendButton->setEnabled(false);
+    PeerInfo* peer = _getPeerInfo(id);
+    if (!peer)
+        return;
+    peer->online = false;
+    bool enable = _getOnlinePeerCount() > 0;
+    _callButon->setEnabled(enable);
+    if (enable)
+        _callButon->setText("Call");
+    _sendButton->setEnabled(enable);
 
-    addMessage(_peerName + " logged out ...", true);
+    addMessage(peer->peerName + " logged out ...");
 }
 
-void WidgetChatTab::addMessage(QString const& msg, bool notif)
+void WidgetChatTab::addMessage(quint32 id, QString const& msg, bool notif)
 {
     QString item = msg;
     if (!notif)
-       item = _peerName + ": " + msg;
+    {
+        if (PeerInfo const* peer = _getPeerInfo(id))
+            item = peer->peerName + ": " + msg;
+    }
+    _chatTable->addItem(item);
+    _chatTable->scrollToBottom();
+}
+
+void WidgetChatTab::addMessage(QString const& msg)
+{
+    QString item = msg;
     _chatTable->addItem(item);
     _chatTable->scrollToBottom();
 }
@@ -85,20 +149,20 @@ void WidgetChatTab::handleCallResponse(SipRespond const& resp)
     switch (resp.getCode())
     {
     case 100: // Forward de l'appel
-        addMessage("Send call request ...", true);
+        addMessage("Send call request ...");
         _callButon->setText("Stop");
         break;
     case 404: // Contact non connecte
-        addMessage(resp.getDestEmail() + " isn't online", true);
+        addMessage(resp.getDestEmail() + " isn't online");
         sClientMgr->setCallRequestPeerId(0);
         sNetworkMgr->quitCall();
         _callButon->setText("Call");
         break;
     case 180: // Ca sonne
-        addMessage("Ringing ...", true);
+        addMessage("Ringing ...");
         break;
     case 200: // Ca a decroche
-        addMessage("Call accepted", true);
+        addMessage("Call accepted");
         sClientMgr->setCallRequestPeerId(0);
         if (sAudioManager->start())
         {
@@ -111,25 +175,25 @@ void WidgetChatTab::handleCallResponse(SipRespond const& resp)
             std::cout << "FAIL TO START AUDIO" << std::endl;
         break;
     case 603: // Refuse
-        addMessage("Call refused", true);
+        addMessage("Call refused");
         sClientMgr->setCallRequestPeerId(0);
         sNetworkMgr->quitCall();
         _callButon->setText("Call");
         break;
     case 604: // Occuped
-        addMessage("Occuped", true);
+        addMessage("Occuped");
         sClientMgr->setCallRequestPeerId(0);
         sNetworkMgr->quitCall();
         _callButon->setText("Call");
         break;
     case 605: // Peer fail to open network
-        addMessage("Peer's network issue", true);
+        addMessage("Peer's network issue");
         sClientMgr->setCallRequestPeerId(0);
         sNetworkMgr->quitCall();
         _callButon->setText("Call");
         break;
     case 606: // Peer fail to start audio
-        addMessage("Peer's audio issue", true);
+        addMessage("Peer's audio issue");
         sClientMgr->setCallRequestPeerId(0);
         sNetworkMgr->quitCall();
         _callButon->setText("Call");
@@ -139,7 +203,7 @@ void WidgetChatTab::handleCallResponse(SipRespond const& resp)
 
 void WidgetChatTab::handleCallRequest(SipRequest const& request)
 {
-    addMessage("Incomming call...", true);
+    addMessage("Incomming call...");
     sClientMgr->setCallRequestPeerId(request.getSenderId());
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Incomming call", "Accept call from " + request.getSenderEmail() + " ?",
@@ -204,5 +268,6 @@ void WidgetChatTab::handleCallRequest(SipRequest const& request)
 void WidgetChatTab::handleByeRequest(SipRequest const& req)
 {
     _callButon->setText("Call");
-    addMessage(_peerName + " close call", true);
+    if (PeerInfo const* peer = _getPeerInfo(req.getSenderId()))
+        addMessage(peer->peerName + " close call");
 }

@@ -15,7 +15,6 @@ public:
     explicit WidgetChatWindow(QWidget *parent = 0);
 
     WidgetChatTab* addChatTab(ContactInfo const* info, bool selectIt = true);
-    WidgetChatTab* getChatTab(QString const& email);
     WidgetChatTab* getChatTab(quint32 peerId);
 
     void addMessageFrom(ContactInfo const* info, QString const& msg, bool notif = false);

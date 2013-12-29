@@ -13,22 +13,12 @@ WidgetChatWindow::WidgetChatWindow(QWidget *parent) :
     setupUi(this);
 }
 
-WidgetChatTab* WidgetChatWindow::getChatTab(QString const& email)
-{
-    int size = _chatTab->count();
-    for (int i = 0; i < size; ++i)
-        if (WidgetChatTab* tab = dynamic_cast<WidgetChatTab*>(_chatTab->widget(i)))
-            if (tab->getPeerEmail() == email)
-                return tab;
-    return NULL;
-}
-
 WidgetChatTab* WidgetChatWindow::getChatTab(quint32 id)
 {
     int size = _chatTab->count();
     for (int i = 0; i < size; ++i)
         if (WidgetChatTab* tab = dynamic_cast<WidgetChatTab*>(_chatTab->widget(i)))
-            if (tab->getPeerId() == id)
+            if (tab->getTabId() == id)
                 return tab;
     return NULL;
 }
@@ -36,7 +26,7 @@ WidgetChatTab* WidgetChatWindow::getChatTab(quint32 id)
 
 WidgetChatTab* WidgetChatWindow::addChatTab(ContactInfo const* info, bool selectIt)
 {
-    WidgetChatTab* tab = getChatTab(info->getEmail());
+    WidgetChatTab* tab = getChatTab(info->getId());
     if (!tab)
     {
         tab = new WidgetChatTab(info, this);
@@ -50,22 +40,22 @@ WidgetChatTab* WidgetChatWindow::addChatTab(ContactInfo const* info, bool select
 
 void WidgetChatWindow::addMessageFrom(ContactInfo const* info, QString const& msg, bool notif)
 {
-    WidgetChatTab* tab = getChatTab(info->getEmail());
+    WidgetChatTab* tab = getChatTab(info->getId());
     if (!tab)
         tab = addChatTab(info, false);
-    tab->addMessage(msg, notif);
+    tab->addMessage(info->getId(), msg, notif);
 }
 
 void WidgetChatWindow::loginContact(quint32 id)
 {
     if (WidgetChatTab* tab = getChatTab(id))
-        tab->loginContact();
+        tab->loginContact(id);
 }
 
 void WidgetChatWindow::logoutContact(quint32 id)
 {
     if (WidgetChatTab* tab = getChatTab(id))
-        tab->logoutContact();
+        tab->logoutContact(id);
 
     if (sClientMgr->getCallRequestPeerId() == id ||
             sClientMgr->getActiveCallPeerId() == id)
