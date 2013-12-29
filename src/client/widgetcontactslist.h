@@ -67,7 +67,6 @@ private slots:
     void handleContactDoubleClick(QListWidgetItem* contact);
     void handleNotificationDoubleClick(QListWidgetItem* item);
     void on__addContactButton_clicked();
-    void on__debugButton_clicked();
 };
 
 #endif // WIDGETCONTACTSLIST_H

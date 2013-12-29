@@ -132,8 +132,3 @@ void WidgetContactsList::handleNotificationDoubleClick(QListWidgetItem* item)
     }
 
 }
-
-void WidgetContactsList::on__debugButton_clicked()
-{
-    sNetworkMgr->debugInput();
-}
