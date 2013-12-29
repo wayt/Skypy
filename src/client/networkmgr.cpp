@@ -159,7 +159,10 @@ void  NetworkMgr::handleSipRep(Packet &pkt)
     pkt >> senderEmail >> senderId >> senderIp >> senderPort;
     pkt >> destEmail >> destId >> destIp >> destPort;
     SipRespond resp(code, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
-    _window->handlesipResponse(resp);
+    if (resp.getCmd() != "INFO")
+        _window->handlesipResponse(resp);
+    else
+        handleSipInfoResponse(resp);
 }
 
 void NetworkMgr::handleSipRequest(Packet &pkt)
@@ -209,7 +212,7 @@ void NetworkMgr::handleAudioNoInput()
     _audioSock.getPeerInfo(peerAddr, peerPort);
 
     quint32 selfPort = hostPort + 1;
-    _audioSock.changeHostAddr(hostAddr, selfPort);
+    //_audioSock.changeHostAddr(hostAddr, selfPort);
     SipRequest Rqst("INFO", sClientMgr->getEmail(), sClientMgr->getAccountId(), hostAddr.toString(), selfPort, info->getEmail(), info->getId(), peerAddr.toString(), peerPort);
     sNetworkMgr->tcpSendPacket(Rqst.getPacket());
     std::cout << "NEW HOST PORT: " << selfPort << std::endl;
@@ -222,4 +225,13 @@ void NetworkMgr::handleSipInfo(SipRequest const& request)
 
     std::cout << "NEW PEER PORT: " << request.getSenderPort() << std::endl;
     sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
+
+    SipRespond resp(200, request);
+    tcpSendPacket(resp.getPacket());
+}
+
+void NetworkMgr::handleSipInfoResponse(SipRespond const& resp)
+{
+    if (resp.getCode() == 100)
+        sNetworkMgr->setCallHostAddr(QHostAddress(resp.getSenderIp()), resp.getSenderPort());
 }

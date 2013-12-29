@@ -43,6 +43,7 @@ public:
     void handleSipRequest(Packet &pkt);
     void handleSipRep(Packet &pkt);
     void handleSipInfo(SipRequest const& request);
+    void handleSipInfoResponse(SipRespond const& resp);
 
     void handleAudioNoInput();
 
