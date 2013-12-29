@@ -57,6 +57,7 @@ private:
     quint32 _getOnlinePeerCount() const;
     PeerInfo* _getPeerInfo(quint32 id);
     PeerInfo const* _getPeerInfo(quint32 id) const;
+    PeerInfo const* _getFirstPeer() const;
 
     quint32 _tabId;
     QMap<quint32, PeerInfo*> _peersMap;

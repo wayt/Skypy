@@ -36,7 +36,7 @@ void WidgetChatTab::on__callButon_clicked()
         return;
     if (_tabType == CHAT_TAB_SINGLE)
     {
-        PeerInfo const* peer = _peersMap.first();
+        PeerInfo const* peer = _getFirstPeer();
         std::cout << "CLICKED CALL BUTTON" << std::endl;
         if (sClientMgr->getActiveCallPeerId() == peer->peerId || sClientMgr->getCallRequestPeerId() == peer->peerId)
         {
@@ -57,7 +57,7 @@ void WidgetChatTab::on__inputText_returnPressed()
     if (_tabType == CHAT_TAB_SINGLE)
     {
         Packet pkt(CMSG_CHAT_TEXT);
-        pkt << quint32(_peersMap.first()->peerId);
+        pkt << quint32(_getFirstPeer()->peerId);
         pkt << text;
         sNetworkMgr->tcpSendPacket(pkt);
     }
@@ -95,6 +95,14 @@ WidgetChatTab::PeerInfo const* WidgetChatTab::_getPeerInfo(quint32 id) const
     if (itr == _peersMap.end())
         return NULL;
     return itr.value();
+}
+
+PeerInfo const* WidgetChatTab::_getFirstPeer() const
+{
+    QMap<quint32, PeerInfo*>::ConstIterator itr = _peersMap.begin();
+    if (itr != _peersMap.end())
+        return itr->second;
+    return NULL;
 }
 
 void WidgetChatTab::loginContact(quint32 id)
