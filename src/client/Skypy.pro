@@ -47,7 +47,6 @@ SOURCES += main.cpp\
     networkmgr.cpp \
     mainwindow.cpp \
     opcodemgr.cpp \
-    widgetloginform.cpp \
     widgetcontactslist.cpp \
     widgetchatwindow.cpp \
     widgetchattab.cpp \
@@ -60,14 +59,14 @@ SOURCES += main.cpp\
     packet.cpp \
     widgetaddcontactwindow.cpp \
     clientmgr.cpp \
-    widgetchattabaddwindow.cpp
+    widgetchattabaddwindow.cpp \
+    widgetlogin.cpp
 
 HEADERS  += \
     networkmgr.h \
     mainwindow.h \
     packet.hpp \
     opcodemgr.h \
-    widgetloginform.h \
     widgetcontactslist.h \
     widgetchatwindow.h \
     widgetchattab.h \
@@ -80,11 +79,13 @@ HEADERS  += \
     audiostream.h \
     widgetaddcontactwindow.h \
     clientmgr.h \
-    widgetchattabaddwindow.h
+    widgetchattabaddwindow.h \
+    widgetlogin.h
 
 FORMS += \
     widgetcontactslist.ui \
     widgetchatwindow.ui \
     widgetchattab.ui \
     widgetaddcontactwindow.ui \
-    widgetchattabaddwindow.ui
+    widgetchattabaddwindow.ui \
+    widgetlogin.ui

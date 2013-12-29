@@ -21,7 +21,7 @@
 MainWindow::MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
     _widgets(new QStackedWidget(this)),
-    _loginForm(new WidgetLoginForm(this)),
+    _loginForm(new WidgetLogin(this)),
     _contactForm(new WidgetContactsList(this))
 {
     setCentralWidget(_widgets);

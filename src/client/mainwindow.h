@@ -5,7 +5,7 @@
 #include <QLineEdit>
 #include "packet.hpp"
 #include <QStackedWidget>
-#include "widgetloginform.h"
+#include "widgetlogin.h"
 #include "widgetcontactslist.h"
 #include "networkmgr.h"
 #include "sipPacket.hpp"
@@ -40,7 +40,7 @@ public:
 private:
     QStackedWidget* _widgets;
 
-    WidgetLoginForm* _loginForm;
+    WidgetLogin* _loginForm;
     WidgetContactsList* _contactForm;
 
 };
