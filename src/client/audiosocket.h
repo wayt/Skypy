@@ -33,8 +33,6 @@ private:
     quint16 _hostPort;
     QHostAddress _peerAddr;
     quint16 _peerPort;
-    bool _firstSend;
-    bool _firstRecv;
 
 private slots:
     void _socket_readyRead();

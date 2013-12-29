@@ -7,8 +7,7 @@ AudioSocket::AudioSocket(QObject *parent) :
     _run(false),
     _socket(new QUdpSocket(this)),
     _hostAddr(),
-    _hostPort(AUDIO_PORT),
-    _firstSend(false), _firstRecv(false)
+    _hostPort(AUDIO_PORT)
 {
     QObject::connect(_socket, SIGNAL(readyRead()), this, SLOT(_socket_readyRead()));
 }
@@ -65,24 +64,19 @@ void AudioSocket::run()
         return ;
     }
 
-    _firstRecv = false;
-    _firstSend = false;
-
     _run = true;
 
     while (_run)
     {
-        while ((!sAudioManager->input()->isStarted() || !sAudioManager->output()->isStarted()) && _run &&
-               (_firstSend && !_firstRecv))
+        while ((!sAudioManager->input()->isStarted() || !sAudioManager->output()->isStarted()) && _run)
             QThread::msleep(100);
 
         if (!_run)
             break;
 
         EncodedSample encodedSample = sAudioManager->inputQueue().dequeue();
-        std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
+        //std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
         _socket->writeDatagram(encodedSample.encodedSample(), _peerAddr, _peerPort);
-        _firstSend = true;
     }
     _socket->abort();
     _socket->close();
@@ -100,11 +94,8 @@ void AudioSocket::_socket_readyRead()
         quint16 fromPort;
 
         _socket->readDatagram(data.data(), data.size(), &fromAddr, &fromPort);
-        std::cout << "AUDIO READ FROM: " << fromAddr.toString().toStdString() << ":" << fromPort << std::endl;
+        //std::cout << "AUDIO READ FROM: " << fromAddr.toString().toStdString() << ":" << fromPort << std::endl;
         if (fromAddr == _peerAddr && fromPort == _peerPort)
-        {
-            _firstRecv = true;
             sAudioManager->push(EncodedSample(data));
-        }
     }
 }
