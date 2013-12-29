@@ -6,88 +6,59 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>236</width>
-    <height>529</height>
+    <width>423</width>
+    <height>617</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPushButton" name="_addContactButton">
-   <property name="geometry">
-    <rect>
-     <x>173</x>
-     <y>60</y>
-     <width>51</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Add</string>
-   </property>
-  </widget>
-  <widget class="QTabWidget" name="tabWidget">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>90</y>
-     <width>231</width>
-     <height>441</height>
-    </rect>
-   </property>
-   <property name="accessibleName">
-    <string>Notifications</string>
-   </property>
-   <property name="currentIndex">
-    <number>0</number>
-   </property>
-   <widget class="QWidget" name="tab">
-    <attribute name="title">
-     <string>Contacts</string>
-    </attribute>
-    <widget class="QListWidget" name="_contactList">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>231</width>
-       <height>411</height>
-      </rect>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="1">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="accessibleName">
+      <string>Notifications</string>
      </property>
-     <property name="alternatingRowColors">
-      <bool>true</bool>
+     <property name="autoFillBackground">
+      <bool>false</bool>
      </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>My friends</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPushButton" name="_addContactButton">
+         <property name="text">
+          <string>Add a contact</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListWidget" name="_contactList">
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Notifications</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QListWidget" name="_notificationList"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
-   </widget>
-   <widget class="QWidget" name="tab_2">
-    <attribute name="title">
-     <string>Notifications</string>
-    </attribute>
-    <widget class="QListWidget" name="_notificationList">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>231</width>
-       <height>411</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-  </widget>
-  <widget class="QPushButton" name="_debugButton">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>30</y>
-     <width>114</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Debug</string>
-   </property>
-  </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>
