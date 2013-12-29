@@ -1,7 +1,7 @@
 #include "clientmgr.h"
 #include <QHostInfo>
 #include "networkmgr.h"
-#include <iostream>>
+#include <iostream>
 #include "audiomanager.h"
 #include "sipPacket.hpp"
 

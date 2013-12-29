@@ -22,6 +22,11 @@ void WidgetAddContactWindow::on__contactEmailInput_returnPressed()
     sNetworkMgr->tcpSendPacket(data);
 }
 
+void WidgetAddContactWindow::on__searchButton_clicked()
+{
+    on__contactEmailInput_returnPressed();
+}
+
 void WidgetAddContactWindow::addResult(ContactInfo *info)
 {
     _contactResultList->addItem(info);

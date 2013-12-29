@@ -24,6 +24,8 @@ private slots:
 
     void on__valideButton_clicked();
 
+    void on__searchButton_clicked();
+
 private:
 };
 

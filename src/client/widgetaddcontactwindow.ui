@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>441</width>
-    <height>457</height>
+    <width>396</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,11 +22,22 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="_contactEmailInput">
-     <property name="placeholderText">
-      <string>Enter an email</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLineEdit" name="_contactEmailInput">
+       <property name="placeholderText">
+        <string>Enter an email</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="_searchButton">
+       <property name="text">
+        <string>Search</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QListWidget" name="_contactResultList"/>
