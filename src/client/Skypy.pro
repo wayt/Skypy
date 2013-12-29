@@ -59,7 +59,8 @@ SOURCES += main.cpp\
     audiostream.cpp \
     packet.cpp \
     widgetaddcontactwindow.cpp \
-    clientmgr.cpp
+    clientmgr.cpp \
+    widgetchattabaddwindow.cpp
 
 HEADERS  += \
     networkmgr.h \
@@ -78,10 +79,12 @@ HEADERS  += \
     audiosocket.h \
     audiostream.h \
     widgetaddcontactwindow.h \
-    clientmgr.h
+    clientmgr.h \
+    widgetchattabaddwindow.h
 
 FORMS += \
     widgetcontactslist.ui \
     widgetchatwindow.ui \
     widgetchattab.ui \
-    widgetaddcontactwindow.ui
+    widgetaddcontactwindow.ui \
+    widgetchattabaddwindow.ui

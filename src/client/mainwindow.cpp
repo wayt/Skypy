@@ -182,7 +182,7 @@ void MainWindow::handlesipResponse(SipRespond const& resp)
 
 void MainWindow::handleCallRequest(SipRequest const& request)
 {
-    ContactInfo* sender = _contactForm->findContact(request.getSenderId());
+    ContactInfo* sender = sClientMgr->findContact(request.getSenderId());
     if (!sender || sClientMgr->hasActiveCall() || sClientMgr->hasCallRequest())
     {
 
@@ -196,7 +196,7 @@ void MainWindow::handleCallRequest(SipRequest const& request)
 
 void MainWindow::handleByeRequest(const SipRequest &request)
 {
-    ContactInfo* sender = _contactForm->findContact(request.getSenderId());
+    ContactInfo* sender = sClientMgr->findContact(request.getSenderId());
     if (!sender || sClientMgr->getActiveCallPeerId() != request.getSenderId())
     {
 

@@ -6,7 +6,8 @@
 #include "sipPacket.hpp"
 
 ClientMgr::ClientMgr() : _accountId(0), _username(""), _email(""),
-    _publicIp(""), _privateIp(""), _activeCallPeerId(0), _requestCallPeerId(0)
+    _publicIp(""), _privateIp(""), _activeCallPeerId(0), _requestCallPeerId(0),
+    _contactMap()
 {
 }
 
@@ -60,4 +61,37 @@ void ClientMgr::stopCall(QString const& destEmail, quint32 destId, QString const
     sClientMgr->setActiveCallPeerId(0);
     sAudioManager->quit();
     sNetworkMgr->quitCall();
+}
+
+ContactInfo* ClientMgr::findContact(quint32 id)
+{
+    QMap<quint32, ContactInfo*>::Iterator itr = _contactMap.find(id);
+    if (itr == _contactMap.end())
+        return NULL;
+    return itr.value();
+}
+
+ContactInfo const* ClientMgr::findContact(quint32 id) const
+{
+    QMap<quint32, ContactInfo*>::ConstIterator itr = _contactMap.find(id);
+    if (itr == _contactMap.end())
+        return NULL;
+    return itr.value();
+}
+
+bool ClientMgr::addContact(ContactInfo* info)
+{
+    if (findContact(info->getId()))
+        return false;
+    _contactMap[info->getId()] = info;
+    return true;
+}
+
+void ClientMgr::removeContact(quint32 id)
+{
+    ContactInfo* info = findContact(id);
+    if (!info)
+        return;
+    _contactMap.remove(id);
+    delete info;
 }

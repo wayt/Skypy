@@ -1,6 +1,7 @@
 #include "widgetaddcontactwindow.h"
 #include "opcodemgr.h"
 #include "networkmgr.h"
+#include "clientmgr.h"
 
 WidgetAddContactWindow::WidgetAddContactWindow(QWidget *parent) :
     QDialog(parent),

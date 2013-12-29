@@ -13,7 +13,6 @@
 WidgetContactsList::WidgetContactsList(QWidget *parent) :
     QWidget(parent),
     Ui::WidgetContactsList(),
-    _contactMap(),
     _chatWindow(new WidgetChatWindow(this)),
     _addContactWindow(new WidgetAddContactWindow(this))
 {
@@ -26,7 +25,7 @@ WidgetContactsList::WidgetContactsList(QWidget *parent) :
 
 void WidgetContactsList::initialize()
 {
-    _contactMap.clear();
+    sClientMgr->clearContacts();
     _contactList->clear();
     _notificationList->clear();
     sClientMgr->setAccountInfo(0, "", "");
@@ -42,21 +41,22 @@ void WidgetContactsList::unload()
 
 void WidgetContactsList::loginContact(ContactInfo* info)
 {
-    _chatWindow->loginContact(info->getId());
-    _contactList->addItem(info);
-    _contactMap[info->getId()] = info;
+    if (sClientMgr->addContact(info))
+    {
+        _chatWindow->loginContact(info->getId());
+        _contactList->addItem(info);
+    }
 }
 
 void WidgetContactsList::logoutContact(quint32 id)
 {
-    ContactInfo* info = findContact(id);
+    ContactInfo* info = sClientMgr->findContact(id);
     if (!info)
         return;
 
     _chatWindow->logoutContact(id);
     _contactList->removeItemWidget(info);
-    _contactMap.erase(id);
-    delete info;
+    sClientMgr->removeContact(id);
 
     if (sClientMgr->getCallRequestPeerId() == id || sClientMgr->getActiveCallPeerId() == id)
     {
@@ -80,31 +80,10 @@ void WidgetContactsList::handleContactDoubleClick(QListWidgetItem* item)
     }
 }
 
-ContactInfo* WidgetContactsList::findContact(quint32 id)
-{
-    for (std::map<quint32, ContactInfo*>::const_iterator itr = _contactMap.begin();
-         itr != _contactMap.end(); ++itr)
-        std::cout << "ID: " << itr->first << " - " << itr->second->getEmail().toStdString() << std::endl;
-    std::map<quint32, ContactInfo*>::const_iterator itr = _contactMap.find(id);
-    if (itr == _contactMap.end())
-        return NULL;
-    return itr->second;
-}
-
-ContactInfo const* WidgetContactsList::findContact(quint32 id) const
-{
-    for (std::map<quint32, ContactInfo*>::const_iterator itr = _contactMap.begin();
-         itr != _contactMap.end(); ++itr)
-        std::cout << "ID: " << itr->first << " - " << itr->second->getEmail().toStdString() << std::endl;
-    std::map<quint32, ContactInfo*>::const_iterator itr = _contactMap.find(id);
-    if (itr == _contactMap.end())
-        return NULL;
-    return itr->second;
-}
 
 void WidgetContactsList::addMessageFrom(quint32 id, QString const& msg, bool notif)
 {
-    ContactInfo* info = findContact(id);
+    ContactInfo* info = sClientMgr->findContact(id);
     if (!info)
         return;
 

@@ -204,7 +204,7 @@ void NetworkMgr::handleAudioNoInput()
         return;
 
     quint32 id = sClientMgr->getActiveCallPeerId();
-    ContactInfo const* info = _window->findConctact(id);
+    ContactInfo const* info = sClientMgr->findContact(id);
 
     QHostAddress hostAddr, peerAddr;
     quint16 hostPort, peerPort;

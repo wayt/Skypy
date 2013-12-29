@@ -6,6 +6,7 @@
 #include "sipPacket.hpp"
 #include "audiomanager.h"
 #include "clientmgr.h"
+#include "widgetchattabaddwindow.h"
 #include <QMessageBox>
 
 WidgetChatTab::WidgetChatTab(ContactInfo const* info, QWidget *parent) :
@@ -13,7 +14,8 @@ WidgetChatTab::WidgetChatTab(ContactInfo const* info, QWidget *parent) :
     Ui::WidgetChatTab(),
     _tabId(info->getId()),
     _peersMap(),
-    _tabType(CHAT_TAB_SINGLE)
+    _tabType(CHAT_TAB_SINGLE),
+    _addWindow(new WidgetChatTabAddWindow(this))
     //_peerId(info->getId()), _peerName(info->getName()), _peerEmail(info->getEmail()),
     //_peerPublicIp(info->getPublicIp()), _peerPrivateIp(info->getPrivateIp()),
     //_online(true)
@@ -89,7 +91,7 @@ WidgetChatTab::PeerInfo* WidgetChatTab::_getPeerInfo(quint32 id)
     return itr.value();
 }
 
-WidgetChatTab::PeerInfo const* WidgetChatTab::_getPeerInfo(quint32 id) const
+WidgetChatTab::PeerInfo const* WidgetChatTab::getPeerInfo(quint32 id) const
 {
     QMap<quint32, PeerInfo*>::ConstIterator itr = _peersMap.find(id);
     if (itr == _peersMap.end())
@@ -138,7 +140,7 @@ void WidgetChatTab::addMessage(quint32 id, QString const& msg, bool notif)
     QString item = msg;
     if (!notif)
     {
-        if (PeerInfo const* peer = _getPeerInfo(id))
+        if (PeerInfo const* peer = getPeerInfo(id))
             item = peer->peerName + ": " + msg;
     }
     _chatTable->addItem(item);
@@ -280,6 +282,13 @@ void WidgetChatTab::handleCallRequest(SipRequest const& request)
 void WidgetChatTab::handleByeRequest(SipRequest const& req)
 {
     _callButon->setText("Call");
-    if (PeerInfo const* peer = _getPeerInfo(req.getSenderId()))
+    if (PeerInfo const* peer = getPeerInfo(req.getSenderId()))
         addMessage(peer->peerName + " close call");
+}
+
+void WidgetChatTab::on__addButton_clicked()
+{
+    _addWindow->setTabId(_tabId);
+    _addWindow->show();
+    _addWindow->onShow();
 }

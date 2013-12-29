@@ -24,6 +24,7 @@ enum Opcodes
     CMSG_ADD_CONTACT_RESPONSE   = 14,
     SMSG_ACCOUNT_INFO           = 15,
     CMSG_GET_ACCOUNT_INFO       = 16,
+    CMSG_CHAT_GROUP_GET_AVAILABLE = 17,
     MSG_MAX
 };
 

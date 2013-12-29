@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "AuthWorker.h"
 #include "ContactMgr.h"
+#include "ChatGroupMgr.h"
 
 Session::Session(SessionSocket* sock, std::string const& email, std::string const& privateIp) : _id(0), _socket(sock), _packetQueue(),
     _logout(false), _name(email), _email(email), _privateIp(privateIp)
@@ -383,4 +384,22 @@ void Session::handleGetAccountInfo(Packet& pkt)
     info << getEmail();
     info << getRemoteAddess();
     send(info);
+}
+
+void Session::handleChatGroupGetAvailable(Packet& pkt)
+{
+    uint32 chatId;
+    pkt >> chatId;
+
+    if (ChatGroup* chat = sChatGroupMgr->findChatGroup(chatId))
+    {
+
+    }
+    else // New chat
+    {
+
+    }
+
+
+
 }

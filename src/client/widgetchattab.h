@@ -6,6 +6,7 @@
 #include "sipPacket.hpp"
 
 class ContactInfo;
+class WidgetChatTabAddWindow;
 
 enum ChatTabTypes
 {
@@ -36,14 +37,6 @@ public:
     void handleCallRequest(SipRequest const& req);
     void handleByeRequest(SipRequest const& req);
 
-private slots:
-    void on__callButon_clicked();
-
-    void on__inputText_returnPressed();
-
-    void on__sendButton_clicked();
-
-private:
     struct PeerInfo
     {
         quint32 peerId;
@@ -54,14 +47,26 @@ private:
         bool online;
     };
 
+    PeerInfo const* getPeerInfo(quint32 id) const;
+
+private slots:
+    void on__callButon_clicked();
+
+    void on__inputText_returnPressed();
+
+    void on__sendButton_clicked();
+
+    void on__addButton_clicked();
+
+private:
     quint32 _getOnlinePeerCount() const;
     PeerInfo* _getPeerInfo(quint32 id);
-    PeerInfo const* _getPeerInfo(quint32 id) const;
     PeerInfo const* _getFirstPeer() const;
 
     quint32 _tabId;
     QMap<quint32, PeerInfo*> _peersMap;
     ChatTabTypes _tabType;
+    WidgetChatTabAddWindow* _addWindow;
 
     /*
     quint32 _peerId;
