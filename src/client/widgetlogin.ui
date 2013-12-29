@@ -6,55 +6,133 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>511</width>
+    <height>371</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QLineEdit" name="_emailInput">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>40</y>
-     <width>113</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>test@gmail.com</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="_passwordInput">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>180</y>
-     <width>113</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>titi</string>
-   </property>
-   <property name="echoMode">
-    <enum>QLineEdit::Password</enum>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="_connectButton">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>100</y>
-     <width>114</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Counection</string>
-   </property>
-  </widget>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Minimum</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_3">
+     <property name="font">
+      <font>
+       <pointsize>76</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Skypy</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Minimum</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="_emailInput">
+       <property name="text">
+        <string>test@gmail.com</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="_passwordInput">
+       <property name="text">
+        <string>titi</string>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Your Email</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Your Password</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QPushButton" name="_connectButton">
+       <property name="text">
+        <string>Connect</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Minimum</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_4">
+     <property name="midLineWidth">
+      <number>0</number>
+     </property>
+     <property name="text">
+      <string>Created by : Maxime Ginters, Vincent Leroy, Fabien Casters, Dorian Stroher</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>
