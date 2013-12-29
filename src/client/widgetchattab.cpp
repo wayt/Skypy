@@ -97,11 +97,11 @@ WidgetChatTab::PeerInfo const* WidgetChatTab::_getPeerInfo(quint32 id) const
     return itr.value();
 }
 
-PeerInfo const* WidgetChatTab::_getFirstPeer() const
+WidgetChatTab::PeerInfo const* WidgetChatTab::_getFirstPeer() const
 {
     QMap<quint32, PeerInfo*>::ConstIterator itr = _peersMap.begin();
     if (itr != _peersMap.end())
-        return itr->second;
+        return itr.value();
     return NULL;
 }
 
