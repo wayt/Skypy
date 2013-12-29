@@ -102,6 +102,24 @@ public:
 
     }
 
+    SipRespond(quint32 code, SipRequest const& req, quint16 peerPort) :
+        _pkt(rMSG_SIP), _code(code), _cmd(req.getCmd()),
+        _senderEmail(req.getSenderEmail()), _senderId(req.getSenderId()), _senderIp(req.getSenderIp()), _senderPort(req.getSenderPort()),
+        _destEmail(req.getDestEmail()), _destId(req.getDestId()), _destIp(req.getDestIp()), _destPort(peerPort)
+    {
+        _pkt << _code;
+        _pkt << _cmd;
+        _pkt << _senderEmail;
+        _pkt << quint32(_senderId);
+        _pkt << _senderIp;
+        _pkt << quint32(_senderPort);
+        _pkt << _destEmail;
+        _pkt << _destId;
+        _pkt << _destIp;
+        _pkt << _destPort;
+
+    }
+
     Packet const& getPacket() const {
         return _pkt;
     }

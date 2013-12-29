@@ -23,6 +23,8 @@ public:
     bool handleAuthResult(Packet& pkt);
     void handleServerConnectionLost(QAbstractSocket::SocketError e, QString const& msg);
 
+    ContactInfo const* findConctact(quint32 id) const { return _contactForm->findContact(id); }
+
     // Network handlers
     void handleSipRep(Packet &);
     void handleSipRequest(Packet &);

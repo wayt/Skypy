@@ -70,6 +70,7 @@ public:
     void logoutContact(quint32 id);
 
     ContactInfo* findContact(quint32 id);
+    ContactInfo const* findContact(quint32 id) const;
 
     QListWidget* getContactListWidget() { return _contactList; }
 

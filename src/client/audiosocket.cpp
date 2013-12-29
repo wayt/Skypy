@@ -1,6 +1,8 @@
 #include "audiomanager.h"
 #include "audiosocket.h"
 #include <iostream>
+#include <QDateTime>
+#include "networkmgr.h"
 
 AudioSocket::AudioSocket(QObject *parent) :
     QThread(parent),
@@ -32,6 +34,7 @@ bool AudioSocket::setHostAddr(const QHostAddress &addr, quint16 port)
         std::cout << "setHostAddr: " << _socket->errorString().toStdString() << " (" << _socket->error() << ")" << std::endl;
         return false;
     }
+    _inputReaded = false;
     return true;
 }
 
@@ -66,6 +69,9 @@ void AudioSocket::run()
 
     _run = true;
 
+    QTime inputTimer;
+    inputTimer.start();
+
     while (_run)
     {
         while ((!sAudioManager->input()->isStarted() || !sAudioManager->output()->isStarted()) && _run)
@@ -73,6 +79,17 @@ void AudioSocket::run()
 
         if (!_run)
             break;
+
+        if (!_inputReaded)
+        {
+            int mstime = inputTimer.elapsed();
+            if (mstime > 2000)
+            {
+                sNetworkMgr->handleAudioNoInput();
+                inputTimer.restart();
+            }
+
+        }
 
         EncodedSample encodedSample = sAudioManager->inputQueue().dequeue();
         //std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
@@ -96,6 +113,9 @@ void AudioSocket::_socket_readyRead()
         _socket->readDatagram(data.data(), data.size(), &fromAddr, &fromPort);
         //std::cout << "AUDIO READ FROM: " << fromAddr.toString().toStdString() << ":" << fromPort << std::endl;
         if (fromAddr == _peerAddr && fromPort == _peerPort)
+        {
+            _inputReaded = true;
             sAudioManager->push(EncodedSample(data));
+        }
     }
 }

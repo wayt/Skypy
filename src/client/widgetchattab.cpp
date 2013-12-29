@@ -216,32 +216,36 @@ void WidgetChatTab::handleCallRequest(SipRequest const& request)
             QHostAddress host(request.getDestIp());
             if (reply == QMessageBox::Yes)
             {
-                if (sNetworkMgr->setCallHostAddr(host, request.getDestPort()))
+                for (quint16 selfPort = request.getSenderPort() + 1; selfPort < request.getSenderPort() + 200; ++selfPort)
                 {
-                    if (sAudioManager->start())
+                    if (sNetworkMgr->setCallHostAddr(host, selfPort))
                     {
-                        std::cout << "SET PEER ADDR: " << request.getSenderIp().toStdString() << std::endl;
-                        sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
-                        sNetworkMgr->runCall();
+                        if (sAudioManager->start())
+                        {
+                            std::cout << "SET PEER ADDR: " << request.getSenderIp().toStdString() << std::endl;
+                            sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
+                            sNetworkMgr->runCall();
 
-                        std::cout << "CALL ACCEPTED, LISTEN ON " << request.getDestIp().toStdString() << ":" << request.getDestPort() << std::endl;
-                        SipRespond Rep(200, request);
-                        sNetworkMgr->tcpSendPacket(Rep.getPacket());
-                        sClientMgr->setCallRequestPeerId(0);
-                        sClientMgr->setActiveCallPeerId(request.getSenderId());
-                        _callButon->setText("Stop");
-                        return;
-                    }
-                    else // Should send error
-                    {
-                        std::cout << "FAIL TO START AUDIO" << std::endl;
+                            std::cout << "CALL ACCEPTED, LISTEN ON " << request.getDestIp().toStdString() << ":" << request.getDestPort() << std::endl;
+                            SipRespond Rep(200, request, selfPort);
+                            sNetworkMgr->tcpSendPacket(Rep.getPacket());
+                            sClientMgr->setCallRequestPeerId(0);
+                            sClientMgr->setActiveCallPeerId(request.getSenderId());
+                            _callButon->setText("Stop");
+                            return;
+                        }
+                        else // Should send error
+                        {
+                            std::cout << "FAIL TO START AUDIO" << std::endl;
 
-                        SipRespond Rep(606, request);
-                        sNetworkMgr->tcpSendPacket(Rep.getPacket());
-                        sClientMgr->setCallRequestPeerId(0);
+                            SipRespond Rep(606, request);
+                            sNetworkMgr->tcpSendPacket(Rep.getPacket());
+                            sClientMgr->setCallRequestPeerId(0);
+                        }
                     }
                 }
-                else
+
+                // Call not succeded
                 {
                     std::cout << "FAIL TO OPEN NETWORK: " << request.getDestIp().toStdString() << ":" << request.getDestPort() << std::endl;
 

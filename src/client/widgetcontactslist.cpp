@@ -80,7 +80,6 @@ void WidgetContactsList::handleContactDoubleClick(QListWidgetItem* item)
     }
 }
 
-
 ContactInfo* WidgetContactsList::findContact(quint32 id)
 {
     for (std::map<quint32, ContactInfo*>::const_iterator itr = _contactMap.begin();
@@ -92,6 +91,16 @@ ContactInfo* WidgetContactsList::findContact(quint32 id)
     return itr->second;
 }
 
+ContactInfo const* WidgetContactsList::findContact(quint32 id) const
+{
+    for (std::map<quint32, ContactInfo*>::const_iterator itr = _contactMap.begin();
+         itr != _contactMap.end(); ++itr)
+        std::cout << "ID: " << itr->first << " - " << itr->second->getEmail().toStdString() << std::endl;
+    std::map<quint32, ContactInfo*>::const_iterator itr = _contactMap.find(id);
+    if (itr == _contactMap.end())
+        return NULL;
+    return itr->second;
+}
 
 void WidgetContactsList::addMessageFrom(quint32 id, QString const& msg, bool notif)
 {

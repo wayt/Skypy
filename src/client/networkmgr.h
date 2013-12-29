@@ -42,6 +42,9 @@ public:
     void runCall() { _audioSock.start(); }
     void handleSipRequest(Packet &pkt);
     void handleSipRep(Packet &pkt);
+    void handleSipInfo(SipRequest const& request);
+
+    void handleAudioNoInput();
 
     void debugInput();
 private slots:
