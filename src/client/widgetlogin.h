@@ -14,12 +14,14 @@ public:
     void initialize();
     void unload();
 
-    QString const& getEmailText() const { return _emailInput->text(); }
-    QString const& getPasswordText() const { return _passwordInput->text(); }
+    QString const& getEmailText() const { return _email; }
+    QString const& getPasswordText() const { return _password; }
 private slots:
     void on__connectButton_clicked();
 
 private:
+    QString _email;
+    QString _password;
 };
 
 #endif // WIDGETLOGIN_H
