@@ -65,6 +65,9 @@ bool AudioManager::start()
         }
     }
 
+    _inputQueue.clear();
+    _outputQueue.clear();
+
     _run = true;
     QThread::start();
     return true;
