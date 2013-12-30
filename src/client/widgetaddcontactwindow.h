@@ -12,6 +12,8 @@ class WidgetAddContactWindow : public QDialog, private Ui::WidgetAddContactWindo
 public:
     explicit WidgetAddContactWindow(QWidget *parent = 0);
 
+    void onShow();
+
     QListWidget* getResultListWidget() { return _contactResultList; }
     void addResult(ContactInfo* info);
 

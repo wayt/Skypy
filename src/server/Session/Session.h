@@ -23,7 +23,7 @@ public:
     bool saveToDb() const;
 
     void update(uint32 diff);
-    void send(Packet const& pkt);
+    void send(Packet const& pkt) const;
 
     void handlePacketInput(Packet& pkt);
     void handleSipPacket(Packet& pkt);
@@ -33,7 +33,8 @@ public:
     void handleAddContactRequest(Packet& pkt);
     void handleAddContactResponse(Packet& pkt);
     void handleGetAccountInfo(Packet& pkt);
-    void handleChatGroupGetAvailable(Packet& pkt);
+    void handleChatGroupAddMembers(Packet& pkt);
+    void handleGroupChatText(Packet& pkt);
 
     bool hasFriend(Session const* sess) const { return hasFriend(sess->getId()); }
     bool hasFriend(uint32 id) const;
@@ -41,7 +42,7 @@ public:
     void addFriend(ContactInfo* info);
     void broadcastToFriend(Packet const& pkt) const;
     void buildOnlineFriendPacket(Packet& pkt) const;
-    void buildLoginPacket(Packet& pkt, Session const* to = NULL) const;
+    void buildLoginPacket(Packet& pkt) const;
 
     void sendContactRequest();
 

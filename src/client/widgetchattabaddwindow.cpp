@@ -35,3 +35,26 @@ void WidgetChatTabAddWindow::on__cancelButton_clicked()
 {
    close();
 }
+
+void WidgetChatTabAddWindow::on__contactList_itemSelectionChanged()
+{
+    QList<QListWidgetItem*> items = _contactList->selectedItems();
+    _okButton->setEnabled(items.size() > 0);
+}
+
+void WidgetChatTabAddWindow::on__okButton_clicked()
+{
+    QList<QListWidgetItem*> items = _contactList->selectedItems();
+    if (items.size() == 0)
+        return;
+
+    Packet data(CMSG_CHAT_GROUP_ADD_MEMBERS);
+    data << quint32(_chatTab->getTabId()); // Currente tab id
+    data << quint32(items.size()); // Add member count
+    for (QList<QListWidgetItem*>::ConstIterator itr = items.begin();
+         itr != items.end(); ++itr)
+        data << quint32(dynamic_cast<ContactInfo*>(*itr)->getId());
+    sNetworkMgr->tcpSendPacket(data);
+
+    close();
+}

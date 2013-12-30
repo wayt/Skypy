@@ -10,6 +10,12 @@ WidgetAddContactWindow::WidgetAddContactWindow(QWidget *parent) :
     setupUi(this);
 }
 
+void WidgetAddContactWindow::onShow()
+{
+    _contactEmailInput->setText("");
+    _contactResultList->clear();
+}
+
 void WidgetAddContactWindow::on__cancelButton_clicked()
 {
     close();

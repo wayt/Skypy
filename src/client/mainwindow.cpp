@@ -219,3 +219,53 @@ void MainWindow::handleAccountInfo(Packet& pkt)
     sClientMgr->setAccountInfo(id, name, email);
     sClientMgr->setPublicIp(publicIp);
 }
+
+void MainWindow::handleJoinChatGroup(Packet& pkt)
+{
+    quint32 chatId;
+    quint32 memberCount;
+
+    pkt >> chatId;
+    pkt >> memberCount;
+
+    _contactForm->createChatGroup(chatId);
+    for (quint32 i = 0; i < memberCount; ++i)
+    {
+        quint32 id;
+        QString name, email, ipPublic, ipPrivate;
+        pkt >> id >> name >> email >> ipPublic >> ipPrivate;
+        WidgetChatTab::PeerInfo* peer = new WidgetChatTab::PeerInfo();
+        peer->peerId = id;
+        peer->peerName = name;
+        peer->peerEmail = email;
+        peer->peerPublicIp = ipPublic;
+        peer->peerPrivateIp = ipPrivate;
+        peer->online = true;
+        _contactForm->chatGroupMemberJoin(chatId, peer);
+    }
+}
+
+void MainWindow::handleChatGroupAddMember(Packet& pkt)
+{
+    quint32 chatId, id;
+    QString name, email, ipPublic, ipPrivate;
+    pkt >> chatId >> id >> name >> email >> ipPublic >> ipPrivate;
+
+    WidgetChatTab::PeerInfo* peer = new WidgetChatTab::PeerInfo();
+    peer->peerId = id;
+    peer->peerName = name;
+    peer->peerEmail = email;
+    peer->peerPublicIp = ipPublic;
+    peer->peerPrivateIp = ipPrivate;
+    peer->online = true;
+    _contactForm->chatGroupMemberJoin(chatId, peer);
+}
+
+void MainWindow::handleGroupChatText(Packet& pkt)
+{
+    quint32 chatId, fromId;
+    QString msg;
+
+    pkt >> chatId >> fromId >> msg;
+    _contactForm->addChatGroupMessageFrom(chatId, fromId, msg);
+}

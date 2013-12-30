@@ -13,12 +13,12 @@ WidgetChatWindow::WidgetChatWindow(QWidget *parent) :
     setupUi(this);
 }
 
-WidgetChatTab* WidgetChatWindow::getChatTab(quint32 id)
+WidgetChatTab* WidgetChatWindow::getChatTab(quint32 id, ChatTabTypes type)
 {
     int size = _chatTab->count();
     for (int i = 0; i < size; ++i)
         if (WidgetChatTab* tab = dynamic_cast<WidgetChatTab*>(_chatTab->widget(i)))
-            if (tab->getTabId() == id)
+            if (tab->getTabId() == id && tab->getTabType() == type)
                 return tab;
     return NULL;
 }
@@ -37,6 +37,19 @@ WidgetChatTab* WidgetChatWindow::addChatTab(ContactInfo const* info, bool select
     return tab;
 }
 
+WidgetChatTab* WidgetChatWindow::addChatTab(quint32 id, bool selectIt)
+{
+    WidgetChatTab* tab = getChatTab(id, CHAT_TAB_MULTI);
+    if (!tab)
+    {
+        tab = new WidgetChatTab(id, this);
+        _chatTab->addTab(tab, "");
+    }
+    if (selectIt)
+        _chatTab->setCurrentWidget(tab);
+    return tab;
+}
+
 
 void WidgetChatWindow::addMessageFrom(ContactInfo const* info, QString const& msg, bool notif)
 {
@@ -48,14 +61,18 @@ void WidgetChatWindow::addMessageFrom(ContactInfo const* info, QString const& ms
 
 void WidgetChatWindow::loginContact(quint32 id)
 {
-    if (WidgetChatTab* tab = getChatTab(id))
-        tab->loginContact(id);
+    int size = _chatTab->count();
+    for (int i = 0; i < size; ++i)
+        if (WidgetChatTab* tab = dynamic_cast<WidgetChatTab*>(_chatTab->widget(i)))
+            tab->loginContact(id);
 }
 
 void WidgetChatWindow::logoutContact(quint32 id)
 {
-    if (WidgetChatTab* tab = getChatTab(id))
-        tab->logoutContact(id);
+    int size = _chatTab->count();
+    for (int i = 0; i < size; ++i)
+        if (WidgetChatTab* tab = dynamic_cast<WidgetChatTab*>(_chatTab->widget(i)))
+            tab->logoutContact(id);
 
     if (sClientMgr->getCallRequestPeerId() == id ||
             sClientMgr->getActiveCallPeerId() == id)
@@ -102,4 +119,32 @@ void WidgetChatWindow::handleByeRequest(ContactInfo const* info, SipRequest cons
 
     SipRespond Rep(200, req);
     sNetworkMgr->tcpSendPacket(Rep.getPacket());
+}
+
+void WidgetChatWindow::createChatGroup(quint32 id)
+{
+    std::cout << "CREATING CHAT GROUP: " << id << std::endl;
+    addChatTab(id, false);
+    std::cout << "DONE" << std::endl;
+}
+
+void WidgetChatWindow::chatGroupMemberJoin(quint32 id, WidgetChatTab::PeerInfo* peer)
+{
+    std::cout << "CHAT GROUP MEMBER JOIN" << std::endl;
+    if (WidgetChatTab* tab = getChatTab(id, CHAT_TAB_MULTI))
+    {
+        tab->memberJoin(peer);
+        int index = _chatTab->indexOf(tab);
+        if (index >= 0)
+            _chatTab->setTabText(index, tab->getTabName());
+    }
+}
+
+void WidgetChatWindow::addChatGroupMessageFrom(quint32 chatId, quint32 fromId, QString const& msg)
+{
+    WidgetChatTab* tab = getChatTab(chatId, CHAT_TAB_MULTI);
+    if (!tab)
+        return;
+    tab->addMessage(fromId, msg, false);
+
 }
