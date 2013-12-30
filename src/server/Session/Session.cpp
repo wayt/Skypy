@@ -267,7 +267,7 @@ void Session::handleSearchNewContact(Packet& pkt)
     if (word.length() < 2)
         return;
 
-    DbResultPtr result = sSkypyDb->query("SELECT id, name, email, online FROM account WHERE email LIKE '%%%s%%@%%' OR name like '%%%s%%' AND email != '%s' LIMIT 25", word.c_str(), word.c_str(), _email.c_str());
+    DbResultPtr result = sSkypyDb->query("SELECT id, name, email, online FROM account WHERE (email LIKE '%%%s%%@%%' OR name like '%%%s%%') AND email != '%s' LIMIT 25", word.c_str(), word.c_str(), _email.c_str());
 
     Packet data(SMSG_SEARCH_CONTACT_RESULT);
     uint32 count = 0;
@@ -279,7 +279,7 @@ void Session::handleSearchNewContact(Packet& pkt)
         std::string email = (*result)["email"]->getValue();
         bool online = (*result)["online"]->getValue<bool>();
 
-        if (hasFriend(id))
+        if (hasFriend(id) || sContactMgr->hasContactRequest(getId(), id))
         {
             std::cout << _email << " has friend " << email << std::endl;
             continue;

@@ -35,3 +35,9 @@ void WidgetChatTabAddWindow::on__cancelButton_clicked()
 {
    close();
 }
+
+void WidgetChatTabAddWindow::on__contactList_itemSelectionChanged()
+{
+    QList<QListWidgetItem*> items = _contactList->selectedItems();
+    _okButton->setEnabled(items.size() > 0);
+}

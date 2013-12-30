@@ -18,6 +18,8 @@ public:
 private slots:
     void on__cancelButton_clicked();
 
+    void on__contactList_itemSelectionChanged();
+
 private:
     quint32 _tabId;
     WidgetChatTab* _chatTab;

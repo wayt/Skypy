@@ -25,8 +25,8 @@ WidgetContactsList::WidgetContactsList(QWidget *parent) :
 
 void WidgetContactsList::initialize()
 {
-    sClientMgr->clearContacts();
     _contactList->clear();
+    sClientMgr->clearContacts();
     _notificationList->clear();
     sClientMgr->setAccountInfo(0, "", "");
 
@@ -43,6 +43,7 @@ void WidgetContactsList::loginContact(ContactInfo* info)
 {
     if (sClientMgr->addContact(info))
     {
+        std::cout << "ADD CONTACT: " << info->text().toStdString() << std::endl;
         _chatWindow->loginContact(info->getId());
         _contactList->addItem(info);
     }
@@ -94,6 +95,7 @@ void WidgetContactsList::addMessageFrom(quint32 id, QString const& msg, bool not
 void WidgetContactsList::on__addContactButton_clicked()
 {
     _addContactWindow->show();
+    _addContactWindow->onShow();
 }
 
 void WidgetContactsList::handleNotificationDoubleClick(QListWidgetItem* item)
