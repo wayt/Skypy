@@ -174,7 +174,7 @@ void Skypy::_handleSessionLogin(Session* sess)
             {
                 Packet data(SMSG_CONTACT_LOGIN);
                 data << uint32(1);
-                sess->buildLoginPacket(data, peer);
+                sess->buildLoginPacket(data);
                 peer->send(data);
             }
     }

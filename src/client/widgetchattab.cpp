@@ -16,9 +16,6 @@ WidgetChatTab::WidgetChatTab(ContactInfo const* info, QWidget *parent) :
     _peersMap(),
     _tabType(CHAT_TAB_SINGLE),
     _addWindow(new WidgetChatTabAddWindow(this))
-    //_peerId(info->getId()), _peerName(info->getName()), _peerEmail(info->getEmail()),
-    //_peerPublicIp(info->getPublicIp()), _peerPrivateIp(info->getPrivateIp()),
-    //_online(true)
 {
     setupUi(this);
 
@@ -31,6 +28,18 @@ WidgetChatTab::WidgetChatTab(ContactInfo const* info, QWidget *parent) :
     peer->online = true;
     _peersMap[peer->peerId] = peer;
 }
+
+WidgetChatTab::WidgetChatTab(quint32 id, QWidget *parent) :
+    QWidget(parent),
+    Ui::WidgetChatTab(),
+    _tabId(id),
+    _peersMap(),
+    _tabType(CHAT_TAB_MULTI),
+    _addWindow(new WidgetChatTabAddWindow(this))
+{
+    setupUi(this);
+}
+
 
 void WidgetChatTab::on__callButon_clicked()
 {
@@ -62,10 +71,17 @@ void WidgetChatTab::on__inputText_returnPressed()
         pkt << quint32(_getFirstPeer()->peerId);
         pkt << text;
         sNetworkMgr->tcpSendPacket(pkt);
+        _chatTable->addItem(sClientMgr->getUserName() + ": " + text);
+    }
+    else if (_tabType == CHAT_TAB_MULTI)
+    {
+        Packet data(CMSG_GROUP_CHAT_TEXT);
+        data << quint32(getTabId());
+        data << text;
+        sNetworkMgr->tcpSendPacket(data);
     }
 
     _inputText->setText("");
-    _chatTable->addItem(sClientMgr->getUserName() + ": " + text);
     _chatTable->scrollToBottom();
 }
 
@@ -142,6 +158,8 @@ void WidgetChatTab::addMessage(quint32 id, QString const& msg, bool notif)
     {
         if (PeerInfo const* peer = getPeerInfo(id))
             item = peer->peerName + ": " + msg;
+        else if (id == sClientMgr->getAccountId())
+            item = sClientMgr->getUserName() + ": " + msg;
     }
     _chatTable->addItem(item);
     _chatTable->scrollToBottom();
@@ -291,4 +309,24 @@ void WidgetChatTab::on__addButton_clicked()
     _addWindow->setTabId(_tabId);
     _addWindow->show();
     _addWindow->onShow();
+}
+
+void WidgetChatTab::memberJoin(PeerInfo* peer)
+{
+    std::cout << "PEER: " << peer->peerEmail.toStdString() << " JOIN GROUP CHAT: " << getTabId() << std::endl;
+    _peersMap[peer->peerId] = peer;
+    addMessage(peer->peerName + " join group");
+}
+
+QString WidgetChatTab::getTabName() const
+{
+    QString title = "";
+    for (QMap<quint32, PeerInfo*>::ConstIterator itr = _peersMap.begin();
+         itr != _peersMap.end(); ++itr)
+    {
+        if (title.size() > 0)
+            title += ", ";
+        title += itr.value()->peerName;
+    }
+    return title;
 }

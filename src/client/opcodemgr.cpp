@@ -20,6 +20,9 @@ OpcodeMgr::OpcodeDefinition const* OpcodeMgr::getOpcodeDefinition(quint16 opcode
         { rMSG_SIP, &MainWindow::handleSipRep},
         { RMSG_SIP, &MainWindow::handleSipRequest},
         { SMSG_ACCOUNT_INFO, &MainWindow::handleAccountInfo },
+        { SMSG_JOIN_CHAT_GROUP, &MainWindow::handleJoinChatGroup },
+        { SMSG_CHAT_GROUP_ADD_MEMBER, &MainWindow::handleChatGroupAddMember },
+        { SMSG_GROUP_CHAT_TEXT, &MainWindow::handleGroupChatText },
         { MSG_MAX, NULL}
     };
 

@@ -56,6 +56,10 @@ public:
     WidgetAddContactWindow* getContactWindow() { return _addContactWindow; }
     QListWidget* getNotificationWidget() { return _notificationList; }
 
+    void createChatGroup(quint32 id) { _chatWindow->createChatGroup(id); }
+    void chatGroupMemberJoin(quint32 id, WidgetChatTab::PeerInfo* peer) { _chatWindow->chatGroupMemberJoin(id, peer); }
+    void addChatGroupMessageFrom(quint32 chatId, quint32 fromId, QString const& msg) { _chatWindow->addChatGroupMessageFrom(chatId, fromId, msg); }
+
 private:
     WidgetChatWindow* _chatWindow;
     WidgetAddContactWindow* _addContactWindow;

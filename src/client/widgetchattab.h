@@ -20,6 +20,7 @@ class WidgetChatTab : public QWidget, private Ui::WidgetChatTab
 
 public:
     explicit WidgetChatTab(ContactInfo const* info, QWidget *parent = 0);
+    WidgetChatTab(quint32 id, QWidget* parent = 0);
 
     QListWidget* getChatTable() { return _chatTable; }
     //quint32 getPeerId() const { return _peerId; }
@@ -48,6 +49,10 @@ public:
     };
 
     PeerInfo const* getPeerInfo(quint32 id) const;
+    ChatTabTypes getTabType() const { return _tabType; }
+
+    void memberJoin(PeerInfo* peer);
+    QString getTabName() const;
 
 private slots:
     void on__callButon_clicked();

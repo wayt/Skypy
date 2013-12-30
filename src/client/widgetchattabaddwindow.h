@@ -20,6 +20,8 @@ private slots:
 
     void on__contactList_itemSelectionChanged();
 
+    void on__okButton_clicked();
+
 private:
     quint32 _tabId;
     WidgetChatTab* _chatTab;

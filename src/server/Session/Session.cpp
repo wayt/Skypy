@@ -91,7 +91,7 @@ void Session::buildOnlineFriendPacket(Packet& pkt) const
         if (Session* peer = sSkypy->findSession(itr->first))
             if (peer->hasFriend(this))
             {
-                peer->buildLoginPacket(pkt, this);
+                peer->buildLoginPacket(pkt);
                 ++count;
                 std::cout << "PEER: " << peer->getId() << std::endl << "NAME: " << peer->getName() << std::endl << "MAIL: " << peer->getEmail() << std::endl;
             }
@@ -103,7 +103,7 @@ void Session::buildOnlineFriendPacket(Packet& pkt) const
     pkt.insert<uint32>(count, holder);
 }
 
-void Session::buildLoginPacket(Packet& pkt, Session const* to) const
+void Session::buildLoginPacket(Packet& pkt) const
 {
     pkt << uint32(getId());
     pkt << getName();
@@ -144,7 +144,7 @@ void Session::handlePacketInput(Packet& pkt)
     _packetQueue.add(newPacket);
 }
 
-void Session::send(Packet const& pkt)
+void Session::send(Packet const& pkt) const
 {
     ON_NETWORK_DEBUG(
             std::cout << "Network: Session::Send" << std::endl;
@@ -184,7 +184,7 @@ void Session::friendLogin(Session* sess)
 {
     Packet data(SMSG_CONTACT_LOGIN);
     data << uint32(1);
-    sess->buildLoginPacket(data, this);
+    sess->buildLoginPacket(data);
     send(data);
 }
 
@@ -386,20 +386,62 @@ void Session::handleGetAccountInfo(Packet& pkt)
     send(info);
 }
 
-void Session::handleChatGroupGetAvailable(Packet& pkt)
+void Session::handleChatGroupAddMembers(Packet& pkt)
 {
     uint32 chatId;
-    pkt >> chatId;
+    uint32 count;
+
+    pkt >> chatId >> count;
 
     if (ChatGroup* chat = sChatGroupMgr->findChatGroup(chatId))
     {
+        if (!chat->isMember(getId()))
+            return;
 
+        for (uint32 i = 0; i < count; ++i)
+        {
+            uint32 peerId;
+            pkt >> peerId;
+
+            if (Session const* sess = sSkypy->findSession(peerId))
+                if (sess->hasFriend(this))
+                    chat->addMember(sess);
+        }
     }
-    else // New chat
+    else // Create chat group
     {
+        if (Session const* sess = sSkypy->findSession(chatId))
+        {
+            ChatGroup* chat = sChatGroupMgr->createChatGroup(this, sess);
+            for (uint32 i = 0; i < count; ++i)
+            {
+                uint32 peerId;
+                pkt >> peerId;
 
+                if (Session const* sess = sSkypy->findSession(peerId))
+                    if (sess->hasFriend(this))
+                        chat->addMember(sess);
+            }
+        }
     }
+}
 
+void Session::handleGroupChatText(Packet& pkt)
+{
+    uint32 chatId;
+    std::string text;
 
+    pkt >> chatId;
+    pkt >> text;
 
+    if (ChatGroup const* chat = sChatGroupMgr->findChatGroup(chatId))
+    {
+        if (!chat->isMember(getId()))
+        {
+            std::cout << "TEST !" << std::endl;
+            return;
+        }
+        chat->addMessageFrom(this, text);
+    }
+    std::cout << "CHAT GROUP NOT FOUND: " << chatId << std::endl;
 }
