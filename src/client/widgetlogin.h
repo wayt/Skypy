@@ -2,6 +2,8 @@
 #define WIDGETLOGIN_H
 
 #include <QWidget>
+#include <QRegExp>
+
 #include "ui_widgetlogin.h"
 
 class WidgetLogin : public QWidget, private Ui::WidgetLogin
@@ -20,6 +22,7 @@ private slots:
     void on__connectButton_clicked();
 
 private:
+    QRegExp _emailRegex;
     QString _email;
     QString _password;
 };
