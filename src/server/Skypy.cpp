@@ -4,6 +4,7 @@
 #include "ConfigMgr.h"
 #include "SkypyDatabase.h"
 #include "ContactMgr.h"
+#include "ChatGroupMgr.h"
 
 Skypy::Skypy() : _stopEvent(false), _sessionAddMutex(), _sessionAddList(),
     _sessionDelMutex(), _sessionDelList(), _sessionMap(),
@@ -46,6 +47,9 @@ void Skypy::onStartup()
     std::cout << ">> Loading ContactMgr ..." << std::endl;
     sContactMgr->loadFromDb();
 
+    std::cout << ">> Loading ChatGroupMgr ..." << std::endl;
+    sChatGroupMgr->loadFromDb();
+
     std::cout << ">> Clearing online account ..." << std::endl;
     sSkypyDb->execute("UPDATE account SET online = 0");
 
@@ -68,6 +72,8 @@ void Skypy::onShutdown()
     std::cout << "Stopping Skypy server..." << std::endl;
     std::cout << ">> Saving ContactMgr ..." << std::endl;
     sContactMgr->saveToDb();
+    std::cout << ">> Savint ChatGroupMgr ..." << std::endl;
+    sChatGroupMgr->saveToDb();
 
     for (std::map<uint32, Utils::Timer*>::iterator itr = _timedActionMap.begin();
             itr != _timedActionMap.end(); ++itr)
@@ -158,11 +164,11 @@ Session* Skypy::findSession(std::string const& email)
 
 void Skypy::_handleSessionLogin(Session* sess)
 {
-    //Packet info(SMSG_ACCOUNT_INFO);
-    //info << uint32(sess->getId());
-    //info << sess->getName();
-    //info << sess->getEmail();
-    //sess->send(info);
+    Packet info(SMSG_ACCOUNT_INFO);
+    info << uint32(sess->getId());
+    info << sess->getName();
+    info << sess->getEmail();
+    sess->send(info);
 
     try
     {
@@ -188,6 +194,8 @@ void Skypy::_handleSessionLogin(Session* sess)
 
     // Send new contact requests to client
     sess->sendContactRequest();
+
+    sChatGroupMgr->handleSessionLogin(sess);
 }
 
 void Skypy::_handleSessionLogout(Session* sess)
@@ -196,11 +204,14 @@ void Skypy::_handleSessionLogout(Session* sess)
     data << uint32(1);
     data << uint32(sess->getId());
     sess->broadcastToFriend(data);
+
+    sChatGroupMgr->handleSessionLogout(sess);
 }
 
 void Skypy::_loadTimedActions()
 {
     _timedActionMap[TM_ACTION_SAVE_CONTACTMGR] = new Utils::Timer(sConfig->getIntDefault("Skypy.ContactMgr.SaveInterval", 60));
+    _timedActionMap[TM_ACTION_SAVE_CHATGRPMGR] = new Utils::Timer(sConfig->getIntDefault("Skypy.ChatGroupMgr.SaveInterval", 60));
 }
 
 void Skypy::_executeTimedAction(TimedActions action)
@@ -210,6 +221,10 @@ void Skypy::_executeTimedAction(TimedActions action)
         case TM_ACTION_SAVE_CONTACTMGR:
             std::cout << "Saving ContactMgr ..." << std::endl;
             sContactMgr->saveToDb();
+            break;
+        case TM_ACTION_SAVE_CHATGRPMGR:
+            std::cout << "Saving ChatGroupMgr ..." << std::endl;
+            sChatGroupMgr->saveToDb();
             break;
     }
 }

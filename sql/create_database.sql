@@ -64,8 +64,55 @@ CREATE TABLE `account_friends` (
 
 LOCK TABLES `account_friends` WRITE;
 /*!40000 ALTER TABLE `account_friends` DISABLE KEYS */;
-INSERT INTO `account_friends` VALUES (1,3,1387815350),(3,1,1387815350);
+INSERT INTO `account_friends` VALUES (1,2,1387834566),(2,1,1387834566);
 /*!40000 ALTER TABLE `account_friends` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `chat_group`
+--
+
+DROP TABLE IF EXISTS `chat_group`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `chat_group` (
+  `id` int(10) unsigned NOT NULL,
+  `create_date` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `chat_group`
+--
+
+LOCK TABLES `chat_group` WRITE;
+/*!40000 ALTER TABLE `chat_group` DISABLE KEYS */;
+/*!40000 ALTER TABLE `chat_group` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `chat_group_member`
+--
+
+DROP TABLE IF EXISTS `chat_group_member`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `chat_group_member` (
+  `chat_id` int(10) unsigned NOT NULL,
+  `member_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`chat_id`,`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `chat_group_member`
+--
+
+LOCK TABLES `chat_group_member` WRITE;
+/*!40000 ALTER TABLE `chat_group_member` DISABLE KEYS */;
+/*!40000 ALTER TABLE `chat_group_member` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -81,7 +128,7 @@ CREATE TABLE `contact_requests` (
   `from_id` int(10) unsigned NOT NULL,
   `date` int(10) unsigned NOT NULL,
   PRIMARY KEY (`request_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -90,6 +137,7 @@ CREATE TABLE `contact_requests` (
 
 LOCK TABLES `contact_requests` WRITE;
 /*!40000 ALTER TABLE `contact_requests` DISABLE KEYS */;
+INSERT INTO `contact_requests` VALUES (1,3,1,1387861383);
 /*!40000 ALTER TABLE `contact_requests` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -102,4 +150,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-12-23 17:18:06
+-- Dump completed on 2013-12-31 15:28:15

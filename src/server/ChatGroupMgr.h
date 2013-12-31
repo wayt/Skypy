@@ -13,6 +13,12 @@ public:
     ChatGroup const* findChatGroup(uint32 id) const;
     ChatGroup* createChatGroup(Session const* owner, Session const* firstPeer);
 
+    void saveToDb();
+    void loadFromDb();
+
+    void handleSessionLogin(Session const* sess);
+    void handleSessionLogout(Session const* sess);
+
 private:
     std::map<uint32, ChatGroup*> _chatGroupMap;
     uint32 _nextChatGroupId;

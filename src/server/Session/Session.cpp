@@ -389,23 +389,27 @@ void Session::handleGetAccountInfo(Packet& pkt)
 void Session::handleChatGroupAddMembers(Packet& pkt)
 {
     uint32 chatId;
+    bool group;
     uint32 count;
 
-    pkt >> chatId >> count;
+    pkt >> chatId >> group >> count;
 
-    if (ChatGroup* chat = sChatGroupMgr->findChatGroup(chatId))
+    if (group)
     {
-        if (!chat->isMember(getId()))
-            return;
-
-        for (uint32 i = 0; i < count; ++i)
+        if (ChatGroup* chat = sChatGroupMgr->findChatGroup(chatId))
         {
-            uint32 peerId;
-            pkt >> peerId;
+            if (!chat->isMember(getId()))
+                return;
 
-            if (Session const* sess = sSkypy->findSession(peerId))
-                if (sess->hasFriend(this))
-                    chat->addMember(sess);
+            for (uint32 i = 0; i < count; ++i)
+            {
+                uint32 peerId;
+                pkt >> peerId;
+
+                if (Session const* sess = sSkypy->findSession(peerId))
+                    if (sess->hasFriend(this))
+                        chat->addMember(sess);
+            }
         }
     }
     else // Create chat group

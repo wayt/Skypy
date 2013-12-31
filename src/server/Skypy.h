@@ -14,6 +14,7 @@ class Session;
 enum TimedActions
 {
     TM_ACTION_SAVE_CONTACTMGR       = 0,
+    TM_ACTION_SAVE_CHATGRPMGR       = 1,
 };
 
 class Skypy : public Singleton<Skypy>

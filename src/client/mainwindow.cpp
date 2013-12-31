@@ -229,18 +229,22 @@ void MainWindow::handleJoinChatGroup(Packet& pkt)
     pkt >> memberCount;
 
     _contactForm->createChatGroup(chatId);
+    std::cout << "JOIN CHAT GROUP, COUNT: " << memberCount << std::endl;
     for (quint32 i = 0; i < memberCount; ++i)
     {
         quint32 id;
         QString name, email, ipPublic, ipPrivate;
-        pkt >> id >> name >> email >> ipPublic >> ipPrivate;
+        quint8 online;
+        pkt >> id >> name >> email >> ipPublic >> ipPrivate >> online;
+        if (id == sClientMgr->getAccountId())
+            continue;
         WidgetChatTab::PeerInfo* peer = new WidgetChatTab::PeerInfo();
         peer->peerId = id;
         peer->peerName = name;
         peer->peerEmail = email;
         peer->peerPublicIp = ipPublic;
         peer->peerPrivateIp = ipPrivate;
-        peer->online = true;
+        peer->online = online;
         _contactForm->chatGroupMemberJoin(chatId, peer);
     }
 }
@@ -249,7 +253,11 @@ void MainWindow::handleChatGroupAddMember(Packet& pkt)
 {
     quint32 chatId, id;
     QString name, email, ipPublic, ipPrivate;
-    pkt >> chatId >> id >> name >> email >> ipPublic >> ipPrivate;
+    quint8 online;
+    pkt >> chatId >> id >> name >> email >> ipPublic >> ipPrivate >> online;
+
+    if (id == sClientMgr->getAccountId())
+        return;
 
     WidgetChatTab::PeerInfo* peer = new WidgetChatTab::PeerInfo();
     peer->peerId = id;
@@ -257,7 +265,7 @@ void MainWindow::handleChatGroupAddMember(Packet& pkt)
     peer->peerEmail = email;
     peer->peerPublicIp = ipPublic;
     peer->peerPrivateIp = ipPrivate;
-    peer->online = true;
+    peer->online = online;
     _contactForm->chatGroupMemberJoin(chatId, peer);
 }
 

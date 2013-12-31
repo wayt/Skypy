@@ -50,6 +50,7 @@ void WidgetChatTabAddWindow::on__okButton_clicked()
 
     Packet data(CMSG_CHAT_GROUP_ADD_MEMBERS);
     data << quint32(_chatTab->getTabId()); // Currente tab id
+    data << quint8(_chatTab->getTabType() == CHAT_TAB_MULTI ? 1 : 0);
     data << quint32(items.size()); // Add member count
     for (QList<QListWidgetItem*>::ConstIterator itr = items.begin();
          itr != items.end(); ++itr)

@@ -34,6 +34,9 @@ WidgetChatTab* WidgetChatWindow::addChatTab(ContactInfo const* info, bool select
     }
     if (selectIt)
         _chatTab->setCurrentWidget(tab);
+
+    if (this->isHidden())
+        this->show();
     return tab;
 }
 
@@ -47,6 +50,9 @@ WidgetChatTab* WidgetChatWindow::addChatTab(quint32 id, bool selectIt)
     }
     if (selectIt)
         _chatTab->setCurrentWidget(tab);
+
+    if (this->isHidden())
+        this->show();
     return tab;
 }
 
@@ -131,20 +137,20 @@ void WidgetChatWindow::createChatGroup(quint32 id)
 void WidgetChatWindow::chatGroupMemberJoin(quint32 id, WidgetChatTab::PeerInfo* peer)
 {
     std::cout << "CHAT GROUP MEMBER JOIN" << std::endl;
-    if (WidgetChatTab* tab = getChatTab(id, CHAT_TAB_MULTI))
-    {
-        tab->memberJoin(peer);
-        int index = _chatTab->indexOf(tab);
-        if (index >= 0)
-            _chatTab->setTabText(index, tab->getTabName());
-    }
+    WidgetChatTab* tab = getChatTab(id, CHAT_TAB_MULTI);
+    if (!tab)
+        tab = addChatTab(id, false);
+    tab->memberJoin(peer);
+    int index = _chatTab->indexOf(tab);
+    if (index >= 0)
+        _chatTab->setTabText(index, tab->getTabName());
 }
 
 void WidgetChatWindow::addChatGroupMessageFrom(quint32 chatId, quint32 fromId, QString const& msg)
 {
     WidgetChatTab* tab = getChatTab(chatId, CHAT_TAB_MULTI);
     if (!tab)
-        return;
+        tab = addChatTab(chatId, false);
     tab->addMessage(fromId, msg, false);
 
 }
