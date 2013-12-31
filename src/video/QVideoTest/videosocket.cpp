@@ -80,8 +80,9 @@ void VideoSocket::run()
         QByteArray ba;
         QBuffer buffer(&ba);
         img.save(&buffer, "JPG");
+        QByteArray array = qCompress(ba, 9);
 
-        qint64 size = _socket->writeDatagram(ba, _peerAddr, _peerPort);
+        qint64 size = _socket->writeDatagram(array, _peerAddr, _peerPort);
         qDebug("size write = %lld", size);
     }
 }
@@ -96,6 +97,7 @@ void VideoSocket::_socket_readyRead()
 
         qint64 size = _socket->readDatagram(data.data(), data.size(), &_hostAddr, &_hostPort);
         qDebug("size read = %lld", size);
-        _videoViewer->setImage(data);
+        QByteArray array = qUncompress(data);
+        _videoViewer->setImage(array);
     }
 }

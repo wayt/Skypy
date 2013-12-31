@@ -24,7 +24,7 @@ bool VideoReader::readFrame(QImage &img)
 QImage VideoReader::_mat2QImage(const cv::Mat &matImg)
 {
     QImage qimg(matImg.data, matImg.cols, matImg.rows, matImg.step, QImage::Format_RGB888);
-    QImage dest(qimg.rgbSwapped());
+    QImage dest(qimg.scaled(640, 480, Qt::IgnoreAspectRatio, Qt::FastTransformation).rgbSwapped().mirrored(true, false));
     dest.detach();
 
     return dest;
