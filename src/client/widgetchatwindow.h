@@ -30,6 +30,7 @@ public:
     void createChatGroup(quint32 id);
     void chatGroupMemberJoin(quint32 id, WidgetChatTab::PeerInfo* peer);
     void addChatGroupMessageFrom(quint32 chatId, quint32 fromId, QString const& msg);
+    void chatGroupMemberUpdate(quint32 chatId, WidgetChatTab::PeerInfo const& peer);
 
 signals:
 

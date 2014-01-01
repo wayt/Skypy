@@ -330,3 +330,22 @@ QString WidgetChatTab::getTabName() const
     }
     return title;
 }
+
+void WidgetChatTab::updateMember(PeerInfo const& peer)
+{
+    PeerInfo* old = _getPeerInfo(peer.peerId);
+    if (!old)
+        return;
+
+    old->peerName = peer.peerName;
+    old->peerEmail = peer.peerEmail;
+    old->peerPublicIp = peer.peerPublicIp;
+    old->peerPrivateIp = peer.peerPrivateIp;
+
+    if (!old->online && peer.online)
+        loginContact(peer.peerId);
+    else if (old->online && !peer.online)
+        logoutContact(peer.peerId);
+
+    old->online = peer.online;
+}

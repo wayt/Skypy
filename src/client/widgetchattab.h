@@ -53,6 +53,7 @@ public:
 
     void memberJoin(PeerInfo* peer);
     QString getTabName() const;
+    void updateMember(PeerInfo const& peer);
 
 private slots:
     void on__callButon_clicked();

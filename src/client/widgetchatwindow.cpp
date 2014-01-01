@@ -70,7 +70,8 @@ void WidgetChatWindow::loginContact(quint32 id)
     int size = _chatTab->count();
     for (int i = 0; i < size; ++i)
         if (WidgetChatTab* tab = dynamic_cast<WidgetChatTab*>(_chatTab->widget(i)))
-            tab->loginContact(id);
+            if (tab->getTabType() == CHAT_TAB_SINGLE)
+                tab->loginContact(id);
 }
 
 void WidgetChatWindow::logoutContact(quint32 id)
@@ -78,7 +79,8 @@ void WidgetChatWindow::logoutContact(quint32 id)
     int size = _chatTab->count();
     for (int i = 0; i < size; ++i)
         if (WidgetChatTab* tab = dynamic_cast<WidgetChatTab*>(_chatTab->widget(i)))
-            tab->logoutContact(id);
+            if (tab->getTabType() == CHAT_TAB_SINGLE)
+                tab->logoutContact(id);
 
     if (sClientMgr->getCallRequestPeerId() == id ||
             sClientMgr->getActiveCallPeerId() == id)
@@ -88,7 +90,6 @@ void WidgetChatWindow::logoutContact(quint32 id)
         sAudioManager->quit();
         sNetworkMgr->quitCall();
     }
-
 }
 
 void WidgetChatWindow::handleCallResponse(SipRespond const& resp)
@@ -152,5 +153,14 @@ void WidgetChatWindow::addChatGroupMessageFrom(quint32 chatId, quint32 fromId, Q
     if (!tab)
         tab = addChatTab(chatId, false);
     tab->addMessage(fromId, msg, false);
+
+}
+
+void WidgetChatWindow::chatGroupMemberUpdate(quint32 chatId, WidgetChatTab::PeerInfo const& peer)
+{
+    WidgetChatTab* tab = getChatTab(chatId, CHAT_TAB_MULTI);
+    if (!tab)
+        tab = addChatTab(chatId, false);
+    tab->updateMember(peer);
 
 }

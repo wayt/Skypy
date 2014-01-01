@@ -277,3 +277,26 @@ void MainWindow::handleGroupChatText(Packet& pkt)
     pkt >> chatId >> fromId >> msg;
     _contactForm->addChatGroupMessageFrom(chatId, fromId, msg);
 }
+
+
+void MainWindow::handleChatGroupUpdateMember(Packet& pkt)
+{
+    quint32 chatId, id;
+    QString name, email, publicIp, privateIp;
+    bool online;
+
+    pkt >> chatId >> id >> name >> email >> publicIp >> privateIp >> online;
+
+    if (id == sClientMgr->getAccountId())
+        return;
+
+    WidgetChatTab::PeerInfo peer;
+    peer.peerId = id;
+    peer.peerName = name;
+    peer.peerEmail = email;
+    peer.peerPublicIp = publicIp;
+    peer.peerPrivateIp = privateIp;
+    peer.online = online;
+    _contactForm->chatGroupMemberUpdate(chatId, peer);
+
+}

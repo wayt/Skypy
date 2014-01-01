@@ -43,6 +43,8 @@ public:
     SaveStatus getSaveStatus() const { return _saveStatus; }
 
     static void buildMemberPacket(Packet& data, ChatGroupMember const* member);
+
+    void broadcastToGroup(Packet const& pkt, uint32 except = 0) const;
 private:
     uint32 _groupId;
     std::map<uint32, ChatGroupMember*> _members;

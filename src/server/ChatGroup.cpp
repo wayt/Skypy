@@ -76,15 +76,7 @@ void ChatGroup::addMessageFrom(Session const* from, std::string const& msg) cons
     data << uint32(from->getId());
     data << msg;
 
-    for (std::map<uint32, ChatGroupMember*>::const_iterator itr = _members.begin();
-            itr != _members.end(); ++itr)
-    {
-        if (Session const* member = sSkypy->findSession(itr->first))
-        {
-            std::cout << "FORWARD MESSAGE TO: " << member->getEmail() << std::endl;
-            member->send(data);
-        }
-    }
+    broadcastToGroup(data);
 }
 
 void ChatGroup::saveToDb()
@@ -153,7 +145,11 @@ void ChatGroup::memberLogin(Session const* member)
     __member->online = true;
     __member->publicIp = member->getHostAddress();
     __member->privateIp = member->getPrivateAddress();
-    // Notify update
+
+    Packet upd(SMSG_CHAT_GROUP_UPD_MEMBER);
+    upd << uint32(getId());
+    buildMemberPacket(upd, __member);
+    broadcastToGroup(upd, __member->id);
 
     Packet data(SMSG_JOIN_CHAT_GROUP);
     data << uint32(getId());
@@ -174,5 +170,18 @@ void ChatGroup::memberLogout(uint32 id)
     member->online = false;
     member->publicIp = "";
     member->privateIp = "";
-    // Notify update
+
+    Packet upd(SMSG_CHAT_GROUP_UPD_MEMBER);
+    upd << uint32(getId());
+    buildMemberPacket(upd, member);
+    broadcastToGroup(upd, member->id);
+}
+
+void ChatGroup::broadcastToGroup(Packet const& pkt, uint32 except) const
+{
+    for (std::map<uint32, ChatGroupMember*>::const_iterator itr = _members.begin();
+            itr != _members.end(); ++itr)
+        if (itr->first != except)
+            if (Session const* member = sSkypy->findSession(itr->first))
+                member->send(pkt);
 }

@@ -35,6 +35,7 @@ public:
     void handleJoinChatGroup(Packet& pkt);
     void handleChatGroupAddMember(Packet& pkt);
     void handleGroupChatText(Packet& pkt);
+    void handleChatGroupUpdateMember(Packet& pkt);
 
     void handlesipResponse(SipRespond const& resp);
     void handleCallRequest(SipRequest const& request);
