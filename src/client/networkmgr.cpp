@@ -208,10 +208,10 @@ void NetworkMgr::handleAudioNoInput(AudioSocket* sock)
     QHostAddress hostAddr, peerAddr;
     quint16 hostPort, peerPort;
     sock->getHostInfo(hostAddr, hostPort);
-    sock->getPeerInfo(peerAddr, peerPort);
 
-    std::cout << "HANDLE AUDIO NO INPUT, HOST: " << hostAddr.toString().toStdString() << ":" << hostPort << " - PEER: " << peerAddr.toString().toStdString() << ":" << peerPort << std::endl;
-    CallPeer const* peer = sClientMgr->getCallPeer(peerAddr.toString(), peerPort);
+
+    std::cout << "HANDLE AUDIO NO INPUT, HOST: " << hostAddr.toString().toStdString() << ":" << hostPort << std::endl;
+    CallPeer const* peer = sClientMgr->getCallPeer(sock->getPeerId());
 
     quint32 selfPort = hostPort + 1;
     SipRequest Rqst("INFO", sClientMgr->getEmail(), sClientMgr->getAccountId(), hostAddr.toString(), selfPort, peer->email, peer->id, peerAddr.toString(), peerPort);
@@ -225,7 +225,7 @@ void NetworkMgr::handleSipInfo(SipRequest const& request)
         return;
 
     std::cout << "NEW PEER PORT: " << request.getSenderPort() << std::endl;
-    sNetworkMgr->setCallPeerAddr(QHostAddress(request.getDestIp()), request.getDestPort(), QHostAddress(request.getSenderIp()), request.getSenderPort());
+    sNetworkMgr->setCallPeerAddr(request.getSenderId(), QHostAddress(request.getSenderIp()), request.getSenderPort());
     if (CallPeer* peer = sClientMgr->getCallPeer(request.getSenderId()))
         peer->port = request.getSenderPort();
 
@@ -237,29 +237,29 @@ void NetworkMgr::handleSipInfoResponse(SipRespond const& resp)
 {
     if (resp.getCode() == 180)
     {
-        if (AudioSocket* sock = findAudioSocket(QHostAddress(resp.getDestIp()), resp.getDestPort()))
+        if (AudioSocket* sock = findAudioSocket(resp.getDestId()))
             sock->setHostAddr(QHostAddress(resp.getSenderIp()), resp.getSenderPort());
     }
 }
 
-bool NetworkMgr::addCallHostAddr(QHostAddress const& addr, quint16 port)
+bool NetworkMgr::addCallHostAddr(quint32 peerId, QHostAddress const& addr, quint16 port)
 {
-    AudioSocket* sock = new AudioSocket(this);
+    AudioSocket* sock = new AudioSocket(this, peerId);
     if (!sock->setHostAddr(addr, port))
     {
         delete sock;
         return false;
     }
-    _audioSocks.push_back(sock);
+    _audioSocks[peerId] = sock;
     return true;
 }
 
 void NetworkMgr::quitCall()
 {
-    for (QList<AudioSocket*>::ConstIterator itr = _audioSocks.begin();
+    for (QMap<quint32, AudioSocket*>::ConstIterator itr = _audioSocks.begin();
          itr != _audioSocks.end();)
     {
-        AudioSocket* sock = *itr;
+        AudioSocket* sock = itr.value();
         ++itr;
         sock->quit();
         delete sock;
@@ -267,30 +267,20 @@ void NetworkMgr::quitCall()
     _audioSocks.clear();
 }
 
-void NetworkMgr::setCallPeerAddr(QHostAddress const& hostAddr, quint16 hostPort, const QHostAddress& addr, quint16 port)
+void NetworkMgr::setCallPeerAddr(quint32 peerId, const QHostAddress& addr, quint16 port)
 {
-    if (AudioSocket* sock = findAudioSocket(hostAddr, hostPort))
+    if (AudioSocket* sock = findAudioSocket(peerId))
     {
         sock->setPeerAddr(addr, port);
         if (!sock->isRunning())
             sock->start();
     }
-    else
-        std::cout << "CAN FOUND SOCKET FOR: " << hostAddr.toString().toStdString() << ":" << hostPort << std::endl;
 }
 
-AudioSocket* NetworkMgr::findAudioSocket(QHostAddress const& host, quint16 port)
+AudioSocket* NetworkMgr::findAudioSocket(quint32 peerId)
 {
-    for (QList<AudioSocket*>::ConstIterator itr = _audioSocks.begin();
-         itr != _audioSocks.end(); ++itr)
-    {
-        AudioSocket* sock = *itr;
-        QHostAddress currHostAddr;
-        quint16 currHostPort;
-        sock->getHostInfo(currHostAddr, currHostPort);
-
-        if (host.toString() == currHostAddr.toString() && currHostPort == port)
-            return sock;
-    }
+    QMap<quint32, AudioSocket*>::Iterator itr = _audioSocks.find(peerId);
+    if (itr != _audioSocks.end())
+        return itr.value();
     return NULL;
 }

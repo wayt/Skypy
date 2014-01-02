@@ -15,7 +15,7 @@ class AudioSocket : public QThread
     Q_OBJECT
 
 public:
-    AudioSocket(QObject *parent = 0);
+    AudioSocket(QObject *parent, quint32 peerId);
     virtual ~AudioSocket();
 
 public slots:
@@ -28,6 +28,7 @@ public slots:
 
     void getHostInfo(QHostAddress& addr, quint16& port) const { addr = _hostAddr; port = _hostPort; }
     void getPeerInfo(QHostAddress& addr, quint16& port) const { addr = _peerAddr; port = _peerPort; }
+    quint32 getPeerId() const { return _peerId; }
 private:
     bool _run;
     QUdpSocket *_socket;
@@ -37,6 +38,7 @@ private:
     quint16 _peerPort;
 
     bool _inputReaded;
+    quint32 _peerId;
 
 private slots:
     void _socket_readyRead();

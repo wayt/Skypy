@@ -36,10 +36,10 @@ public:
     void setMainWindow(MainWindow* window) { _window = window; }
 
     //bool setCallHostAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { return _audioSock.setHostAddr(addr, port); }
-    bool addCallHostAddr(QHostAddress const& addr, quint16 port);
-    void setCallPeerAddr(QHostAddress const& hostAddr, quint16 hostPort, const QHostAddress& addr, quint16 port);
+    bool addCallHostAddr(quint32 peerId, QHostAddress const& addr, quint16 port);
+    void setCallPeerAddr(quint32 peerId, const QHostAddress& addr, quint16 port);
     void quitCall();
-    AudioSocket* findAudioSocket(QHostAddress const& host, quint16 port);
+    AudioSocket* findAudioSocket(quint32 peerId);
     void handleSipRequest(Packet &pkt);
     void handleSipRep(Packet &pkt);
     void handleSipInfo(SipRequest const& request);
@@ -56,7 +56,7 @@ private:
     QTcpSocket _tcpSock;
     MainWindow* _window;
     ConnectionState _connState;
-    QList<AudioSocket*> _audioSocks;
+    QMap<quint32, AudioSocket*> _audioSocks;
 };
 
 #define sNetworkMgr NetworkMgr::instance()

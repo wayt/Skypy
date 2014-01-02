@@ -32,7 +32,7 @@ void ClientMgr::makeCall(quint32 chatId, const QString &destEmail, quint32 destI
 
     std::cout << "SEND CALL TO: " << host.toString().toStdString() << std::endl;
     for (quint32 selfPort = AUDIO_PORT; selfPort < AUDIO_PORT + 200; ++selfPort)
-        if (sNetworkMgr->addCallHostAddr(host, selfPort))
+        if (sNetworkMgr->addCallHostAddr(destId, host, selfPort))
         {
             SipRequest Rqst("INVITE", sClientMgr->getEmail(), sClientMgr->getAccountId(), host.toString(), selfPort, destEmail, destId, destIp, selfPort, chatId);
             sNetworkMgr->tcpSendPacket(Rqst.getPacket());

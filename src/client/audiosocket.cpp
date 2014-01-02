@@ -4,12 +4,13 @@
 #include <QDateTime>
 #include "networkmgr.h"
 
-AudioSocket::AudioSocket(QObject *parent) :
+AudioSocket::AudioSocket(QObject *parent, quint32 peerId) :
     QThread(parent),
     _run(false),
     _socket(new QUdpSocket(this)),
     _hostAddr(),
-    _hostPort(AUDIO_PORT)
+    _hostPort(AUDIO_PORT),
+    _peerId(peerId)
 {
     QObject::connect(_socket, SIGNAL(readyRead()), this, SLOT(_socket_readyRead()));
 }
