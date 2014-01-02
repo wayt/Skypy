@@ -46,14 +46,6 @@ void AudioSocket::setPeerAddr(const QHostAddress& addr, quint16 port)
     std::cout << "PEERADDR: " << addr.toString().toStdString() << " - PORT: " << port << std::endl;
 }
 
-void AudioSocket::quit()
-{
-    _run = false;
-    QThread::quit();
-    _socket->abort();
-    _socket->close();
-}
-
 void AudioSocket::terminate()
 {
     _run = false;
@@ -97,6 +89,7 @@ void AudioSocket::run()
     }
     _socket->abort();
     _socket->close();
+    std::cout << "EXIT AudioSocket thread" << std::endl;
 }
 
 void AudioSocket::_socket_readyRead()

@@ -261,7 +261,8 @@ void NetworkMgr::quitCall()
     {
         AudioSocket* sock = itr.value();
         ++itr;
-        sock->quit();
+        sock->terminate();
+        sock->wait();
         delete sock;
     }
     _audioSocks.clear();
