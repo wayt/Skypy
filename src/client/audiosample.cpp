@@ -41,6 +41,14 @@ AudioSample& AudioSample::operator=(const AudioSample &other)
     return *this;
 }
 
+AudioSample& AudioSample::operator+=(const AudioSample &other)
+{
+    for (int i = 0; i < other._nbFrame; ++i)
+        _buffer[i] = (_buffer[i] + other[i]) / 2;
+
+    return *this;
+}
+
 void AudioSample::setBuffer(const SAMPLE *buffer, int nbFrame)
 {
     int maxFrame = qMin(nbFrame, NB_MAX_FRAMES);

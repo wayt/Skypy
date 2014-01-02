@@ -41,6 +41,7 @@ public:
     virtual ~AudioSample();
 
     AudioSample& operator=(const AudioSample &other);
+    AudioSample& operator+=(const AudioSample &other);
 
     inline const SAMPLE* buffer() const { return _buffer; }
     inline SAMPLE* buffer() { return _buffer; }
