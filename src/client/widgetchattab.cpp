@@ -207,9 +207,11 @@ void WidgetChatTab::handleCallResponse(SipRespond const& resp)
         addMessage("Call accepted");
         if (sAudioManager->start())
         {
-            std::cout << "RECEIV PEER ADDR: " << resp.getDestIp().toStdString() << std::endl;
+            std::cout << "RECEIV PEER ADDR: " << resp.getDestIp().toStdString() << ":" << resp.getDestPort() << std::endl;
             sNetworkMgr->setCallPeerAddr(QHostAddress(resp.getSenderIp()), resp.getSenderPort(), QHostAddress(resp.getDestIp()), resp.getDestPort());
-            sClientMgr->setActiveCallPeer(resp.getDestId());
+            CallPeer* callPeer = sClientMgr->getCallPeer(resp.getDestId());
+            callPeer->active = true;
+            callPeer->port = resp.getDestPort();
         }
         else
             std::cout << "FAIL TO START AUDIO" << std::endl;

@@ -210,6 +210,7 @@ void NetworkMgr::handleAudioNoInput(AudioSocket* sock)
     sock->getHostInfo(hostAddr, hostPort);
     sock->getPeerInfo(peerAddr, peerPort);
 
+    std::cout << "HANDLE AUDIO NO INPUT, HOST: " << hostAddr.toString().toStdString() << ":" << hostPort << " - PEER: " << peerAddr.toString().toStdString() << ":" << peerPort << std::endl;
     CallPeer const* peer = sClientMgr->getCallPeer(peerAddr.toString(), peerPort);
 
     quint32 selfPort = hostPort + 1;
@@ -239,8 +240,6 @@ void NetworkMgr::handleSipInfoResponse(SipRespond const& resp)
         if (AudioSocket* sock = findAudioSocket(QHostAddress(resp.getDestIp()), resp.getDestPort()))
             sock->setHostAddr(QHostAddress(resp.getSenderIp()), resp.getSenderPort());
     }
-
-
 }
 
 bool NetworkMgr::addCallHostAddr(QHostAddress const& addr, quint16 port)
@@ -272,10 +271,12 @@ void NetworkMgr::setCallPeerAddr(QHostAddress const& hostAddr, quint16 hostPort,
 {
     if (AudioSocket* sock = findAudioSocket(hostAddr, hostPort))
     {
-        sock->setHostAddr(addr, port);
+        sock->setPeerAddr(addr, port);
         if (!sock->isRunning())
             sock->start();
     }
+    else
+        std::cout << "CAN FOUND SOCKET FOR: " << hostAddr.toString().toStdString() << ":" << hostPort << std::endl;
 }
 
 AudioSocket* NetworkMgr::findAudioSocket(QHostAddress const& host, quint16 port)

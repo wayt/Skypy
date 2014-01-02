@@ -38,12 +38,6 @@ bool AudioSocket::setHostAddr(const QHostAddress &addr, quint16 port)
     return true;
 }
 
-void AudioSocket::changeHostAddr(QHostAddress const& addr, quint16 port)
-{
-    _hostAddr = addr;
-    _hostPort = port;
-}
-
 void AudioSocket::setPeerAddr(const QHostAddress& addr, quint16 port)
 {
     _peerAddr = addr;

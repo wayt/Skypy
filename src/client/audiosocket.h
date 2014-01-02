@@ -21,7 +21,6 @@ public:
 public slots:
     bool setHostAddr(const QHostAddress &addr, quint16 port = AUDIO_PORT);
     void setPeerAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT);
-    void changeHostAddr(QHostAddress const& addr, quint16 port);
 
     void quit();
     void terminate();
