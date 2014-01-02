@@ -166,7 +166,7 @@ void AudioManager::removeInputPeer(quint32 id)
     }
 }
 
-void AudioManager::forwardToOtherAudioSocket(EncodedSample const& data, quint32 peerId)
+void AudioManager::addToForwardEncodedSample(EncodedSample const& data, quint32 peerId)
 {
     _forwardQueues[peerId]->enqueue(data);
 }
