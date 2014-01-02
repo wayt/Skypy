@@ -44,7 +44,7 @@ AudioSample& AudioSample::operator=(const AudioSample &other)
 AudioSample& AudioSample::operator+=(const AudioSample &other)
 {
     for (int i = 0; i < other._nbFrame; ++i)
-        _buffer[i] = (_buffer[i] + other[i]) / 2;
+        _buffer[i] = _buffer[i] + other[i];
 
     return *this;
 }
