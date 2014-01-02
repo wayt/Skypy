@@ -93,16 +93,30 @@ void WidgetChatWindow::logoutContact(quint32 id)
 
 void WidgetChatWindow::handleCallResponse(SipRespond const& resp)
 {
-    if (WidgetChatTab* tab = getChatTab(resp.getDestId()))
+    WidgetChatTab* tab = NULL;
+    if (resp.getChatId() > 0)
+        tab = getChatTab(resp.getChatId(), CHAT_TAB_MULTI);
+    else
+        tab = getChatTab(resp.getDestId());
+
+    if (tab)
         tab->handleCallResponse(resp);
 }
 
 void WidgetChatWindow::handleCallRequest(ContactInfo const* info, SipRequest const& req)
 {
-    WidgetChatTab* tab = getChatTab(info->getId());
-    if (!tab)
-        tab = addChatTab(info, false);
-    tab->handleCallRequest(req);
+    WidgetChatTab* tab = NULL;
+    if (req.getChatId() > 0)
+        tab = getChatTab(req.getChatId(), CHAT_TAB_MULTI);
+    else
+    {
+        tab = getChatTab(req.getDestId());
+        if (!tab)
+            tab = addChatTab(info, false);
+    }
+
+    if (tab)
+        tab->handleCallRequest(req);
 }
 
 void WidgetChatWindow::handleByeResponse(SipRespond const& resp)

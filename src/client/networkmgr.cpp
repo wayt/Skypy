@@ -108,7 +108,7 @@ void NetworkMgr::_readInput()
                 if (size > 0 && size << Packet::MaxBodySize)
                     _tcpSock.read(data, size);
                 Packet pkt(code, data, size);
-                pkt.dumpHex();
+                //pkt.dumpHex();
 
                 OpcodeMgr::OpcodeDefinition const* opcodedef = OpcodeMgr::getOpcodeDefinition(pkt.getOpcode());
                 if (!opcodedef)

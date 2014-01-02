@@ -59,10 +59,11 @@ void WidgetChatTab::on__callButon_clicked()
     }
     else if (_tabType == CHAT_TAB_MULTI)
     {
+        bool make = sClientMgr->hasGroupCall(getTabId());
         for (QMap<quint32, PeerInfo*>::ConstIterator itr = _peersMap.begin(); itr != _peersMap.end(); ++itr)
         {
             PeerInfo const* peer = itr.value();
-            if (sClientMgr->hasGroupCall(getTabId()))
+            if (make)
             {
                 sClientMgr->stopCall(getTabId(), peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
                 _callButon->setText("Call");
@@ -205,7 +206,7 @@ void WidgetChatTab::handleCallResponse(SipRespond const& resp)
         break;
     case 200: // Ca a decroche
         addMessage("Call accepted");
-        if (sAudioManager->start())
+        if (sAudioManager->isRunning() || sAudioManager->start())
         {
             std::cout << "RECEIV PEER ADDR: " << resp.getDestIp().toStdString() << ":" << resp.getDestPort() << std::endl;
             sNetworkMgr->setCallPeerAddr(resp.getDestId(), QHostAddress(resp.getDestIp()), resp.getDestPort());

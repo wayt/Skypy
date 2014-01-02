@@ -13,11 +13,13 @@ ClientMgr::ClientMgr() : _accountId(0), _username(""), _email(""),
 
 void ClientMgr::makeCall(quint32 chatId, const QString &destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp)
 {
+    /*
     if (chatId == 0 && hasGroupCall())
         return;
 
     if (hasCallRequestFrom(destId) || hasActiveCallWith(destId))
         return;
+        */
 
 
     QHostAddress host;
