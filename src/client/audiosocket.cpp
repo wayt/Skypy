@@ -114,7 +114,7 @@ void AudioSocket::_socket_readyRead()
         {
             _inputReaded = true;
             sAudioManager->push(EncodedSample(data));
-            sNetworkMgr->forwardToOtherAudioSocket(data, _peerId);
+            sAudioManager->addToForwardEncodedSample(EncodedSample(data), _peerId);
         }
     }
 }

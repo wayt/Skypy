@@ -48,6 +48,8 @@ public:
     const QSynchronizedQueue<EncodedSample>& outputQueue() const { return _outputQueue; }
     QSynchronizedQueue<EncodedSample>& outputQueue() { return _outputQueue; }
 
+    void forwardToOtherAudioSocket(EncodedSample const& data, quint32 peerId);
+
 public slots:
     bool start();
     void terminate();
@@ -64,6 +66,7 @@ private:
     //QSynchronizedQueue<EncodedSample> _inputQueue;
     QMap<quint32, QSynchronizedQueue<EncodedSample>*> _inputQueues;
     QSynchronizedQueue<EncodedSample> _outputQueue;
+    QMap<quint32, QQueue<EncodedSample>*> _forwardQueues;
 
 signals:
     void error(const QString &errText);

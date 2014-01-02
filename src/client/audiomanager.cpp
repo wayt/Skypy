@@ -9,7 +9,8 @@ AudioManager::AudioManager(QObject *parent) :
     _input(new AudioStream()),
     _output(new AudioStream()),
     _inputQueues(),
-    _outputQueue()
+    _outputQueue(),
+    _forwardQueues()
 {
 }
 
@@ -99,11 +100,30 @@ void AudioManager::run()
         while (!_input->inputQueue().isEmpty())
         {
             sample = _input->inputQueue().dequeue();
-            if (sAudioEncoder->encode(sample, encodedSample))
+
+            QMap<quint32, AudioSample> sampleMap;
+            for (QMap<quint32, QQueue<EncodedSample>*>::ConstIterator itr2 = _forwardQueues.begin();
+                 itr2 != _forwardQueues.end(); ++itr2)
             {
-                for (QMap<quint32, QSynchronizedQueue<EncodedSample>*>::Iterator itr = _inputQueues.begin();
-                     itr != _inputQueues.end(); ++itr)
+                if (itr2.value()->size() > 0)
+                    sAudioEncoder->decode(sampleMap[itr2.key()], itr2.value()->dequeue());
+            }
+
+            AudioSample saveSample = sample;
+            for (QMap<quint32, QSynchronizedQueue<EncodedSample>*>::Iterator itr = _inputQueues.begin();
+                 itr != _inputQueues.end(); ++itr)
+            {
+                sample = saveSample;
+
+                for (QMap<quint32, AudioSample>::ConstIterator itr2 = sampleMap.begin();
+                     itr2 != sampleMap.end(); ++itr2)
+                    if (itr.key() != itr2.key())
+                        sample += itr2.value();
+
+                if (sAudioEncoder->encode(sample, encodedSample))
+                {
                     itr.value()->enqueue(encodedSample);
+                }
             }
         }
 
@@ -120,14 +140,33 @@ void AudioManager::run()
 void AudioManager::addInputPeer(quint32 id)
 {
     _inputQueues[id] = new QSynchronizedQueue<EncodedSample>();
+    _forwardQueues[id] = new QQueue<EncodedSample>();
 }
 
 void AudioManager::removeInputPeer(quint32 id)
 {
-    QMap<quint32, QSynchronizedQueue<EncodedSample>*>::Iterator itr = _inputQueues.find(id);
-    if (itr == _inputQueues.end())
-        return;
-    QSynchronizedQueue<EncodedSample>* input = itr.value();
-    _inputQueues.erase(itr);
-    delete input;
+    {
+        QMap<quint32, QSynchronizedQueue<EncodedSample>*>::Iterator itr = _inputQueues.find(id);
+        if (itr != _inputQueues.end())
+        {
+            QSynchronizedQueue<EncodedSample>* input = itr.value();
+            _inputQueues.erase(itr);
+            delete input;
+        }
+    }
+
+    {
+        QMap<quint32, QQueue<EncodedSample>*>::Iterator itr = _forwardQueues.find(id);
+        if (itr != _forwardQueues.end())
+        {
+            QQueue<EncodedSample>* input = itr.value();
+            _forwardQueues.erase(itr);
+            delete input;
+        }
+    }
+}
+
+void AudioManager::forwardToOtherAudioSocket(EncodedSample const& data, quint32 peerId)
+{
+    _forwardQueues[peerId]->enqueue(data);
 }
