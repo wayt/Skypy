@@ -104,7 +104,7 @@ void AudioManager::run()
         timer.start();
         quint32 sendCount = 0;
         // Audio stream (raw data) to input queue (Encoded data)
-        while (!_input->inputQueue().isEmpty())
+        if (!_input->inputQueue().isEmpty())
         {
             sample = _input->inputQueue().dequeue();
 
