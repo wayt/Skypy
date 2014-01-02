@@ -213,6 +213,8 @@ void WidgetChatTab::handleCallResponse(SipRespond const& resp)
             CallPeer* callPeer = sClientMgr->getCallPeer(resp.getDestId());
             callPeer->active = true;
             callPeer->port = resp.getDestPort();
+
+            sAudioManager->addInputPeer(resp.getDestId());
         }
         else
             std::cout << "FAIL TO START AUDIO" << std::endl;
@@ -276,6 +278,7 @@ void WidgetChatTab::handleCallRequest(SipRequest const& request)
                             sNetworkMgr->tcpSendPacket(Rep.getPacket());
                             if (CallPeer* peer = sClientMgr->getCallPeer(request.getSenderId()))
                                 peer->active = true;
+                            sAudioManager->addInputPeer(request.getSenderId());
                             _callButon->setText("Stop");
                             return;
                         }

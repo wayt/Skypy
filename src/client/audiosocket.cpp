@@ -83,9 +83,14 @@ void AudioSocket::run()
             }
         }
 
-        EncodedSample encodedSample = sAudioManager->inputQueue().dequeue();
-        //std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
-        _socket->writeDatagram(encodedSample.encodedSample(), _peerAddr, _peerPort);
+        if (QSynchronizedQueue<EncodedSample>* queue = sAudioManager->inputQueue(_peerId))
+        {
+            EncodedSample encodedSample = queue->dequeue();
+            //std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
+            _socket->writeDatagram(encodedSample.encodedSample(), _peerAddr, _peerPort);
+        }
+        else
+            QThread::msleep(100);
     }
     _socket->abort();
     _socket->close();

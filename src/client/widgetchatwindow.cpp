@@ -129,9 +129,15 @@ void WidgetChatWindow::handleByeResponse(SipRespond const& resp)
 
 void WidgetChatWindow::handleByeRequest(ContactInfo const* info, SipRequest const& req)
 {
-    sClientMgr->clearCallPeers();
-    sAudioManager->quit();
-    sNetworkMgr->quitCall();
+    if (CallPeer* peer = sClientMgr->getCallPeer(req.getSenderId()))
+    {
+        sClientMgr->removeCallPeer(peer);
+        if (!sClientMgr->hasActiveCall())
+        {
+            sAudioManager->terminate();
+            sNetworkMgr->quitCall();
+        }
+    }
 
     WidgetChatTab* tab = getChatTab(info->getId());
     if (!tab)

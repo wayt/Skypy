@@ -2,6 +2,7 @@
 #define AUDIOMANAGER_H
 
 #include <QThread>
+#include <QMap>
 
 #include "singleton.h"
 #include "audiostream.h"
@@ -27,14 +28,28 @@ public:
 
     inline void push(const EncodedSample &encodedSample) { _outputQueue.enqueue(encodedSample); }
 
-    const QSynchronizedQueue<EncodedSample>& inputQueue() const { return _inputQueue; }
-    QSynchronizedQueue<EncodedSample>& inputQueue() { return _inputQueue; }
+    void addInputPeer(quint32 id);
+    void removeInputPeer(quint32 id);
+
+    const QSynchronizedQueue<EncodedSample>* inputQueue(quint32 id) const
+    {
+        QMap<quint32, QSynchronizedQueue<EncodedSample>*>::ConstIterator itr = _inputQueues.find(id);
+        if (itr == _inputQueues.end())
+            return NULL;
+        return itr.value();
+    }
+    QSynchronizedQueue<EncodedSample>* inputQueue(quint32 id)
+    {
+        QMap<quint32, QSynchronizedQueue<EncodedSample>*>::Iterator itr = _inputQueues.find(id);
+        if (itr == _inputQueues.end())
+            return NULL;
+        return itr.value();
+    }
     const QSynchronizedQueue<EncodedSample>& outputQueue() const { return _outputQueue; }
     QSynchronizedQueue<EncodedSample>& outputQueue() { return _outputQueue; }
 
 public slots:
     bool start();
-    void quit();
     void terminate();
 
 protected:
@@ -46,7 +61,8 @@ private:
     AudioStream *_input;
     AudioStream *_output;
 
-    QSynchronizedQueue<EncodedSample> _inputQueue;
+    //QSynchronizedQueue<EncodedSample> _inputQueue;
+    QMap<quint32, QSynchronizedQueue<EncodedSample>*> _inputQueues;
     QSynchronizedQueue<EncodedSample> _outputQueue;
 
 signals:

@@ -156,6 +156,19 @@ public:
         return NULL;
     }
 
+    void removeCallPeer(CallPeer* peer)
+    {
+        for (QList<CallPeer*>::Iterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+        {
+            if (*itr == peer)
+            {
+                _callPeer.erase(itr);
+                return;
+            }
+        }
+    }
+
     void clearCallPeers()
     {
         for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
