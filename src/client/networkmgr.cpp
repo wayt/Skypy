@@ -287,3 +287,14 @@ AudioSocket* NetworkMgr::findAudioSocket(quint32 peerId)
         return itr.value();
     return NULL;
 }
+
+void NetworkMgr::forwardToOtherAudioSocket(QByteArray const& data, quint32 peerId)
+{
+    if (_audioSocks.size() <= 1)
+        return;
+
+    for (QMap<quint32, AudioSocket*>::Iterator itr = _audioSocks.begin();
+         itr != _audioSocks.end(); ++itr)
+        if (itr.key() != peerId)
+            itr.value()->sendToPeer(data);
+}

@@ -46,6 +46,7 @@ public:
     void handleSipInfoResponse(SipRespond const& resp);
 
     void handleAudioNoInput(AudioSocket* sock);
+    void forwardToOtherAudioSocket(QByteArray const& data, quint32 peerId);
 
     void debugInput();
 private slots:

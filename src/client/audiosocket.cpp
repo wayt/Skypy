@@ -87,7 +87,7 @@ void AudioSocket::run()
         {
             EncodedSample encodedSample = queue->dequeue();
             //std::cout << "WRITE AUDIO ON: " << _peerAddr.toString().toStdString() << ":" << _peerPort << std::endl;
-            _socket->writeDatagram(encodedSample.encodedSample(), _peerAddr, _peerPort);
+            sendToPeer(encodedSample.encodedSample());
         }
         else
             QThread::msleep(100);
@@ -114,6 +114,7 @@ void AudioSocket::_socket_readyRead()
         {
             _inputReaded = true;
             sAudioManager->push(EncodedSample(data));
+            sNetworkMgr->forwardToOtherAudioSocket(data, _peerId);
         }
     }
 }

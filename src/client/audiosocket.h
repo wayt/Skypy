@@ -28,6 +28,8 @@ public slots:
     void getHostInfo(QHostAddress& addr, quint16& port) const { addr = _hostAddr; port = _hostPort; }
     void getPeerInfo(QHostAddress& addr, quint16& port) const { addr = _peerAddr; port = _peerPort; }
     quint32 getPeerId() const { return _peerId; }
+
+    void sendToPeer(QByteArray const& data) { _socket->writeDatagram(data, _peerAddr, _peerPort); }
 private:
     bool _run;
     QUdpSocket *_socket;
