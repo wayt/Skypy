@@ -93,6 +93,7 @@ void WidgetChatWindow::logoutContact(quint32 id)
 
 void WidgetChatWindow::handleCallResponse(SipRespond const& resp)
 {
+    std::cout << "CALL RESPONSE, CHATID: " << resp.getChatId() << std::endl;
     WidgetChatTab* tab = NULL;
     if (resp.getChatId() > 0)
         tab = getChatTab(resp.getChatId(), CHAT_TAB_MULTI);
@@ -101,6 +102,8 @@ void WidgetChatWindow::handleCallResponse(SipRespond const& resp)
 
     if (tab)
         tab->handleCallResponse(resp);
+    else
+        std::cout << "CHAT NO FOUND" << std::endl;
 }
 
 void WidgetChatWindow::handleCallRequest(ContactInfo const* info, SipRequest const& req)

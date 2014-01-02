@@ -199,23 +199,25 @@ void Session::handleSipPacket(Packet& pkt)
     uint32 destId;
     std::string destIp;
     uint32 destPort;
+    uint32 chatId;
 
     std::cout << "SIP REQUESTPACKET RECEIVED" << std::endl;
     pkt >> cmd;
     pkt >> senderEmail >> senderId >> senderIp >> senderPort;
     pkt >> destEmail >> destId >> destIp >> destPort;
-    sSipManager->sendSipResponse(this, 100, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+    pkt >> chatId;
+    sSipManager->sendSipResponse(this, 100, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort, chatId);
     Session* peer = sSkypy->findSession(destId);
     if (!peer)
     {
         std::cout << "Peer not found" << std::endl;
-        sSipManager->sendSipResponse(this, 404, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+        sSipManager->sendSipResponse(this, 404, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort, chatId);
         return;
     }
     else
     {
         sSipManager->forwardSip(peer, pkt);
-        sSipManager->sendSipResponse(this, 180, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+        sSipManager->sendSipResponse(this, 180, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort, chatId);
     }
 }
 
@@ -231,11 +233,13 @@ void Session::handleSipRespond(Packet& pkt)
     uint32 destId;
     std::string destIp;
     uint32 destPort;
+    uint32 chatId;
 
     std::cout << "SIP REQUESTPACKET RECEIVED" << std::endl;
     pkt >> code >> cmd;
     pkt >> senderEmail >> senderId >> senderIp >> senderPort;
     pkt >> destEmail >> destId >> destIp >> destPort;
+    pkt >> chatId;
 
     if (Session* sess = sSkypy->findSession(senderId))
         sSipManager->forwardSip(sess, pkt);

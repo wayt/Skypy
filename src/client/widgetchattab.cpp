@@ -252,6 +252,8 @@ void WidgetChatTab::handleCallRequest(SipRequest const& request)
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Incomming call", "Accept call from " + request.getSenderEmail() + " ?",
                               QMessageBox::Yes | QMessageBox::No);
+
+    std::cout << "====== CALL REQUEST CHATID: " << request.getChatId() << " =======" << std::endl;
     switch (reply)
     {
         case QMessageBox::Yes:

@@ -11,7 +11,7 @@ class sSipManager : public Singleton<sSipManager>
 {
 public:
     sSipManager() {}
-    void sendSipResponse(Session *peer, uint32 code, std::string const& cmd, std::string const senderEmail, uint32 senderId, std::string const& senderIp, uint32 senderPort, std::string const& destEmail, uint32 destId, std::string const& destIp, uint32 destPort) const
+    void sendSipResponse(Session *peer, uint32 code, std::string const& cmd, std::string const senderEmail, uint32 senderId, std::string const& senderIp, uint32 senderPort, std::string const& destEmail, uint32 destId, std::string const& destIp, uint32 destPort, uint32 chatId) const
     {
         Packet pkt(rMSG_SIP);
         pkt << uint32(code);
@@ -24,6 +24,7 @@ public:
         pkt << uint32(destId);
         pkt << destIp;
         pkt << uint32(destPort);
+        pkt << uint32(chatId);
         peer->send(pkt);
     }
 
