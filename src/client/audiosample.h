@@ -10,10 +10,14 @@
 # define SAMPLE         float
 # define SAMPLE_FORMAT  paFloat32
 # define ZERO           0.f
+# define MIN_VALUE      -1.f
+# define MAX_VALUE      1.f
 #else
 # define SAMPLE         short
 # define SAMPLE_FORMAT  paInt16
 # define ZERO           0
+# define MIN_VALUE      -128
+# define MAX_VALUE      127
 #endif
 
 class AudioSample
