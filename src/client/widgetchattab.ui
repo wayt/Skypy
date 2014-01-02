@@ -62,6 +62,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLineEdit" name="_inputText">
+       <property name="maxLength">
+        <number>480</number>
+       </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>

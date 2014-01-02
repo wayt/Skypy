@@ -98,23 +98,35 @@ void AudioManager::run()
         AudioSample sample;
         EncodedSample encodedSample;
 
-        if (_input->inputQueue().isEmpty() && _output->outputQueue().isEmpty() && _forwardQueues.empty() && _run)
-            QThread::msleep(10);
+        //if (_input->inputQueue().isEmpty() && _output->outputQueue().isEmpty() && _forwardQueues.empty() && _run)
+        //    QThread::msleep(10);
 
 
         quint32 sendCount = 0;
         // Audio stream (raw data) to input queue (Encoded data)
-        if (timer.elapsed() >= 20)
+        int elapsed = timer.elapsed();
+        if (elapsed >= 20)
         {
+            sample.clearBuffer();
             timer.restart();
-            sample = _input->inputQueue().dequeue();
+            int size = _input->inputQueue().size();
+            while (--size >= 0)
+                sample += _input->inputQueue().dequeue();
 
             QMap<quint32, AudioSample> sampleMap;
             for (QMap<quint32, QQueue<EncodedSample>*>::ConstIterator itr2 = _forwardQueues.begin();
                  itr2 != _forwardQueues.end(); ++itr2)
             {
                 if (itr2.value()->size() > 0 && sNetworkMgr->isAudioSocketConnect(itr2.key()))
-                    sAudioEncoder->decode(sampleMap[itr2.key()], itr2.value()->dequeue());
+                {
+                    AudioSample temp;
+                    int size = itr2.value()->size();
+                    while (--size >= 0)
+                    {
+                        sAudioEncoder->decode(temp, itr2.value()->dequeue());
+                        sampleMap[itr2.key()] += temp;
+                    }
+                }
             }
 
             AudioSample saveSample = sample;
@@ -135,20 +147,31 @@ void AudioManager::run()
                     std::cout << "PEER: " << itr.key() << " - SIZE: " << itr.value()->size() << std::endl;
                 }
             }
-        }
-        if (sendCount > 0)
-            std::cout << "DIFF: " << timer.elapsed() << " COUNT: " << sendCount << std::endl;
 
-        // Output queue (Encoded data) to audio stream (raw data)
-        while (!_outputQueue.isEmpty())
-        {
-            encodedSample = _outputQueue.dequeue();
-            if (sAudioEncoder->decode(sample, encodedSample))
+            // Output queue (Encoded data) to audio stream (raw data)
+            size = _outputQueue.size();
+            if (size > 0)
             {
+                sample.clearBuffer();
+                while (--size >= 0)
+                {
+                    AudioSample temp;
+                    encodedSample = _outputQueue.dequeue();
+                    if (sAudioEncoder->decode(temp, encodedSample))
+                    {
+                        sample += temp;
+                    }
+                }
                 _output->outputQueue().enqueue(sample);
                 std::cout << "OUPUT SIZE: " << _output->outputQueue().size() << std::endl;
             }
+
         }
+        else
+            QThread::msleep(20 - elapsed);
+        if (sendCount > 0)
+            std::cout << "DIFF: " << timer.elapsed() << " COUNT: " << sendCount << std::endl;
+
     }
 }
 
