@@ -178,12 +178,14 @@ void NetworkMgr::handleSipRequest(Packet &pkt)
     quint32 destId;
     QString destIp;
     quint32 destPort;
+    quint32 chatId;
 
     std::cout << "SIP REQUESTPACKET RECEIVED" << std::endl;
     pkt >> cmd;
     pkt >> senderEmail >> senderId >> senderIp >> senderPort;
     pkt >> destEmail >> destId >> destIp >> destPort;
-    SipRequest request(cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+    pkt >> chatId;
+    SipRequest request(cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort, chatId);
 
     if (cmd == "INVITE")
     {
