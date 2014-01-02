@@ -49,13 +49,18 @@ void WidgetChatTab::on__callButon_clicked()
     {
         PeerInfo const* peer = _getFirstPeer();
         std::cout << "CLICKED CALL BUTTON" << std::endl;
-        if (sClientMgr->getActiveCallPeerId() == peer->peerId || sClientMgr->getCallRequestPeerId() == peer->peerId)
+        if (sClientMgr->hasActiveCallWith(peer->peerId) || sClientMgr->hasCallRequestFrom(peer->peerId))
         {
             sClientMgr->stopCall(peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
             _callButon->setText("Call");
         }
         else
             sClientMgr->makeCall(peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
+    }
+    else if (_tabType == CHAT_TAB_MULTI)
+    {
+
+
     }
 }
 
@@ -182,7 +187,7 @@ void WidgetChatTab::handleCallResponse(SipRespond const& resp)
         break;
     case 404: // Contact non connecte
         addMessage(resp.getDestEmail() + " isn't online");
-        sClientMgr->setCallRequestPeerId(0);
+        sClientMgr->clearCallPeers();
         sNetworkMgr->quitCall();
         _callButon->setText("Call");
         break;
@@ -191,38 +196,37 @@ void WidgetChatTab::handleCallResponse(SipRespond const& resp)
         break;
     case 200: // Ca a decroche
         addMessage("Call accepted");
-        sClientMgr->setCallRequestPeerId(0);
         if (sAudioManager->start())
         {
             std::cout << "RECEIV PEER ADDR: " << resp.getDestIp().toStdString() << std::endl;
             sNetworkMgr->setCallPeerAddr(QHostAddress(resp.getDestIp()), resp.getDestPort());
             sNetworkMgr->runCall();
-            sClientMgr->setActiveCallPeerId(resp.getDestId());
+            sClientMgr->setActiveCallPeer(resp.getDestId());
         }
         else
             std::cout << "FAIL TO START AUDIO" << std::endl;
         break;
     case 603: // Refuse
         addMessage("Call refused");
-        sClientMgr->setCallRequestPeerId(0);
+        sClientMgr->clearCallPeers();
         sNetworkMgr->quitCall();
         _callButon->setText("Call");
         break;
     case 604: // Occuped
         addMessage("Occuped");
-        sClientMgr->setCallRequestPeerId(0);
+        sClientMgr->clearCallPeers();
         sNetworkMgr->quitCall();
         _callButon->setText("Call");
         break;
     case 605: // Peer fail to open network
         addMessage("Peer's network issue");
-        sClientMgr->setCallRequestPeerId(0);
+        sClientMgr->clearCallPeers();
         sNetworkMgr->quitCall();
         _callButon->setText("Call");
         break;
     case 606: // Peer fail to start audio
         addMessage("Peer's audio issue");
-        sClientMgr->setCallRequestPeerId(0);
+        sClientMgr->clearCallPeers();
         sNetworkMgr->quitCall();
         _callButon->setText("Call");
         break;
@@ -232,7 +236,8 @@ void WidgetChatTab::handleCallResponse(SipRespond const& resp)
 void WidgetChatTab::handleCallRequest(SipRequest const& request)
 {
     addMessage("Incomming call...");
-    sClientMgr->setCallRequestPeerId(request.getSenderId());
+    CallPeer* peer = new CallPeer(getTabId(), request.getSenderId(), request.getSenderEmail(), request.getSenderIp(), request.getSenderPort(), false);
+    sClientMgr->addCallRequest(peer);
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Incomming call", "Accept call from " + request.getSenderEmail() + " ?",
                               QMessageBox::Yes | QMessageBox::No);
@@ -257,8 +262,8 @@ void WidgetChatTab::handleCallRequest(SipRequest const& request)
                             std::cout << "CALL ACCEPTED, LISTEN ON " << request.getDestIp().toStdString() << ":" << request.getDestPort() << std::endl;
                             SipRespond Rep(200, request, selfPort);
                             sNetworkMgr->tcpSendPacket(Rep.getPacket());
-                            sClientMgr->setCallRequestPeerId(0);
-                            sClientMgr->setActiveCallPeerId(request.getSenderId());
+                            if (CallPeer* peer = sClientMgr->getCallPeer(request.getSenderId()))
+                                peer->active = true;
                             _callButon->setText("Stop");
                             return;
                         }
@@ -268,7 +273,7 @@ void WidgetChatTab::handleCallRequest(SipRequest const& request)
 
                             SipRespond Rep(606, request);
                             sNetworkMgr->tcpSendPacket(Rep.getPacket());
-                            sClientMgr->setCallRequestPeerId(0);
+                            sClientMgr->clearCallPeers();
                         }
                     }
                 }
@@ -279,20 +284,20 @@ void WidgetChatTab::handleCallRequest(SipRequest const& request)
 
                     SipRespond Rep(605, request);
                     sNetworkMgr->tcpSendPacket(Rep.getPacket());
-                    sClientMgr->setCallRequestPeerId(0);
+                    sClientMgr->clearCallPeers();
                 }
             }
             else
             {
                 SipRespond Rep(603, request);
                 sNetworkMgr->tcpSendPacket(Rep.getPacket());
-                sClientMgr->setCallRequestPeerId(0);
+                sClientMgr->clearCallPeers();
                 std::cout << "SEND CALL REFUSED" << std::endl;
             }
             break;
         }
         default:
-            sClientMgr->setCallRequestPeerId(0);
+            sClientMgr->clearCallPeers();
             break;
     }
 }

@@ -45,7 +45,7 @@ public:
     void handleSipInfo(SipRequest const& request);
     void handleSipInfoResponse(SipRespond const& resp);
 
-    void handleAudioNoInput();
+    void handleAudioNoInput(QString const& addr, quint16 port);
 
     void debugInput();
 private slots:

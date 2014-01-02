@@ -36,6 +36,19 @@ private:
     QString _privateIp;
 };
 
+struct CallPeer
+{
+    CallPeer(quint32 chatId, quint32 id, QString const& email, QString const& ip, quint16 port, bool active = false) :
+        chatId(chatId), id(id), email(email), callIp(ip), port(port), active(active)
+    {}
+    quint32 chatId;
+    quint32 id;
+    QString email;
+    QString callIp;
+    quint16 port;
+    bool active;
+};
+
 class ClientMgr : public Singleton<ClientMgr>
 {
 public:
@@ -50,13 +63,95 @@ public:
     QString const& getPrivateIp() const { return _privateIp; }
     void setPrivateIp(QString const& ip) { _privateIp = ip; }
 
-    bool hasActiveCall() const { return _activeCallPeerId > 0; }
-    quint32 getActiveCallPeerId() const { return _activeCallPeerId; }
-    void setActiveCallPeerId(quint32 id) { _activeCallPeerId = id; }
+    bool hasActiveCall() const
+    {
+        for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+            if ((*itr)->active)
+                return true;
+        return false;
+    }
+    bool hasActiveCallWith(quint32 id) const
+    {
+        for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+            if ((*itr)->active && (*itr)->id == id)
+                return true;
+        return false;
+    }
+    void setActiveCallPeer(quint32 id)
+    {
+        for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+            if ((*itr)->id == id)
+                (*itr)->active = true;
+    }
 
-    bool hasCallRequest() const { return _requestCallPeerId > 0; }
-    quint32 getCallRequestPeerId() const { return _requestCallPeerId; }
-    void setCallRequestPeerId(quint32 id) { _requestCallPeerId = id; }
+    bool hasCallRequest() const
+    {
+        for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+            if (!(*itr)->active)
+                return true;
+        return false;
+    }
+    bool hasCallRequestFrom(quint32 id) const
+    {
+        for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+            if (!(*itr)->active && (*itr)->id == id)
+                return true;
+        return false;
+    }
+
+    void addCallRequest(CallPeer* peer) { _callPeer.push_back(peer); }
+    CallPeer* getCallPeer(quint32 id)
+    {
+        for (QList<CallPeer*>::iterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+            if ((*itr)->id == id)
+                return *itr;
+        return NULL;
+    }
+
+    CallPeer const* getCallPeer(quint32 id) const
+    {
+        for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+            if ((*itr)->id == id)
+                return *itr;
+        return NULL;
+    }
+
+    CallPeer* getCallPeer(QString const& addr, quint16 port = 0)
+    {
+        for (QList<CallPeer*>::iterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+            if ((*itr)->callIp == addr && ((*itr)->port == port || port == 0))
+                return *itr;
+        return NULL;
+    }
+
+    CallPeer const* getCallPeer(QString const& addr, quint16 port = 0) const
+    {
+        for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+            if ((*itr)->callIp == addr && ((*itr)->port == port || port == 0))
+                return *itr;
+        return NULL;
+    }
+
+    void clearCallPeers()
+    {
+        for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
+             itr != _callPeer.end();)
+        {
+            CallPeer* peer = *itr;
+            ++itr;
+            delete peer;
+        }
+        _callPeer.clear();
+    }
 
 
     void makeCall(QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp);
@@ -77,8 +172,7 @@ private:
     QString _publicIp;
     QString _privateIp;
 
-    quint32 _activeCallPeerId;
-    quint32 _requestCallPeerId;
+    QList<CallPeer*> _callPeer;
     QMap<quint32, ContactInfo*> _contactMap;
 };
 

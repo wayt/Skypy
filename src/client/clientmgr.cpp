@@ -6,7 +6,7 @@
 #include "sipPacket.hpp"
 
 ClientMgr::ClientMgr() : _accountId(0), _username(""), _email(""),
-    _publicIp(""), _privateIp(""), _activeCallPeerId(0), _requestCallPeerId(0),
+    _publicIp(""), _privateIp(""), _callPeer(),
     _contactMap()
 {
 }
@@ -32,7 +32,8 @@ void ClientMgr::makeCall(const QString &destEmail, quint32 destId, QString const
         {
             SipRequest Rqst("INVITE", sClientMgr->getEmail(), sClientMgr->getAccountId(), host.toString(), selfPort, destEmail, destId, destIp, selfPort);
             sNetworkMgr->tcpSendPacket(Rqst.getPacket());
-            setCallRequestPeerId(destId);
+            CallPeer* peer = new CallPeer(0, destId, destEmail, destIp, selfPort, false);
+            sClientMgr->addCallRequest(peer);
             break;
         }
 }
@@ -57,8 +58,7 @@ void ClientMgr::stopCall(QString const& destEmail, quint32 destId, QString const
     SipRequest Rqst("BYE", sClientMgr->getEmail(), sClientMgr->getAccountId(), host.toString(), 0, destEmail, destId, destIp, 0);
     sNetworkMgr->tcpSendPacket(Rqst.getPacket());
 
-    sClientMgr->setCallRequestPeerId(0);
-    sClientMgr->setActiveCallPeerId(0);
+    sClientMgr->clearCallPeers();
     sAudioManager->quit();
     sNetworkMgr->quitCall();
 }

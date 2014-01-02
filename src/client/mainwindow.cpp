@@ -197,7 +197,7 @@ void MainWindow::handleCallRequest(SipRequest const& request)
 void MainWindow::handleByeRequest(const SipRequest &request)
 {
     ContactInfo* sender = sClientMgr->findContact(request.getSenderId());
-    if (!sender || sClientMgr->getActiveCallPeerId() != request.getSenderId())
+    if (!sender || !sClientMgr->hasActiveCallWith(request.getSenderId()))
     {
 
         SipRespond Rep(604, request);

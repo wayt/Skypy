@@ -82,11 +82,10 @@ void WidgetChatWindow::logoutContact(quint32 id)
             if (tab->getTabType() == CHAT_TAB_SINGLE)
                 tab->logoutContact(id);
 
-    if (sClientMgr->getCallRequestPeerId() == id ||
-            sClientMgr->getActiveCallPeerId() == id)
+    if (sClientMgr->hasCallRequestFrom(id) ||
+            sClientMgr->hasActiveCallWith(id))
     {
-        sClientMgr->setCallRequestPeerId(0);
-        sClientMgr->setActiveCallPeerId(0);
+        sClientMgr->clearCallPeers();
         sAudioManager->quit();
         sNetworkMgr->quitCall();
     }
@@ -113,8 +112,7 @@ void WidgetChatWindow::handleByeResponse(SipRespond const& resp)
 
 void WidgetChatWindow::handleByeRequest(ContactInfo const* info, SipRequest const& req)
 {
-    sClientMgr->setCallRequestPeerId(0);
-    sClientMgr->setActiveCallPeerId(0);
+    sClientMgr->clearCallPeers();
     sAudioManager->quit();
     sNetworkMgr->quitCall();
 

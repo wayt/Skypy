@@ -198,13 +198,12 @@ void NetworkMgr::handleSipRequest(Packet &pkt)
     }
 }
 
-void NetworkMgr::handleAudioNoInput()
+void NetworkMgr::handleAudioNoInput(QString const& addr, quint16 port)
 {
     if (!sClientMgr->hasActiveCall())
         return;
 
-    quint32 id = sClientMgr->getActiveCallPeerId();
-    ContactInfo const* info = sClientMgr->findContact(id);
+    CallPeer const* peer = sClientMgr->getCallPeer(addr, port);
 
     QHostAddress hostAddr, peerAddr;
     quint16 hostPort, peerPort;
@@ -212,18 +211,20 @@ void NetworkMgr::handleAudioNoInput()
     _audioSock.getPeerInfo(peerAddr, peerPort);
 
     quint32 selfPort = hostPort + 1;
-    SipRequest Rqst("INFO", sClientMgr->getEmail(), sClientMgr->getAccountId(), hostAddr.toString(), selfPort, info->getEmail(), info->getId(), peerAddr.toString(), peerPort);
+    SipRequest Rqst("INFO", sClientMgr->getEmail(), sClientMgr->getAccountId(), hostAddr.toString(), selfPort, peer->email, peer->id, peerAddr.toString(), peerPort);
     sNetworkMgr->tcpSendPacket(Rqst.getPacket());
     std::cout << "NEW HOST PORT: " << selfPort << std::endl;
 }
 
 void NetworkMgr::handleSipInfo(SipRequest const& request)
 {
-    if (sClientMgr->getActiveCallPeerId() != request.getSenderId())
+    if (!sClientMgr->hasActiveCallWith(request.getSenderId()))
         return;
 
     std::cout << "NEW PEER PORT: " << request.getSenderPort() << std::endl;
     sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
+    if (CallPeer* peer = sClientMgr->getCallPeer(request.getSenderId()))
+        peer->port = request.getSenderPort();
 
     SipRespond resp(200, request);
     tcpSendPacket(resp.getPacket());
