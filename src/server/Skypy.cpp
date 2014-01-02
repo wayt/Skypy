@@ -168,6 +168,7 @@ void Skypy::_handleSessionLogin(Session* sess)
     info << uint32(sess->getId());
     info << sess->getName();
     info << sess->getEmail();
+    info << sess->getHostAddress();
     sess->send(info);
 
     try

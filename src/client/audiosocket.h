@@ -38,7 +38,6 @@ private:
     quint16 _peerPort;
 
     bool _inputReaded;
-    bool _newHostInfo;
 
 private slots:
     void _socket_readyRead();

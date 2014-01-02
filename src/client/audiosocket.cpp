@@ -9,8 +9,7 @@ AudioSocket::AudioSocket(QObject *parent) :
     _run(false),
     _socket(new QUdpSocket(this)),
     _hostAddr(),
-    _hostPort(AUDIO_PORT),
-    _newHostInfo(false)
+    _hostPort(AUDIO_PORT)
 {
     QObject::connect(_socket, SIGNAL(readyRead()), this, SLOT(_socket_readyRead()));
 }
@@ -43,7 +42,6 @@ void AudioSocket::changeHostAddr(QHostAddress const& addr, quint16 port)
 {
     _hostAddr = addr;
     _hostPort = port;
-    _newHostInfo = true;
 }
 
 void AudioSocket::setPeerAddr(const QHostAddress& addr, quint16 port)
@@ -90,21 +88,12 @@ void AudioSocket::run()
 
         if (!_inputReaded)
         {
-            if (_newHostInfo)
+            int mstime = inputTimer.elapsed();
+            if (mstime > 2000)
             {
-                setHostAddr(_hostAddr, _hostPort);
-                _newHostInfo = false;
+                sNetworkMgr->handleAudioNoInput(_peerAddr.toString(), _peerPort);
+                inputTimer.restart();
             }
-            else
-            {
-                int mstime = inputTimer.elapsed();
-                if (mstime > 2000)
-                {
-                    sNetworkMgr->handleAudioNoInput(_peerAddr.toString(), _peerPort);
-                    inputTimer.restart();
-                }
-            }
-
         }
 
         EncodedSample encodedSample = sAudioManager->inputQueue().dequeue();
