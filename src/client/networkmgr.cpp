@@ -9,7 +9,7 @@
 #include "clientmgr.h"
 
 NetworkMgr::NetworkMgr() : _tcpSock(), _window(NULL), _connState(STATE_DISCONNECTED),
-    _audioSock(this)
+    _audioSocks()
 {
     QTcpSocket::connect(&_tcpSock, SIGNAL(connected()), this, SLOT(_handleTcpConnected()));
     QTcpSocket::connect(&_tcpSock, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(_handleTcpError(QAbstractSocket::SocketError)));
@@ -153,12 +153,14 @@ void  NetworkMgr::handleSipRep(Packet &pkt)
     quint32 destId;
     QString destIp;
     quint32 destPort;
+    quint32 chatId;
 
     std::cout << "SIP RESPOND RECEIVED" << std::endl;
     pkt >> code >> cmd;
     pkt >> senderEmail >> senderId >> senderIp >> senderPort;
     pkt >> destEmail >> destId >> destIp >> destPort;
-    SipRespond resp(code, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort);
+    pkt >> chatId;
+    SipRespond resp(code, cmd, senderEmail, senderId, senderIp, senderPort, destEmail, destId, destIp, destPort, chatId);
     if (resp.getCmd() != "INFO")
         _window->handlesipResponse(resp);
     else
@@ -198,17 +200,17 @@ void NetworkMgr::handleSipRequest(Packet &pkt)
     }
 }
 
-void NetworkMgr::handleAudioNoInput(QString const& addr, quint16 port)
+void NetworkMgr::handleAudioNoInput(AudioSocket* sock)
 {
     if (!sClientMgr->hasActiveCall())
         return;
 
-    CallPeer const* peer = sClientMgr->getCallPeer(addr, port);
-
     QHostAddress hostAddr, peerAddr;
     quint16 hostPort, peerPort;
-    _audioSock.getHostInfo(hostAddr, hostPort);
-    _audioSock.getPeerInfo(peerAddr, peerPort);
+    sock->getHostInfo(hostAddr, hostPort);
+    sock->getPeerInfo(peerAddr, peerPort);
+
+    CallPeer const* peer = sClientMgr->getCallPeer(peerAddr.toString(), peerPort);
 
     quint32 selfPort = hostPort + 1;
     SipRequest Rqst("INFO", sClientMgr->getEmail(), sClientMgr->getAccountId(), hostAddr.toString(), selfPort, peer->email, peer->id, peerAddr.toString(), peerPort);
@@ -222,7 +224,7 @@ void NetworkMgr::handleSipInfo(SipRequest const& request)
         return;
 
     std::cout << "NEW PEER PORT: " << request.getSenderPort() << std::endl;
-    sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
+    sNetworkMgr->setCallPeerAddr(QHostAddress(request.getDestIp()), request.getDestPort(), QHostAddress(request.getSenderIp()), request.getSenderPort());
     if (CallPeer* peer = sClientMgr->getCallPeer(request.getSenderId()))
         peer->port = request.getSenderPort();
 
@@ -233,5 +235,61 @@ void NetworkMgr::handleSipInfo(SipRequest const& request)
 void NetworkMgr::handleSipInfoResponse(SipRespond const& resp)
 {
     if (resp.getCode() == 180)
-        sNetworkMgr->setCallHostAddr(QHostAddress(resp.getSenderIp()), resp.getSenderPort());
+    {
+        if (AudioSocket* sock = findAudioSocket(QHostAddress(resp.getDestIp()), resp.getDestPort()))
+            sock->setHostAddr(QHostAddress(resp.getSenderIp()), resp.getSenderPort());
+    }
+
+
+}
+
+bool NetworkMgr::addCallHostAddr(QHostAddress const& addr, quint16 port)
+{
+    AudioSocket* sock = new AudioSocket(this);
+    if (!sock->setHostAddr(addr, port))
+    {
+        delete sock;
+        return false;
+    }
+    _audioSocks.push_back(sock);
+    return true;
+}
+
+void NetworkMgr::quitCall()
+{
+    for (QList<AudioSocket*>::ConstIterator itr = _audioSocks.begin();
+         itr != _audioSocks.end();)
+    {
+        AudioSocket* sock = *itr;
+        ++itr;
+        sock->quit();
+        delete sock;
+    }
+    _audioSocks.clear();
+}
+
+void NetworkMgr::setCallPeerAddr(QHostAddress const& hostAddr, quint16 hostPort, const QHostAddress& addr, quint16 port)
+{
+    if (AudioSocket* sock = findAudioSocket(hostAddr, hostPort))
+    {
+        sock->setHostAddr(addr, port);
+        if (!sock->isRunning())
+            sock->start();
+    }
+}
+
+AudioSocket* NetworkMgr::findAudioSocket(QHostAddress const& host, quint16 port)
+{
+    for (QList<AudioSocket*>::ConstIterator itr = _audioSocks.begin();
+         itr != _audioSocks.end(); ++itr)
+    {
+        AudioSocket* sock = *itr;
+        QHostAddress currHostAddr;
+        quint16 currHostPort;
+        sock->getHostInfo(currHostAddr, currHostPort);
+
+        if (host.toString() == currHostAddr.toString() && currHostPort == port)
+            return sock;
+    }
+    return NULL;
 }

@@ -51,16 +51,25 @@ void WidgetChatTab::on__callButon_clicked()
         std::cout << "CLICKED CALL BUTTON" << std::endl;
         if (sClientMgr->hasActiveCallWith(peer->peerId) || sClientMgr->hasCallRequestFrom(peer->peerId))
         {
-            sClientMgr->stopCall(peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
+            sClientMgr->stopCall(0, peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
             _callButon->setText("Call");
         }
         else
-            sClientMgr->makeCall(peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
+            sClientMgr->makeCall(0, peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
     }
     else if (_tabType == CHAT_TAB_MULTI)
     {
-
-
+        for (QMap<quint32, PeerInfo*>::ConstIterator itr = _peersMap.begin(); itr != _peersMap.end(); ++itr)
+        {
+            PeerInfo const* peer = itr.value();
+            if (sClientMgr->hasGroupCall(getTabId()))
+            {
+                sClientMgr->stopCall(getTabId(), peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
+                _callButon->setText("Call");
+            }
+            else
+                sClientMgr->makeCall(getTabId(), peer->peerEmail, peer->peerId, peer->peerPublicIp, peer->peerPrivateIp);
+        }
     }
 }
 
@@ -199,8 +208,7 @@ void WidgetChatTab::handleCallResponse(SipRespond const& resp)
         if (sAudioManager->start())
         {
             std::cout << "RECEIV PEER ADDR: " << resp.getDestIp().toStdString() << std::endl;
-            sNetworkMgr->setCallPeerAddr(QHostAddress(resp.getDestIp()), resp.getDestPort());
-            sNetworkMgr->runCall();
+            sNetworkMgr->setCallPeerAddr(QHostAddress(resp.getSenderIp()), resp.getSenderPort(), QHostAddress(resp.getDestIp()), resp.getDestPort());
             sClientMgr->setActiveCallPeer(resp.getDestId());
         }
         else
@@ -251,13 +259,12 @@ void WidgetChatTab::handleCallRequest(SipRequest const& request)
             {
                 for (quint16 selfPort = request.getSenderPort() + 1; selfPort < request.getSenderPort() + 200; ++selfPort)
                 {
-                    if (sNetworkMgr->setCallHostAddr(host, selfPort))
+                    if (sNetworkMgr->addCallHostAddr(host, selfPort))
                     {
                         if (sAudioManager->start())
                         {
                             std::cout << "SET PEER ADDR: " << request.getSenderIp().toStdString() << std::endl;
-                            sNetworkMgr->setCallPeerAddr(QHostAddress(request.getSenderIp()), request.getSenderPort());
-                            sNetworkMgr->runCall();
+                            sNetworkMgr->setCallPeerAddr(QHostAddress(request.getDestIp()), request.getDestPort(), QHostAddress(request.getSenderIp()), request.getSenderPort());
 
                             std::cout << "CALL ACCEPTED, LISTEN ON " << request.getDestIp().toStdString() << ":" << request.getDestPort() << std::endl;
                             SipRespond Rep(200, request, selfPort);

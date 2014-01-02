@@ -141,6 +141,21 @@ public:
         return NULL;
     }
 
+    bool hasGroupCall(quint32 id = 0) const
+    {
+        for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
+             itr != _callPeer.end(); ++itr)
+            if (id == 0)
+            {
+                if ((*itr)->chatId != 0)
+                    return true;
+            }
+            else
+                if ((*itr)->chatId  == id)
+                    return true;
+        return NULL;
+    }
+
     void clearCallPeers()
     {
         for (QList<CallPeer*>::ConstIterator itr = _callPeer.begin();
@@ -154,8 +169,8 @@ public:
     }
 
 
-    void makeCall(QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp);
-    void stopCall(QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp);
+    void makeCall(quint32 chatId, QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp);
+    void stopCall(quint32 chatId, QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp);
 
     void clearContacts() { _contactMap.clear(); }
     bool addContact(ContactInfo* info);

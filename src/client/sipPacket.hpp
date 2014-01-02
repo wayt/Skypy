@@ -7,9 +7,9 @@
 class SipRequest
 {
 public:
-    explicit SipRequest(QString const& cmd, QString const& senderEmail, quint32 senderId, QString const& senderIp, quint32 senderPort, QString const& destEmail, quint32 destId, QString const& destIp, quint32 destPort) :
+    explicit SipRequest(QString const& cmd, QString const& senderEmail, quint32 senderId, QString const& senderIp, quint32 senderPort, QString const& destEmail, quint32 destId, QString const& destIp, quint32 destPort, quint32 chatId = 0) :
         _pkt(RMSG_SIP), _cmd(cmd), _senderEmail(senderEmail), _senderId(senderId), _senderIp(senderIp), _senderPort(senderPort),
-        _destEmail(destEmail), _destId(destId), _destIp(destIp), _destPort(destPort)
+        _destEmail(destEmail), _destId(destId), _destIp(destIp), _destPort(destPort), _chatId(chatId)
     {
         _pkt << _cmd;
         _pkt << _senderEmail;
@@ -20,6 +20,7 @@ public:
         _pkt << quint32(_destId);
         _pkt << _destIp;
         _pkt << quint32(_destPort);
+        _pkt << quint32(_chatId);
     }
     Packet const& getPacket() const {
         return _pkt;
@@ -51,6 +52,9 @@ public:
     quint32 getDestPort() const {
         return _destPort;
     }
+    quint32 getChatId() const {
+        return _chatId;
+    }
 private:
     Packet _pkt;
     QString const _cmd;
@@ -62,15 +66,16 @@ private:
     quint32 _destId;
     QString const _destIp;
     quint32 _destPort;
+    quint32 _chatId;
 };
 
 class SipRespond
 {
 public:
-    explicit SipRespond(quint32 code, QString const& cmd, QString const& senderEmail, quint32 senderId, QString const& senderIp, quint32 senderPort, QString const& destEmail, quint32 destId, QString const& destIp, quint32 destPort) :
+    explicit SipRespond(quint32 code, QString const& cmd, QString const& senderEmail, quint32 senderId, QString const& senderIp, quint32 senderPort, QString const& destEmail, quint32 destId, QString const& destIp, quint32 destPort, quint32 chatId = 0) :
         _pkt(rMSG_SIP), _code(code), _cmd(cmd),
         _senderEmail(senderEmail), _senderId(senderId), _senderIp(senderIp), _senderPort(senderPort),
-        _destEmail(destEmail), _destId(destId), _destIp(destIp), _destPort(destPort)
+        _destEmail(destEmail), _destId(destId), _destIp(destIp), _destPort(destPort), _chatId(chatId)
     {
         _pkt << _code;
         _pkt << _cmd;
@@ -82,12 +87,13 @@ public:
         _pkt << _destId;
         _pkt << _destIp;
         _pkt << _destPort;
+        _pkt << quint32(_chatId);
 
     }
     SipRespond(quint32 code, SipRequest const& req) :
         _pkt(rMSG_SIP), _code(code), _cmd(req.getCmd()),
         _senderEmail(req.getSenderEmail()), _senderId(req.getSenderId()), _senderIp(req.getSenderIp()), _senderPort(req.getSenderPort()),
-        _destEmail(req.getDestEmail()), _destId(req.getDestId()), _destIp(req.getDestIp()), _destPort(req.getDestPort())
+        _destEmail(req.getDestEmail()), _destId(req.getDestId()), _destIp(req.getDestIp()), _destPort(req.getDestPort()), _chatId(req.getChatId())
     {
         _pkt << _code;
         _pkt << _cmd;
@@ -99,13 +105,14 @@ public:
         _pkt << _destId;
         _pkt << _destIp;
         _pkt << _destPort;
+        _pkt << quint32(_chatId);
 
     }
 
     SipRespond(quint32 code, SipRequest const& req, quint16 peerPort) :
         _pkt(rMSG_SIP), _code(code), _cmd(req.getCmd()),
         _senderEmail(req.getSenderEmail()), _senderId(req.getSenderId()), _senderIp(req.getSenderIp()), _senderPort(req.getSenderPort()),
-        _destEmail(req.getDestEmail()), _destId(req.getDestId()), _destIp(req.getDestIp()), _destPort(peerPort)
+        _destEmail(req.getDestEmail()), _destId(req.getDestId()), _destIp(req.getDestIp()), _destPort(peerPort), _chatId(req.getChatId())
     {
         _pkt << _code;
         _pkt << _cmd;
@@ -117,6 +124,7 @@ public:
         _pkt << _destId;
         _pkt << _destIp;
         _pkt << _destPort;
+        _pkt << quint32(_chatId);
 
     }
 
@@ -153,6 +161,9 @@ public:
     quint32 getDestPort() const {
         return _destPort;
     }
+    quint32 getChatId() const {
+        return _chatId;
+    }
 private:
     Packet _pkt;
     quint32 _code;
@@ -165,6 +176,7 @@ private:
     quint32 _destId;
     QString const _destIp;
     quint32 _destPort;
+    quint32 _chatId;
 };
 
 #endif

@@ -35,17 +35,17 @@ public:
     void closeTcpConnection();
     void setMainWindow(MainWindow* window) { _window = window; }
 
-    bool setCallHostAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { return _audioSock.setHostAddr(addr, port); }
-    void setCallPeerAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { _audioSock.setPeerAddr(addr, port); }
-    void quitCall() { _audioSock.quit(); }
-    void terminateCall() { _audioSock.terminate(); }
-    void runCall() { _audioSock.start(); }
+    //bool setCallHostAddr(const QHostAddress& addr, quint16 port = AUDIO_PORT) { return _audioSock.setHostAddr(addr, port); }
+    bool addCallHostAddr(QHostAddress const& addr, quint16 port);
+    void setCallPeerAddr(QHostAddress const& hostAddr, quint16 hostPort, const QHostAddress& addr, quint16 port);
+    void quitCall();
+    AudioSocket* findAudioSocket(QHostAddress const& host, quint16 port);
     void handleSipRequest(Packet &pkt);
     void handleSipRep(Packet &pkt);
     void handleSipInfo(SipRequest const& request);
     void handleSipInfoResponse(SipRespond const& resp);
 
-    void handleAudioNoInput(QString const& addr, quint16 port);
+    void handleAudioNoInput(AudioSocket* sock);
 
     void debugInput();
 private slots:
@@ -56,7 +56,7 @@ private:
     QTcpSocket _tcpSock;
     MainWindow* _window;
     ConnectionState _connState;
-    AudioSocket _audioSock;
+    QList<AudioSocket*> _audioSocks;
 };
 
 #define sNetworkMgr NetworkMgr::instance()

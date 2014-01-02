@@ -91,7 +91,7 @@ void AudioSocket::run()
             int mstime = inputTimer.elapsed();
             if (mstime > 2000)
             {
-                sNetworkMgr->handleAudioNoInput(_peerAddr.toString(), _peerPort);
+                sNetworkMgr->handleAudioNoInput(this);
                 inputTimer.restart();
             }
         }

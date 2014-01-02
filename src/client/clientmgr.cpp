@@ -11,10 +11,14 @@ ClientMgr::ClientMgr() : _accountId(0), _username(""), _email(""),
 {
 }
 
-void ClientMgr::makeCall(const QString &destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp)
+void ClientMgr::makeCall(quint32 chatId, const QString &destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp)
 {
-    if (hasCallRequest() || hasActiveCall())
+    if (chatId == 0 && hasGroupCall())
         return;
+
+    if (hasCallRequestFrom(destId) || hasActiveCallWith(destId))
+        return;
+
 
     QHostAddress host;
     QString destIp = destPublicIp;
@@ -28,18 +32,18 @@ void ClientMgr::makeCall(const QString &destEmail, quint32 destId, QString const
 
     std::cout << "SEND CALL TO: " << host.toString().toStdString() << std::endl;
     for (quint32 selfPort = AUDIO_PORT; selfPort < AUDIO_PORT + 200; ++selfPort)
-        if (sNetworkMgr->setCallHostAddr(host, selfPort))
+        if (sNetworkMgr->addCallHostAddr(host, selfPort))
         {
-            SipRequest Rqst("INVITE", sClientMgr->getEmail(), sClientMgr->getAccountId(), host.toString(), selfPort, destEmail, destId, destIp, selfPort);
+            SipRequest Rqst("INVITE", sClientMgr->getEmail(), sClientMgr->getAccountId(), host.toString(), selfPort, destEmail, destId, destIp, selfPort, chatId);
             sNetworkMgr->tcpSendPacket(Rqst.getPacket());
-            CallPeer* peer = new CallPeer(0, destId, destEmail, destIp, selfPort, false);
+            CallPeer* peer = new CallPeer(chatId, destId, destEmail, destIp, selfPort, false);
             sClientMgr->addCallRequest(peer);
             break;
         }
 }
 
 
-void ClientMgr::stopCall(QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp)
+void ClientMgr::stopCall(quint32 chatId, QString const& destEmail, quint32 destId, QString const& destPublicIp, QString const& destPrivateIp)
 {
     if (!hasActiveCall())
         return;
@@ -55,7 +59,7 @@ void ClientMgr::stopCall(QString const& destEmail, quint32 destId, QString const
         host.setAddress(_publicIp);
 
     std::cout << "CANCEL CALL" << std::endl;
-    SipRequest Rqst("BYE", sClientMgr->getEmail(), sClientMgr->getAccountId(), host.toString(), 0, destEmail, destId, destIp, 0);
+    SipRequest Rqst("BYE", sClientMgr->getEmail(), sClientMgr->getAccountId(), host.toString(), 0, destEmail, destId, destIp, chatId);
     sNetworkMgr->tcpSendPacket(Rqst.getPacket());
 
     sClientMgr->clearCallPeers();
