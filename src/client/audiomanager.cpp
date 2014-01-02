@@ -91,6 +91,8 @@ void AudioManager::terminate()
 
 void AudioManager::run()
 {
+    QTime timer;
+    timer.start();
     while (_run)
     {
         AudioSample sample;
@@ -100,19 +102,18 @@ void AudioManager::run()
             QThread::msleep(10);
 
 
-        QTime timer;
-        timer.start();
         quint32 sendCount = 0;
         // Audio stream (raw data) to input queue (Encoded data)
-        if (!_input->inputQueue().isEmpty())
+        if (timer.elapsed() >= 20)
         {
+            timer.restart();
             sample = _input->inputQueue().dequeue();
 
             QMap<quint32, AudioSample> sampleMap;
-            for (QMap<quint32, QSynchronizedQueue<EncodedSample>*>::ConstIterator itr2 = _forwardQueues.begin();
+            for (QMap<quint32, QQueue<EncodedSample>*>::ConstIterator itr2 = _forwardQueues.begin();
                  itr2 != _forwardQueues.end(); ++itr2)
             {
-                if (sNetworkMgr->isAudioSocketConnect(itr2.key()))
+                if (itr2.value()->size() > 0 && sNetworkMgr->isAudioSocketConnect(itr2.key()))
                     sAudioEncoder->decode(sampleMap[itr2.key()], itr2.value()->dequeue());
             }
 
@@ -154,7 +155,7 @@ void AudioManager::run()
 void AudioManager::addInputPeer(quint32 id)
 {
     _inputQueues[id] = new QSynchronizedQueue<EncodedSample>();
-    _forwardQueues[id] = new QSynchronizedQueue<EncodedSample>();
+    _forwardQueues[id] = new QQueue<EncodedSample>();
 }
 
 void AudioManager::removeInputPeer(quint32 id)
@@ -170,10 +171,10 @@ void AudioManager::removeInputPeer(quint32 id)
     }
 
     {
-        QMap<quint32, QSynchronizedQueue<EncodedSample>*>::Iterator itr = _forwardQueues.find(id);
+        QMap<quint32, QQueue<EncodedSample>*>::Iterator itr = _forwardQueues.find(id);
         if (itr != _forwardQueues.end())
         {
-            QSynchronizedQueue<EncodedSample>* input = itr.value();
+            QQueue<EncodedSample>* input = itr.value();
             _forwardQueues.erase(itr);
             delete input;
         }

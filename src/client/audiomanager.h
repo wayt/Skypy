@@ -67,7 +67,7 @@ private:
     //QSynchronizedQueue<EncodedSample> _inputQueue;
     QMap<quint32, QSynchronizedQueue<EncodedSample>*> _inputQueues;
     QSynchronizedQueue<EncodedSample> _outputQueue;
-    QMap<quint32, QSynchronizedQueue<EncodedSample>*> _forwardQueues;
+    QMap<quint32, QQueue<EncodedSample>*> _forwardQueues;
 
 signals:
     void error(const QString &errText);
