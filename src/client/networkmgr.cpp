@@ -288,13 +288,18 @@ AudioSocket* NetworkMgr::findAudioSocket(quint32 peerId)
     return NULL;
 }
 
-void NetworkMgr::forwardToOtherAudioSocket(QByteArray const& data, quint32 peerId)
+AudioSocket const* NetworkMgr::findAudioSocket(quint32 peerId) const
 {
-    if (_audioSocks.size() <= 1)
-        return;
+    QMap<quint32, AudioSocket*>::ConstIterator itr = _audioSocks.find(peerId);
+    if (itr != _audioSocks.end())
+        return itr.value();
+    return NULL;
+}
 
-    for (QMap<quint32, AudioSocket*>::Iterator itr = _audioSocks.begin();
-         itr != _audioSocks.end(); ++itr)
-        if (itr.key() != peerId)
-            itr.value()->sendToPeer(data);
+bool NetworkMgr::isAudioSocketConnect(quint32 peerId) const
+{
+    AudioSocket const* sock = findAudioSocket(peerId);
+    if (sock && sock->isConnected())
+        return true;
+    return false;
 }

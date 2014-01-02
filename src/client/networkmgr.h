@@ -40,13 +40,15 @@ public:
     void setCallPeerAddr(quint32 peerId, const QHostAddress& addr, quint16 port);
     void quitCall();
     AudioSocket* findAudioSocket(quint32 peerId);
+    AudioSocket const* findAudioSocket(quint32 peerId) const;
     void handleSipRequest(Packet &pkt);
     void handleSipRep(Packet &pkt);
     void handleSipInfo(SipRequest const& request);
     void handleSipInfoResponse(SipRespond const& resp);
 
     void handleAudioNoInput(AudioSocket* sock);
-    void forwardToOtherAudioSocket(QByteArray const& data, quint32 peerId);
+
+    bool isAudioSocketConnect(quint32 peerId) const;
 
     void debugInput();
 private slots:

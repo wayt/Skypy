@@ -1,5 +1,8 @@
 #include "audioencoder.h"
 #include "audiomanager.h"
+#include <QTime>
+#include <iostream>
+#include "networkmgr.h"
 
 AudioManager::AudioManager(QObject *parent) :
     QThread(parent),
@@ -93,19 +96,23 @@ void AudioManager::run()
         AudioSample sample;
         EncodedSample encodedSample;
 
-        if (_input->inputQueue().isEmpty() && _output->outputQueue().isEmpty())
+        if (_input->inputQueue().isEmpty() && _output->outputQueue().isEmpty() && _forwardQueues.empty() && _run)
             QThread::msleep(10);
 
+
+        QTime timer;
+        timer.start();
+        quint32 sendCount = 0;
         // Audio stream (raw data) to input queue (Encoded data)
         while (!_input->inputQueue().isEmpty())
         {
             sample = _input->inputQueue().dequeue();
 
             QMap<quint32, AudioSample> sampleMap;
-            for (QMap<quint32, QQueue<EncodedSample>*>::ConstIterator itr2 = _forwardQueues.begin();
+            for (QMap<quint32, QSynchronizedQueue<EncodedSample>*>::ConstIterator itr2 = _forwardQueues.begin();
                  itr2 != _forwardQueues.end(); ++itr2)
             {
-                if (itr2.value()->size() > 0)
+                if (sNetworkMgr->isAudioSocketConnect(itr2.key()))
                     sAudioEncoder->decode(sampleMap[itr2.key()], itr2.value()->dequeue());
             }
 
@@ -122,17 +129,24 @@ void AudioManager::run()
 
                 if (sAudioEncoder->encode(sample, encodedSample))
                 {
+                    ++sendCount;
                     itr.value()->enqueue(encodedSample);
+                    std::cout << "PEER: " << itr.key() << " - SIZE: " << itr.value()->size() << std::endl;
                 }
             }
         }
+        if (sendCount > 0)
+            std::cout << "DIFF: " << timer.elapsed() << " COUNT: " << sendCount << std::endl;
 
         // Output queue (Encoded data) to audio stream (raw data)
         while (!_outputQueue.isEmpty())
         {
             encodedSample = _outputQueue.dequeue();
             if (sAudioEncoder->decode(sample, encodedSample))
+            {
                 _output->outputQueue().enqueue(sample);
+                std::cout << "OUPUT SIZE: " << _output->outputQueue().size() << std::endl;
+            }
         }
     }
 }
@@ -140,7 +154,7 @@ void AudioManager::run()
 void AudioManager::addInputPeer(quint32 id)
 {
     _inputQueues[id] = new QSynchronizedQueue<EncodedSample>();
-    _forwardQueues[id] = new QQueue<EncodedSample>();
+    _forwardQueues[id] = new QSynchronizedQueue<EncodedSample>();
 }
 
 void AudioManager::removeInputPeer(quint32 id)
@@ -156,10 +170,10 @@ void AudioManager::removeInputPeer(quint32 id)
     }
 
     {
-        QMap<quint32, QQueue<EncodedSample>*>::Iterator itr = _forwardQueues.find(id);
+        QMap<quint32, QSynchronizedQueue<EncodedSample>*>::Iterator itr = _forwardQueues.find(id);
         if (itr != _forwardQueues.end())
         {
-            QQueue<EncodedSample>* input = itr.value();
+            QSynchronizedQueue<EncodedSample>* input = itr.value();
             _forwardQueues.erase(itr);
             delete input;
         }

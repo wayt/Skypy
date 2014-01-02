@@ -161,9 +161,10 @@ public:
         for (QList<CallPeer*>::Iterator itr = _callPeer.begin();
              itr != _callPeer.end(); ++itr)
         {
-            if (*itr == peer)
+            if ((*itr)->id == peer->id)
             {
                 _callPeer.erase(itr);
+                delete peer;
                 return;
             }
         }

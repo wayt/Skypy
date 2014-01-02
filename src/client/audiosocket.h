@@ -30,6 +30,8 @@ public slots:
     quint32 getPeerId() const { return _peerId; }
 
     void sendToPeer(QByteArray const& data) { _socket->writeDatagram(data, _peerAddr, _peerPort); }
+
+    bool isConnected() const { return _inputReaded; }
 private:
     bool _run;
     QUdpSocket *_socket;
