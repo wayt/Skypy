@@ -52,8 +52,7 @@ AudioSample& AudioSample::operator+=(const AudioSample &other)
         else if (_buffer[i] > MAX_VALUE)
             _buffer[i] = MAX_VALUE;
     }
-    if (_nbFrame < other._nbFrame)
-        _nbFrame = other._nbFrame;
+    _nbFrame = qMax(_nbFrame, other._nbFrame);
 
     return *this;
 }
