@@ -51,7 +51,7 @@ public:
     inline SAMPLE* buffer() { return _buffer; }
     void setBuffer(const SAMPLE *buffer, int nbFrame);
 
-    inline SAMPLE operator[](int idx) const { return _buffer[idx]; }
+    inline SAMPLE const& operator[](int idx) const { return _buffer[idx]; }
     inline SAMPLE& operator[](int idx) { return _buffer[idx]; }
 
     void clearBuffer();

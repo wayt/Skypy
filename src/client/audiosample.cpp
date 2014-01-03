@@ -48,7 +48,7 @@ AudioSample& AudioSample::operator+=(const AudioSample &other)
 {
     for (int i = 0; i < other._nbFrame; ++i)
     {
-        _buffer[i] = (_buffer[i] + other[i]) / 2;
+        _buffer[i] = qMax(_buffer[i], other[i]);
         if (_buffer[i] < MIN_VALUE)
             _buffer[i] = MIN_VALUE;
         else if (_buffer[i] > MAX_VALUE)
