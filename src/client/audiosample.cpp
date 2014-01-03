@@ -1,6 +1,7 @@
 #include <QtGlobal>
 
 #include "audiosample.h"
+#include <iostream>
 
 AudioSample::AudioSample() :
     _nbFrame(0),
@@ -45,12 +46,14 @@ AudioSample& AudioSample::operator+=(const AudioSample &other)
 {
     for (int i = 0; i < other._nbFrame; ++i)
     {
-        _buffer[i] = _buffer[i] + other[i];
+        _buffer[i] = (_buffer[i] + other[i]) / 2;
         if (_buffer[i] < MIN_VALUE)
             _buffer[i] = MIN_VALUE;
         else if (_buffer[i] > MAX_VALUE)
             _buffer[i] = MAX_VALUE;
     }
+    if (_nbFrame < other._nbFrame)
+        _nbFrame = other._nbFrame;
 
     return *this;
 }
@@ -69,6 +72,18 @@ void AudioSample::clearBuffer()
     for (int i = 0; i < NB_MAX_FRAMES; ++i)
         _buffer[i] = ZERO;
     _nbFrame = 0;
+}
+
+void AudioSample::dumpBuffer() const
+{
+    std::cout << "BUFFER: " << sizeof(SAMPLE) << " - FRAMES: " << _nbFrame << std::endl;
+    for (int i = 0; i < _nbFrame; ++i)
+    {
+        if (i % 10 == 0)
+            std::cout << std::endl;
+        std::cout << _buffer[i];
+    }
+    std::cout << std::endl;
 }
 
 double AudioSample::frequencyToDouble(eFrequency frequency)

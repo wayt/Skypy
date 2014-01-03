@@ -122,8 +122,8 @@ void AudioManager::run()
                     int size = itr2.value()->size();
                     while (--size >= 0)
                     {
-                        sAudioEncoder->decode(temp, itr2.value()->dequeue());
-                        sampleMap[itr2.key()] += temp;
+                        if (sAudioEncoder->decode(temp, itr2.value()->dequeue()))
+                            sampleMap[itr2.key()] += temp;
                     }
                 }
             }
@@ -163,13 +163,18 @@ void AudioManager::run()
                         ++addCount;
                     }
                 }
+                //output.dumpBuffer();
                 _output->outputQueue().enqueue(output);
-                std::cout << "OUPUT SIZE: " << _output->outputQueue().size() << " (" << addCount << ")" << std::endl;
+                //std::cout << "OUPUT SIZE: " << _output->outputQueue().size() << " (" << addCount << ")" << std::endl;
             }
 
         }
         else
-            QThread::msleep(20 - elapsed);
+        {
+            int time = 20 - elapsed - 2;
+            if (time > 0)
+                QThread::msleep(time);
+        }
         //if (sendCount > 0)
         //    std::cout << "DIFF: " << timer.elapsed() << " COUNT: " << sendCount << std::endl;
 

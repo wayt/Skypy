@@ -59,6 +59,8 @@ public:
     inline int nbFrame() const { return _nbFrame; }
     inline void setNbFrame(int nbFrame) { _nbFrame = nbFrame; }
 
+    void dumpBuffer() const;
+
 public:
     static double frequencyToDouble(eFrequency frequency);
     static int channelToInt(eChannel channel);
