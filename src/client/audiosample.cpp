@@ -7,6 +7,8 @@ AudioSample::AudioSample() :
     _nbFrame(0),
     _buffer()
 {
+    for (int i = 0; i < NB_MAX_FRAMES; ++i)
+        _buffer[i] = ZERO;
 }
 
 AudioSample::AudioSample(const SAMPLE *buffer, int nbFrame) :
