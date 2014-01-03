@@ -95,7 +95,6 @@ void AudioManager::run()
     timer.start();
     while (_run)
     {
-        AudioSample sample;
         EncodedSample encodedSample;
 
         //if (_input->inputQueue().isEmpty() && _output->outputQueue().isEmpty() && _forwardQueues.empty() && _run)
@@ -107,7 +106,7 @@ void AudioManager::run()
         int elapsed = timer.elapsed();
         if (elapsed >= 20)
         {
-            sample.clearBuffer();
+            AudioSample sample;
             timer.restart();
             int size = _input->inputQueue().size();
             while (--size >= 0)
@@ -144,7 +143,7 @@ void AudioManager::run()
                 {
                     ++sendCount;
                     itr.value()->enqueue(encodedSample);
-                    std::cout << "PEER: " << itr.key() << " - SIZE: " << itr.value()->size() << std::endl;
+                    //std::cout << "PEER: " << itr.key() << " - SIZE: " << itr.value()->size() << std::endl;
                 }
             }
 
@@ -152,25 +151,27 @@ void AudioManager::run()
             size = _outputQueue.size();
             if (size > 0)
             {
-                sample.clearBuffer();
+                AudioSample output;
+                quint32 addCount = 0;
                 while (--size >= 0)
                 {
                     AudioSample temp;
                     encodedSample = _outputQueue.dequeue();
                     if (sAudioEncoder->decode(temp, encodedSample))
                     {
-                        sample += temp;
+                        output += temp;
+                        ++addCount;
                     }
                 }
-                _output->outputQueue().enqueue(sample);
-                std::cout << "OUPUT SIZE: " << _output->outputQueue().size() << std::endl;
+                _output->outputQueue().enqueue(output);
+                std::cout << "OUPUT SIZE: " << _output->outputQueue().size() << " (" << addCount << ")" << std::endl;
             }
 
         }
         else
             QThread::msleep(20 - elapsed);
-        if (sendCount > 0)
-            std::cout << "DIFF: " << timer.elapsed() << " COUNT: " << sendCount << std::endl;
+        //if (sendCount > 0)
+        //    std::cout << "DIFF: " << timer.elapsed() << " COUNT: " << sendCount << std::endl;
 
     }
 }
