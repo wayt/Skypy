@@ -27,6 +27,10 @@ public:
     QString const& getPublicIp() const { return _publicIp; }
     QString const& getPrivateIp() const { return _privateIp; }
 
+    void setOnline(bool online) { _online = online; setText(QString(_name + " (" + _email + ") - " + (_online ? "Online" : "Offline"))); }
+    void setPublicIp(QString const& ip) { _publicIp = ip; }
+    void setPrivateIp(QString const& ip) { _privateIp = ip; }
+
 private:
     quint32 _id;
     QString _name;

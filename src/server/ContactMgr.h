@@ -18,8 +18,10 @@ enum SaveStatus
 
 struct ContactInfo
 {
-    ContactInfo(uint32 id, uint32 date, SaveStatus status = STATUS_SAVED);
+    ContactInfo(uint32 id, std::string const& name, std::string const& email, uint32 date, SaveStatus status = STATUS_SAVED);
     uint32 id;
+    std::string name;
+    std::string email;
     uint32 date;
     SaveStatus saveStatus;
 };

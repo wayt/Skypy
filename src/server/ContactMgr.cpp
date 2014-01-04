@@ -1,8 +1,8 @@
 #include "ContactMgr.h"
 #include "SkypyDatabase.h"
 
-ContactInfo::ContactInfo(uint32 id, uint32 date, SaveStatus status) :
-    id(id), date(date), saveStatus(status)
+ContactInfo::ContactInfo(uint32 id, std::string const& name, std::string const& email, uint32 date, SaveStatus status) :
+    id(id), name(name), email(email), date(date), saveStatus(status)
 {
 }
 
@@ -18,16 +18,18 @@ ContactMgr::ContactMgr() :
 
 void ContactMgr::loadFromDb()
 {
-    DbResultPtr result = sSkypyDb->query("SELECT account_id, friend_id, date FROM account_friends ORDER BY account_id");
+    DbResultPtr result = sSkypyDb->query("SELECT af.account_id, af.friend_id, af.date, a.name, a.email FROM account_friends af LEFT JOIN account a ON af.friend_id = a.id ORDER BY af.account_id");
 
     uint32 contactCount = 0;
     while (result->fetch())
     {
         uint32 account = (*result)["account_id"]->getValue<uint32>();
         uint32 friendId = (*result)["friend_id"]->getValue<uint32>();
+        std::string name = (*result)["name"]->getValue();
+        std::string email = (*result)["email"]->getValue();
         uint32 date = (*result)["date"]->getValue<uint32>();
 
-        _contacsMap[account][friendId] = new ContactInfo(friendId, date, STATUS_SAVED);
+        _contacsMap[account][friendId] = new ContactInfo(friendId, name, email, date, STATUS_SAVED);
         ++contactCount;
     }
 

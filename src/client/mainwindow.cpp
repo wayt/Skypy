@@ -101,7 +101,14 @@ void MainWindow::handleContactLogin(Packet& pkt)
         pkt >> ipPublic;
         pkt >> ipPrivate;
 
-        ContactInfo* info = new ContactInfo(_contactForm->getContactListWidget(), id, name, email, true, ipPublic, ipPrivate);
+        ContactInfo* info = sClientMgr->findContact(id);
+        if (!info)
+            continue;
+
+        info->setPublicIp(ipPublic);
+        info->setPrivateIp(ipPrivate);
+        info->setOnline(true);
+
         _contactForm->loginContact(info);
     }
 }
@@ -114,6 +121,14 @@ void MainWindow::handleContactLogout(Packet& pkt)
     {
         quint32 id;
         pkt >> id;
+
+        ContactInfo* info = sClientMgr->findContact(id);
+        if (!info)
+            continue;
+        info->setPublicIp("");
+        info->setPrivateIp("");
+        info->setOnline(false);
+
         _contactForm->logoutContact(id);
     }
 }
@@ -298,5 +313,28 @@ void MainWindow::handleChatGroupUpdateMember(Packet& pkt)
     peer.peerPrivateIp = privateIp;
     peer.online = online;
     _contactForm->chatGroupMemberUpdate(chatId, peer);
+}
 
+void MainWindow::handleContactList(Packet& pkt)
+{
+    quint32 count;
+    pkt >> count;
+    std::cout << "RECEIV CONTACT COUNT: " << count << std::endl;
+    for (quint32 i = 0; i < count; ++i)
+    {
+        quint32 id;
+        QString name;
+        QString email;
+        QString ipPublic, ipPrivate;
+        quint8 online;
+        pkt >> id;
+        pkt >> name;
+        pkt >> email;
+        pkt >> ipPublic;
+        pkt >> ipPrivate;
+        pkt >> online;
+
+        ContactInfo* info = new ContactInfo(_contactForm->getContactListWidget(), id, name, email, online != 0, ipPublic, ipPrivate);
+        _contactForm->addContact(info);
+    }
 }

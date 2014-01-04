@@ -24,6 +24,7 @@ OpcodeMgr::OpcodeDefinition const* OpcodeMgr::getOpcodeDefinition(quint16 opcode
         { SMSG_CHAT_GROUP_ADD_MEMBER, &MainWindow::handleChatGroupAddMember },
         { SMSG_GROUP_CHAT_TEXT, &MainWindow::handleGroupChatText },
         { SMSG_CHAT_GROUP_UPD_MEMBER, &MainWindow::handleChatGroupUpdateMember },
+        { SMSG_CONTACT_LIST, &MainWindow::handleContactList },
         { MSG_MAX, NULL}
     };
 

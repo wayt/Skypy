@@ -42,6 +42,7 @@ public:
     void initialize();
     void unload();
 
+    void addContact(ContactInfo* info);
     void loginContact(ContactInfo* info);
     void logoutContact(quint32 id);
 

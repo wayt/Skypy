@@ -41,7 +41,7 @@ public:
     void friendLogin(Session* sess);
     void addFriend(ContactInfo* info);
     void broadcastToFriend(Packet const& pkt) const;
-    void buildOnlineFriendPacket(Packet& pkt) const;
+    void buildFriendListPacket(Packet& pkt) const;
     void buildLoginPacket(Packet& pkt) const;
 
     void sendContactRequest();

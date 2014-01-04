@@ -189,8 +189,8 @@ void Skypy::_handleSessionLogin(Session* sess)
     {
     }
 
-    Packet peerData(SMSG_CONTACT_LOGIN);
-    sess->buildOnlineFriendPacket(peerData);
+    Packet peerData(SMSG_CONTACT_LIST);
+    sess->buildFriendListPacket(peerData);
     sess->send(peerData);
 
     // Send new contact requests to client

@@ -36,14 +36,20 @@ void WidgetContactsList::unload()
     _chatWindow->hide();
 }
 
-void WidgetContactsList::loginContact(ContactInfo* info)
+void WidgetContactsList::addContact(ContactInfo *info)
 {
     if (sClientMgr->addContact(info))
     {
         std::cout << "ADD CONTACT: " << info->text().toStdString() << std::endl;
-        _chatWindow->loginContact(info->getId());
+        if (info->isOnline())
+            _chatWindow->loginContact(info->getId());
         _contactList->addItem(info);
     }
+}
+
+void WidgetContactsList::loginContact(ContactInfo* info)
+{
+    _chatWindow->loginContact(info->getId());
 }
 
 void WidgetContactsList::logoutContact(quint32 id)
@@ -53,8 +59,6 @@ void WidgetContactsList::logoutContact(quint32 id)
         return;
 
     _chatWindow->logoutContact(id);
-    _contactList->removeItemWidget(info);
-    sClientMgr->removeContact(id);
 
     if (sClientMgr->hasActiveCallWith(id) || sClientMgr->hasCallRequestFrom(id))
     {

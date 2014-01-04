@@ -27,6 +27,7 @@ enum Opcodes
     CMSG_GROUP_CHAT_TEXT        = 20,
     SMSG_GROUP_CHAT_TEXT        = 21,
     SMSG_CHAT_GROUP_UPD_MEMBER  = 22,
+    SMSG_CONTACT_LIST           = 23,
     MSG_MAX
 };
 
