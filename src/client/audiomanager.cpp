@@ -93,14 +93,77 @@ void AudioManager::run()
 {
     QTime timer;
     timer.start();
+    AudioSample outSample;
+    bool outSampleValid = false;
+
     while (_run)
     {
         EncodedSample encodedSample;
+        AudioSample sample;
 
         //if (_input->inputQueue().isEmpty() && _output->outputQueue().isEmpty() && _forwardQueues.empty() && _run)
         //    QThread::msleep(10);
 
 
+        if (!_outputQueue.isEmpty())
+        {
+            while (!_outputQueue.isEmpty())
+            {
+                AudioSample temp;
+                encodedSample = _outputQueue.dequeue();
+                if (sAudioEncoder->decode(temp, encodedSample))
+                {
+                    outSample += temp;
+                    outSampleValid = true;
+                }
+            }
+
+        }
+        if (outSampleValid && timer.elapsed() >= 20)
+        {
+            std::cout << "ELAPSED: " << timer.elapsed() << " - SIZE: " << _output->outputQueue().size() << std::endl;
+            timer.restart();
+            _output->outputQueue().enqueue(outSample);
+            outSample.clearBuffer();
+            outSampleValid = false;
+        }
+
+        if (!_input->inputQueue().isEmpty())
+        {
+            sample = _input->inputQueue().dequeue();
+
+            QMap<quint32, AudioSample> sampleMap;
+            for (QMap<quint32, QQueue<EncodedSample>*>::ConstIterator itr = _forwardQueues.begin();
+                 itr != _forwardQueues.end(); ++itr)
+            {
+                if (itr.value()->size() > 0 && sNetworkMgr->isAudioSocketConnect(itr.key()))
+                {
+                    AudioSample temp;
+                    encodedSample = itr.value()->dequeue();
+                    if (sAudioEncoder->decode(temp, encodedSample))
+                    {
+                        sampleMap[itr.key()] = temp;
+                    }
+                }
+            }
+
+            for (QMap<quint32, QSynchronizedQueue<EncodedSample>*>::Iterator itr = _inputQueues.begin();
+                 itr != _inputQueues.end(); ++itr)
+            {
+                AudioSample sendSample = sample;
+
+                for (QMap<quint32, AudioSample>::ConstIterator itr2 = sampleMap.begin();
+                     itr2 != sampleMap.end(); ++itr2)
+                    if (itr.key() != itr2.key())
+                        sendSample += itr2.value();
+
+                if (sAudioEncoder->encode(sendSample, encodedSample))
+                    itr.value()->enqueue(encodedSample);
+            }
+        }
+
+
+        /*
         quint32 sendCount = 0;
         // Audio stream (raw data) to input queue (Encoded data)
         int elapsed = timer.elapsed();
@@ -175,6 +238,7 @@ void AudioManager::run()
             if (time > 0)
                 QThread::msleep(time);
         }
+        */
         //if (sendCount > 0)
         //    std::cout << "DIFF: " << timer.elapsed() << " COUNT: " << sendCount << std::endl;
 

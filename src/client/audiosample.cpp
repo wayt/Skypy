@@ -17,8 +17,7 @@ AudioSample::AudioSample(const SAMPLE *buffer, int nbFrame) :
 {
     int maxFrame = qMin(nbFrame, NB_MAX_FRAMES);
 
-    for (int i = 0; i < maxFrame; ++i)
-        _buffer[i] = buffer[i];
+    memcpy(_buffer, buffer, maxFrame * sizeof(SAMPLE));
     _nbFrame = maxFrame;
 }
 
@@ -26,8 +25,7 @@ AudioSample::AudioSample(const AudioSample &other) :
     _nbFrame(other._nbFrame),
     _buffer()
 {
-    for (int i = 0; i < _nbFrame; ++i)
-        _buffer[i] = other._buffer[i];
+    memcpy(_buffer, other._buffer, _nbFrame * sizeof(SAMPLE));
 }
 
 AudioSample::~AudioSample()
@@ -38,8 +36,7 @@ AudioSample& AudioSample::operator=(const AudioSample &other)
 {
     _nbFrame = other._nbFrame;
 
-    for (int i = 0; i < _nbFrame; ++i)
-        _buffer[i] = other._buffer[i];
+    memcpy(_buffer, other._buffer, _nbFrame * sizeof(SAMPLE));
 
     return *this;
 }
@@ -48,7 +45,7 @@ AudioSample& AudioSample::operator+=(const AudioSample &other)
 {
     for (int i = 0; i < other._nbFrame; ++i)
     {
-        _buffer[i] = qMax(_buffer[i], other[i]);
+        _buffer[i] = _buffer[i] + other[i];
         if (_buffer[i] < MIN_VALUE)
             _buffer[i] = MIN_VALUE;
         else if (_buffer[i] > MAX_VALUE)
@@ -63,8 +60,7 @@ void AudioSample::setBuffer(const SAMPLE *buffer, int nbFrame)
 {
     int maxFrame = qMin(nbFrame, NB_MAX_FRAMES);
 
-    for (int i = 0; i < maxFrame; ++i)
-        _buffer[i] = buffer[i];
+    memcpy(_buffer, buffer, maxFrame * sizeof(SAMPLE));
     _nbFrame = maxFrame;
 }
 
