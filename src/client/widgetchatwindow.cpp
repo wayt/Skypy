@@ -124,7 +124,7 @@ void WidgetChatWindow::handleCallRequest(ContactInfo const* info, SipRequest con
 
 void WidgetChatWindow::handleByeResponse(SipRespond const& resp)
 {
-
+    Q_UNUSED(resp);
 }
 
 void WidgetChatWindow::handleByeRequest(ContactInfo const* info, SipRequest const& req)

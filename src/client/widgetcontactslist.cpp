@@ -129,6 +129,7 @@ void WidgetContactsList::handleNotificationDoubleClick(QListWidgetItem* item)
                     delete notif;
                     break;
                 }
+                default: return ;
             }
         }
     }

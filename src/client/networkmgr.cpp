@@ -105,7 +105,7 @@ void NetworkMgr::_readInput()
 
                 std::cout << "RECEIV SIZE: " << size << " - CODE : " << code << std::endl;
                 char data[Packet::MaxBodySize];
-                if (size > 0 && size << Packet::MaxBodySize)
+                if (size > 0 && size < Packet::MaxBodySize)
                     _tcpSock.read(data, size);
                 Packet pkt(code, data, size);
                 //pkt.dumpHex();
@@ -208,7 +208,7 @@ void NetworkMgr::handleAudioNoInput(AudioSocket* sock)
         return;
 
     QHostAddress hostAddr, peerAddr;
-    quint16 hostPort, peerPort;
+    quint16 hostPort, peerPort = 0;
     sock->getHostInfo(hostAddr, hostPort);
 
 
