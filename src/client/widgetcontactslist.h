@@ -12,25 +12,25 @@ class WidgetAddContactWindow;
 enum NotificationTypes
 {
     NOTIF_CONTACT_REQUEST       = 0,
+    NOTIF_NEW_MESSAGE           = 1,
 };
 
 class Notification : public QListWidgetItem
 {
 public:
-    Notification(QListWidget* parent, NotificationTypes type, QString text, ContactInfo* sender) :
+    Notification(QListWidget* parent, NotificationTypes type, QString text, quint32 id) :
         QListWidgetItem(text, parent),
-        _type(type), _sender(sender)
+        _type(type), _id(id), _textInfo()
     {}
-    virtual ~Notification()
-    {
-        delete _sender;
-    }
 
     NotificationTypes getNotificationType() const { return _type; }
-    ContactInfo const* getSender() const { return _sender; }
+    quint32 getId() const { return _id; }
+    QString const& getTextInfo() const { return _textInfo; }
+    void setTextInfo(QString const& text) { _textInfo = text; }
 private:
     NotificationTypes _type;
-    ContactInfo* _sender;
+    quint32 _id;
+    QString _textInfo;
 };
 
 class WidgetContactsList : public QWidget, private Ui::WidgetContactsList
@@ -55,6 +55,7 @@ public:
     void handleByeRequest(ContactInfo const* info, SipRequest const& req) { _chatWindow->handleByeRequest(info, req); }
 
     WidgetAddContactWindow* getContactWindow() { return _addContactWindow; }
+    void addNotification(Notification* notif);
     QListWidget* getNotificationWidget() { return _notificationList; }
 
     void createChatGroup(quint32 id) { _chatWindow->createChatGroup(id); }
@@ -73,6 +74,7 @@ private slots:
     void handleContactDoubleClick(QListWidgetItem* contact);
     void handleNotificationDoubleClick(QListWidgetItem* item);
     void on__addContactButton_clicked();
+    void on__tabWidget_currentChanged(int index);
 };
 
 #endif // WIDGETCONTACTSLIST_H

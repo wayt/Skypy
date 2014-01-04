@@ -112,7 +112,7 @@ void WidgetContactsList::handleNotificationDoubleClick(QListWidgetItem* item)
         case NOTIF_CONTACT_REQUEST:
         {
             QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(this, "Contact request", "Accept contact request from " + notif->getSender()->text() + " ?",
+            reply = QMessageBox::question(this, "Contact request", "Accept contact request from " + notif->getTextInfo() + " ?",
                                       QMessageBox::Yes | QMessageBox::No);
             switch (reply)
             {
@@ -120,18 +120,39 @@ void WidgetContactsList::handleNotificationDoubleClick(QListWidgetItem* item)
                 case QMessageBox::No:
                 {
                     Packet data(CMSG_ADD_CONTACT_RESPONSE);
-                    data << quint32(notif->getSender()->getId()); // request id
+                    data << quint32(notif->getId()); // request id
                     data << quint8(reply == QMessageBox::Yes ? 1 : 0);
-                    std::cout << (reply == QMessageBox::Yes ? "Accept" : "Refuse") << " contact request " << notif->getSender()->getId() << std::endl;
                     sNetworkMgr->tcpSendPacket(data);
 
-                    _notificationList->removeItemWidget(notif);
-                    delete notif;
                     break;
                 }
-                default: return ;
+                default:
+                    break;
             }
+        }
+        case NOTIF_NEW_MESSAGE:
+        {
+            _chatWindow->showTabId(notif->getId(), CHAT_TAB_SINGLE);
+            break;
         }
     }
 
+    _notificationList->removeItemWidget(notif);
+    delete notif;
+}
+
+void WidgetContactsList::addNotification(Notification* notif)
+{
+    if (_tabWidget->currentWidget() != tab_notifications)
+    {
+        _tabWidget->setTabText(_tabWidget->indexOf(tab_notifications), "Notifications *");
+    }
+
+    _notificationList->addItem(notif);
+}
+
+void WidgetContactsList::on__tabWidget_currentChanged(int index)
+{
+   if (index == _tabWidget->indexOf(tab_notifications))
+       _tabWidget->setTabText(index, "Notifications");
 }

@@ -32,6 +32,8 @@ public:
     void addChatGroupMessageFrom(quint32 chatId, quint32 fromId, QString const& msg);
     void chatGroupMemberUpdate(quint32 chatId, WidgetChatTab::PeerInfo const& peer);
 
+    void showTabId(quint32 id, ChatTabTypes type = CHAT_TAB_SINGLE);
+
 signals:
 
 public slots:

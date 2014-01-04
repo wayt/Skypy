@@ -168,11 +168,9 @@ void MainWindow::handleAddContactRequest(Packet &pkt)
     QString email;
     pkt >> reqId >> name >> email;
 
-    ContactInfo* info = new ContactInfo(NULL, reqId, name, email, false);
-    info->setText(name + " (" + email + ")");
-
-    Notification* notif = new Notification(_contactForm->getNotificationWidget(), NOTIF_CONTACT_REQUEST, "New contact request from " + info->text(), info);
-    _contactForm->getNotificationWidget()->addItem(notif);
+    Notification* notif = new Notification(_contactForm->getNotificationWidget(), NOTIF_CONTACT_REQUEST, "New contact request from " + name + " (" + email + ")", reqId);
+    notif->setTextInfo(name + " (" + email + ")");
+    _contactForm->addNotification(notif);
 }
 
 void MainWindow::handleSipRep(Packet &pkt)

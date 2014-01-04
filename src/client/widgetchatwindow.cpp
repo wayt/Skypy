@@ -31,12 +31,18 @@ WidgetChatTab* WidgetChatWindow::addChatTab(ContactInfo const* info, bool select
     {
         tab = new WidgetChatTab(info, this);
         _chatTab->addTab(tab, info->getName());
-    }
-    if (selectIt)
-        _chatTab->setCurrentWidget(tab);
 
-    if (this->isHidden())
-        this->show();
+     }
+
+
+    if (selectIt)
+    {
+        _chatTab->setCurrentWidget(tab);
+        if (this->isHidden())
+            this->show();
+        if (!hasFocus())
+            setFocus();
+    }
     return tab;
 }
 
@@ -49,10 +55,14 @@ WidgetChatTab* WidgetChatWindow::addChatTab(quint32 id, bool selectIt)
         _chatTab->addTab(tab, "");
     }
     if (selectIt)
+    {
         _chatTab->setCurrentWidget(tab);
+        if (isHidden())
+            show();
+        if (!hasFocus())
+            setFocus();
+    }
 
-    if (this->isHidden())
-        this->show();
     return tab;
 }
 
@@ -60,6 +70,26 @@ WidgetChatTab* WidgetChatWindow::addChatTab(quint32 id, bool selectIt)
 void WidgetChatWindow::addMessageFrom(ContactInfo const* info, QString const& msg, bool notif)
 {
     WidgetChatTab* tab = getChatTab(info->getId());
+    if ((!tab && !hasFocus()) || isHidden())
+    {
+        if (WidgetContactsList* parent = dynamic_cast<WidgetContactsList*>(this->parentWidget()))
+        {
+            bool present = false;
+            for (int i = 0; i < parent->getNotificationWidget()->count(); ++i)
+                if (Notification* notif = dynamic_cast<Notification*>(parent->getNotificationWidget()->item(i)))
+                    if (notif->getId() == info->getId() && notif->getNotificationType() == NOTIF_NEW_MESSAGE)
+                    {
+                        present = true;
+                        break;
+                    }
+
+            if (!present)
+            {
+                Notification* notif = new Notification(parent->getNotificationWidget(), NOTIF_NEW_MESSAGE, "New message from " + info->getName(), info->getId());
+                parent->addNotification(notif);
+            }
+        }
+    }
     if (!tab)
         tab = addChatTab(info, false);
     tab->addMessage(info->getId(), msg, notif);
@@ -93,7 +123,6 @@ void WidgetChatWindow::logoutContact(quint32 id)
 
 void WidgetChatWindow::handleCallResponse(SipRespond const& resp)
 {
-    std::cout << "CALL RESPONSE, CHATID: " << resp.getChatId() << std::endl;
     WidgetChatTab* tab = NULL;
     if (resp.getChatId() > 0)
         tab = getChatTab(resp.getChatId(), CHAT_TAB_MULTI);
@@ -102,8 +131,6 @@ void WidgetChatWindow::handleCallResponse(SipRespond const& resp)
 
     if (tab)
         tab->handleCallResponse(resp);
-    else
-        std::cout << "CHAT NO FOUND" << std::endl;
 }
 
 void WidgetChatWindow::handleCallRequest(ContactInfo const* info, SipRequest const& req)
@@ -151,14 +178,11 @@ void WidgetChatWindow::handleByeRequest(ContactInfo const* info, SipRequest cons
 
 void WidgetChatWindow::createChatGroup(quint32 id)
 {
-    std::cout << "CREATING CHAT GROUP: " << id << std::endl;
     addChatTab(id, false);
-    std::cout << "DONE" << std::endl;
 }
 
 void WidgetChatWindow::chatGroupMemberJoin(quint32 id, WidgetChatTab::PeerInfo* peer)
 {
-    std::cout << "CHAT GROUP MEMBER JOIN" << std::endl;
     WidgetChatTab* tab = getChatTab(id, CHAT_TAB_MULTI);
     if (!tab)
         tab = addChatTab(id, false);
@@ -183,5 +207,17 @@ void WidgetChatWindow::chatGroupMemberUpdate(quint32 chatId, WidgetChatTab::Peer
     if (!tab)
         tab = addChatTab(chatId, false);
     tab->updateMember(peer);
+}
+
+void WidgetChatWindow::showTabId(quint32 id, ChatTabTypes type)
+{
+    WidgetChatTab* tab = getChatTab(id, type);
+    if (!tab)
+        return;
+    _chatTab->setCurrentWidget(tab);
+    if (isHidden())
+        show();
+    if (!hasFocus())
+        this->setFocus();
 
 }
