@@ -385,11 +385,34 @@ void Session::handleAddContactResponse(Packet& pkt)
         addFriend(new ContactInfo(request->fromId, request->fromName, request->fromEmail, time));
         sContactMgr->addFriend(request->fromId, new ContactInfo(request->destId, getName(), getEmail(), time));
 
-        if (Session* sess = sSkypy->findSession(request->fromId))
+        Packet data(SMSG_CONTACT_LIST);
+        data << uint32(1);
+        data << uint32(request->fromId);
+        data << request->fromName;
+        data << request->fromEmail;
+        if (Session* peer = sSkypy->findSession(request->fromId))
         {
-            friendLogin(sess);
-            sess->friendLogin(this);
+            data << peer->getHostAddress();
+            data << peer->getPrivateAddress();
+            data << uint8(1);
+
+            Packet data2(SMSG_CONTACT_LIST);
+            data2 << uint32(1);
+            data2 << uint32(getId());
+            data2 << getName();
+            data2 << getEmail();
+            data2 << getHostAddress();
+            data2 << getPrivateAddress();
+            data2 << uint8(1);
+            peer->send(data2);
         }
+        else
+        {
+            pkt << std::string("");
+            pkt << std::string("");
+            pkt << uint8(0);
+        }
+        send(data);
     }
     else
         std::cout << getEmail() << " refuse contact request " << reqId << std::endl;

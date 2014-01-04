@@ -334,7 +334,17 @@ void MainWindow::handleContactList(Packet& pkt)
         pkt >> ipPrivate;
         pkt >> online;
 
-        ContactInfo* info = new ContactInfo(_contactForm->getContactListWidget(), id, name, email, online != 0, ipPublic, ipPrivate);
-        _contactForm->addContact(info);
+        ContactInfo* info = sClientMgr->findContact(id);
+        if (info)
+        {
+            info->setPublicIp(ipPublic);
+            info->setPrivateIp(ipPrivate);
+            info->setOnline(online != 0);
+        }
+        else
+        {
+            info = new ContactInfo(_contactForm->getContactListWidget(), id, name, email, online != 0, ipPublic, ipPrivate);
+            _contactForm->addContact(info);
+        }
     }
 }
