@@ -31,6 +31,8 @@ public:
     bool encode(const AudioSample &sample, EncodedSample &encodedSample);
     bool decode(AudioSample &sample, const EncodedSample &encodedSample);
 
+    bool merge(const EncodedSample &es1, const EncodedSample &es2, EncodedSample &res);
+
 private:
     bool _encoder_ctl(int request, int data);
     bool _encoder_ctl(int request, void *data);
@@ -41,6 +43,7 @@ private:
     QString _errText;
     OpusEncoder *_encoder;
     OpusDecoder *_decoder;
+    OpusRepacketizer *_repack;
     AudioSample::eFrequency _frequency;
     AudioSample::eChannel _channel;
     int _gain;

@@ -6,6 +6,7 @@ AudioEncoder::AudioEncoder() :
     Singleton<AudioEncoder>(),
     _encoder(NULL),
     _decoder(NULL),
+    _repack(NULL),
     _frequency(AudioSample::FREQ_8000),
     _channel(AudioSample::MONO),
     _init(false)
@@ -19,6 +20,9 @@ AudioEncoder::~AudioEncoder()
 
     if (_decoder)
         opus_decoder_destroy(_decoder);
+
+    if (_repack)
+        opus_repacketizer_destroy(_repack);
 }
 
 bool AudioEncoder::setGain(int gain)
@@ -63,6 +67,13 @@ bool AudioEncoder::init(AudioSample::eFrequency frequency, AudioSample::eChannel
     {
         _decoder = NULL;
         _errText = opus_strerror(errorCode);
+        return false;
+    }
+
+    _repack = opus_repacketizer_create();
+    if (_repack == NULL)
+    {
+        _errText = "Unable to allocate memory for repacktizer";
         return false;
     }
 
@@ -124,6 +135,37 @@ bool AudioEncoder::decode(AudioSample &sample, const EncodedSample &encodedSampl
     }
 
     sample.setNbFrame(nbBytes * channelCount);
+
+    return true;
+}
+
+bool AudioEncoder::merge(const EncodedSample &es1, const EncodedSample &es2, EncodedSample &res)
+{
+    int errCode;
+
+    opus_repacketizer_init(_repack);
+    if ((errCode = opus_repacketizer_cat(_repack, es1.udata(), es1.size())) != OPUS_OK)
+    {
+        _errText = opus_strerror(errCode);
+        return false;
+    }
+    if ((errCode = opus_repacketizer_cat(_repack, es2.udata(), es2.size())) != OPUS_OK)
+    {
+        _errText = opus_strerror(errCode);
+        return false;
+    }
+
+    int nbFrame = opus_repacketizer_get_nb_frames(_repack);
+    unsigned char data[nbFrame];
+    if ((errCode = opus_repacketizer_out(_repack, data, nbFrame)) < 0)
+    {
+        _errText = opus_strerror(errCode);
+        return false;
+    }
+
+    qDebug("size of merge sample: %d", errCode);
+
+    res.setEncodedSample(data, nbFrame);
 
     return true;
 }
