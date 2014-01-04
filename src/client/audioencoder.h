@@ -43,7 +43,6 @@ private:
     QString _errText;
     OpusEncoder *_encoder;
     OpusDecoder *_decoder;
-    OpusRepacketizer *_repack;
     AudioSample::eFrequency _frequency;
     AudioSample::eChannel _channel;
     int _gain;

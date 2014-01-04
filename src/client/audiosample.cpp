@@ -2,6 +2,7 @@
 
 #include "audiosample.h"
 #include <iostream>
+#include <cstring>
 
 AudioSample::AudioSample() :
     _nbFrame(0),
@@ -43,15 +44,11 @@ AudioSample& AudioSample::operator=(const AudioSample &other)
 
 AudioSample& AudioSample::operator+=(const AudioSample &other)
 {
-    for (int i = 0; i < other._nbFrame; ++i)
-    {
-        _buffer[i] = _buffer[i] + other[i];
-        if (_buffer[i] < MIN_VALUE)
-            _buffer[i] = MIN_VALUE;
-        else if (_buffer[i] > MAX_VALUE)
-            _buffer[i] = MAX_VALUE;
-    }
-    _nbFrame = qMax(_nbFrame, other._nbFrame);
+    int nbFrameMax = qMax(_nbFrame, other._nbFrame);
+
+    for (int i = 0; i < nbFrameMax; ++i)
+        _buffer[i] = (_buffer[i] + other[i]) - ((_buffer[i] * other[i]) / LIMIT_VALUE);
+    _nbFrame = nbFrameMax;
 
     return *this;
 }
