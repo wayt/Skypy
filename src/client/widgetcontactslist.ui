@@ -66,7 +66,10 @@
       </font>
      </property>
      <property name="text">
-      <string>Skypy</string>
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="Ressources.qrc">:/images/logo.png</pixmap>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -107,6 +110,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="Ressources.qrc"/>
+ </resources>
  <connections/>
 </ui>

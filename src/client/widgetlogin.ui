@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>511</width>
-    <height>371</height>
+    <height>380</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,7 +38,10 @@
       </font>
      </property>
      <property name="text">
-      <string>Skypy</string>
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="Ressources.qrc">:/images/logo.png</pixmap>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -134,6 +137,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="Ressources.qrc"/>
+ </resources>
  <connections/>
 </ui>
