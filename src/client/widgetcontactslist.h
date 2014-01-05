@@ -62,6 +62,7 @@ public:
     void chatGroupMemberJoin(quint32 id, WidgetChatTab::PeerInfo* peer) { _chatWindow->chatGroupMemberJoin(id, peer); }
     void addChatGroupMessageFrom(quint32 chatId, quint32 fromId, QString const& msg) { _chatWindow->addChatGroupMessageFrom(chatId, fromId, msg); }
     void chatGroupMemberUpdate(quint32 chatId, WidgetChatTab::PeerInfo const& peer) { _chatWindow->chatGroupMemberUpdate(chatId, peer); }
+    void chatGroupRemoveMember(quint32 chatId, quint32 id) { _chatWindow->chatGroupRemoveMember(chatId, id); }
 
 private:
     WidgetChatWindow* _chatWindow;

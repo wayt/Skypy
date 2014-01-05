@@ -30,6 +30,11 @@ ChatGroup* ChatGroupMgr::createChatGroup(Session const* owner, Session const* pe
     return chat;
 }
 
+void ChatGroupMgr::deleteChatGroup(ChatGroup* group)
+{
+    group->setDeleted();
+}
+
 void ChatGroupMgr::saveToDb()
 {
     for (std::map<uint32, ChatGroup*>::iterator itr = _chatGroupMap.begin();

@@ -30,11 +30,14 @@ public:
     uint32 getId() const { return _groupId; }
 
     void addMember(Session const* sess);
+    void removeMember(Session const* sess);
     bool isMember(uint32 id) const { return _members.find(id) != _members.end(); }
     void memberLogin(Session const* member);
     void memberLogout(uint32 id);
     ChatGroupMember* findMember(uint32 id);
     ChatGroupMember const* findMember(uint32 id) const;
+    bool isEmpty() const { return _members.size() < 2; }
+    void setDeleted() { _saveStatus = STATUS_DELETED; }
 
     void addMessageFrom(Session const* from, std::string const& msg) const;
 

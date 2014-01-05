@@ -221,3 +221,30 @@ void WidgetChatWindow::showTabId(quint32 id, ChatTabTypes type)
         this->setFocus();
 
 }
+
+void WidgetChatWindow::on__chatTab_tabCloseRequested(int index)
+{
+    WidgetChatTab* tab = dynamic_cast<WidgetChatTab*>(_chatTab->widget(index));
+    if (!tab)
+        return;
+
+    if (tab->getTabType() == CHAT_TAB_MULTI)
+    {
+        Packet data(CMSG_LEAVE_CHAT_GROUP);
+        data << quint32(tab->getTabId());
+        sNetworkMgr->tcpSendPacket(data);
+    }
+
+    _chatTab->removeTab(index);
+    if (_chatTab->count() == 0)
+        close();
+}
+
+void WidgetChatWindow::chatGroupRemoveMember(quint32 chatId, quint32 id)
+{
+    WidgetChatTab* tab = getChatTab(chatId, CHAT_TAB_MULTI);
+    if (!tab)
+        return;
+
+    tab->removeMember(id);
+}

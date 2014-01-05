@@ -59,6 +59,24 @@ void ChatGroup::addMember(Session const* sess)
         _saveStatus = STATUS_CHANGED;
 }
 
+void ChatGroup::removeMember(Session const* sess)
+{
+    std::map<uint32, ChatGroupMember*>::iterator itr = _members.find(sess->getId());
+    if (itr == _members.end())
+        return;
+    ChatGroupMember* member = itr->second;
+    _members.erase(sess->getId());
+    delete member;
+
+    if (_members.empty())
+        return;
+
+    Packet data(SMSG_CHAT_GROUP_DEL_MEMBER);
+    data << uint32(getId());
+    data << uint32(sess->getId());
+    broadcastToGroup(data);
+}
+
 void ChatGroup::buildMemberPacket(Packet& data, ChatGroupMember const* member)
 {
     data << uint32(member->id);

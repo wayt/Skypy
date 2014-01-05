@@ -12,6 +12,7 @@ public:
     ChatGroup* findChatGroup(uint32 id);
     ChatGroup const* findChatGroup(uint32 id) const;
     ChatGroup* createChatGroup(Session const* owner, Session const* firstPeer);
+    void deleteChatGroup(ChatGroup* group);
 
     void saveToDb();
     void loadFromDb();

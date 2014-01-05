@@ -346,3 +346,14 @@ void MainWindow::handleContactList(Packet& pkt)
         }
     }
 }
+
+void MainWindow::handleChatGroupDelMember(Packet& pkt)
+{
+    quint32 chatId, id;
+    pkt >> chatId >> id;
+
+    if (id == sClientMgr->getAccountId())
+        return;
+
+    _contactForm->chatGroupRemoveMember(chatId, id);
+}

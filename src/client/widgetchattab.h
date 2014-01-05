@@ -54,6 +54,7 @@ public:
     void memberJoin(PeerInfo* peer);
     QString getTabName() const;
     void updateMember(PeerInfo const& peer);
+    bool removeMember(quint32 id);
 
 private slots:
     void on__callButon_clicked();

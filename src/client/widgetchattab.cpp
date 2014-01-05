@@ -410,3 +410,24 @@ void WidgetChatTab::updateMember(PeerInfo const& peer)
 
     old->online = peer.online;
 }
+
+bool WidgetChatTab::removeMember(quint32 id)
+{
+    PeerInfo* peer = _getPeerInfo(id);
+    if (!peer)
+        return false;
+
+    _peersMap.remove(id);
+    addMessage(peer->peerName + " leave group");
+    QList<QListWidgetItem*> items = _peerListWidget->findItems(peer->peerName + " (" + peer->peerEmail + ")", Qt::MatchExactly);
+    if (!items.empty())
+    {
+        QListWidgetItem* item = items.first();
+        _peerListWidget->removeItemWidget(item);
+    }
+    delete peer;
+
+    if (_peerListWidget->count() == 0)
+        return true;
+    return false;
+}

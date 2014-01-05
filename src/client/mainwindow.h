@@ -37,6 +37,7 @@ public:
     void handleGroupChatText(Packet& pkt);
     void handleChatGroupUpdateMember(Packet& pkt);
     void handleContactList(Packet& pkt);
+    void handleChatGroupDelMember(Packet& pkt);
 
     void handlesipResponse(SipRespond const& resp);
     void handleCallRequest(SipRequest const& request);

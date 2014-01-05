@@ -494,3 +494,21 @@ void Session::handleGroupChatText(Packet& pkt)
     }
     std::cout << "CHAT GROUP NOT FOUND: " << chatId << std::endl;
 }
+
+void Session::handleLeaveChatGroup(Packet& pkt)
+{
+    uint32 chatId;
+
+    pkt >> chatId;
+
+    if (ChatGroup* chat = sChatGroupMgr->findChatGroup(chatId))
+    {
+        if (!chat->isMember(getId()))
+            return;
+
+        chat->removeMember(this);
+
+        if (chat->isEmpty())
+            sChatGroupMgr->deleteChatGroup(chat);
+    }
+}
