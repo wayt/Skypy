@@ -15,16 +15,14 @@ class Packet
 {
 public:
     Packet(quint16 code, quint32 size = PACKET_DEFAULT_SIZE) :
-        _rpos(4), _wpos(2)
+        _storage(PACKET_DEFAULT_SIZE + PACKET_HEADER_SIZE), _rpos(4), _wpos(2)
     {
-        _storage.reserve(size + 4);
         *this << quint16(code);
     }
 
     Packet(quint16 code, char buff[], quint16 size) :
-        _rpos(4), _wpos(0)
+        _storage(PACKET_DEFAULT_SIZE + PACKET_HEADER_SIZE), _rpos(4), _wpos(0)
     {
-        _storage.reserve(size + 4);
         *this << quint16(size);
         *this << quint16(code);
         append(buff, size);
@@ -228,7 +226,8 @@ public:
 
     quint64 size() const
     {
-        return _storage.size();
+        //return _storage.size();
+        return _wpos;
     }
 
     const char* content() const
