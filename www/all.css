@@ -1,0 +1,20 @@
+* { font-family: "Roboto", sans-serif; margin: 0; padding: 0; }
+
+body { background: #09b3f1 url(bg.jpg) repeat-x; font-size: 12px; }
+
+header { text-align: center; padding-top: 170px;  }
+
+.main { background: #fff; width: 600px; margin: 0 auto; margin-top: 20px; border-radius: 20px; padding: 30px; }
+
+h1 { color: #09b3f1; }
+
+label { display: block; color: #666; margin-top: 10px; }
+
+input[type=text], input[type=password] { background: #fff; color: #0a78a0; border: 1px solid #09b3f1; width: 585px; font-size: 20px; padding: 5px;}
+
+.btn, input[type=submit] { display: inline-block; text-decoration:none; margin-top: 20px; background: #09b3f1; color: #fff; border-radius: 10px; border:0; padding: 10px; font-size: 20px; }
+.btn:hover { text-decoration:underline;}
+
+.center { text-align: center; }
+
+.error { padding: 10px; margin-top: 10px; background: #F79E9E; }
