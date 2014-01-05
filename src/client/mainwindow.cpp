@@ -30,6 +30,8 @@ MainWindow::MainWindow(QMainWindow *parent) :
     _loginForm->initialize();
     _widgets->setCurrentWidget(_loginForm);
 
+    setWindowTitle("Skypy");
+
     sNetworkMgr->setMainWindow(this);
 
     // Init audio
@@ -79,7 +81,7 @@ void MainWindow::handleServerConnectionLost(QAbstractSocket::SocketError e, QStr
     (void)e;
     _contactForm->unload();
     _loginForm->initialize();
-    setWindowTitle("");
+    setWindowTitle("Skypy");
     _widgets->setCurrentWidget(_loginForm);
     QMessageBox::information(this, "Connection error", "Error: " + msg);
 }
@@ -228,7 +230,7 @@ void MainWindow::handleAccountInfo(Packet& pkt)
     QString name, email, publicIp;
     pkt >> id >> name >> email >> publicIp;
     std::cout << "RECEIV id: " << id << " - name: " << name.toStdString() << " - email: " << email.toStdString() << " - publicIp: " << publicIp.toStdString() << std::endl;
-    setWindowTitle(name + " (" + email + ")");
+    setWindowTitle("Skypy - " + name + " (" + email + ")");
     sClientMgr->setAccountInfo(id, name, email);
     sClientMgr->setPublicIp(publicIp);
 }
