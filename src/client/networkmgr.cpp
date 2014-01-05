@@ -47,6 +47,9 @@ void NetworkMgr::_handleTcpError(QAbstractSocket::SocketError e)
 
 void NetworkMgr::closeTcpConnection()
 {
+    if (_connState == STATE_DISCONNECTED)
+        return;
+
     _connState = STATE_DISCONNECTED;
     _tcpSock.close();
 }

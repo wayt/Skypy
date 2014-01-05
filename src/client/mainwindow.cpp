@@ -22,7 +22,9 @@ MainWindow::MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
     _widgets(new QStackedWidget(this)),
     _loginForm(new WidgetLogin(this)),
-    _contactForm(new WidgetContactsList(this))
+    _contactForm(new WidgetContactsList(this)),
+    _menuBar(new QMenuBar(this)),
+    _configWindow(new WidgetConfigWindow(this))
 {
     setCentralWidget(_widgets);
     _widgets->addWidget(_loginForm);
@@ -33,6 +35,11 @@ MainWindow::MainWindow(QMainWindow *parent) :
     setWindowTitle("Skypy");
 
     sNetworkMgr->setMainWindow(this);
+
+    setMenuBar(_menuBar);
+    QMenu* menu = _menuBar->addMenu("Menu");
+    menu->addAction("Settings", this, SLOT(_handleSettings()));
+    menu->addAction("Logout", this, SLOT(_handleLogout()));
 
     // Init audio
     if (!sAudioManager->setInputDevice(DEFAULT_DEVICE, AudioSample::MONO, AudioSample::FREQ_48000))
@@ -358,4 +365,18 @@ void MainWindow::handleChatGroupDelMember(Packet& pkt)
         return;
 
     _contactForm->chatGroupRemoveMember(chatId, id);
+}
+
+void MainWindow::_handleLogout()
+{
+    sNetworkMgr->closeTcpConnection();
+    _contactForm->unload();
+    _loginForm->initialize();
+    setWindowTitle("Skypy");
+    _widgets->setCurrentWidget(_loginForm);
+}
+
+void MainWindow::_handleSettings()
+{
+    _configWindow->show();
 }

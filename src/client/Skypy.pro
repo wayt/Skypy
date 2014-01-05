@@ -60,7 +60,8 @@ SOURCES += main.cpp\
     widgetaddcontactwindow.cpp \
     clientmgr.cpp \
     widgetchattabaddwindow.cpp \
-    widgetlogin.cpp
+    widgetlogin.cpp \
+    widgetconfigwindow.cpp
 
 HEADERS  += \
     networkmgr.h \
@@ -80,7 +81,8 @@ HEADERS  += \
     widgetaddcontactwindow.h \
     clientmgr.h \
     widgetchattabaddwindow.h \
-    widgetlogin.h
+    widgetlogin.h \
+    widgetconfigwindow.h
 
 FORMS += \
     widgetcontactslist.ui \
@@ -88,7 +90,8 @@ FORMS += \
     widgetchattab.ui \
     widgetaddcontactwindow.ui \
     widgetchattabaddwindow.ui \
-    widgetlogin.ui
+    widgetlogin.ui \
+    widgetconfigwindow.ui
 
 RESOURCES += \
     Ressources.qrc

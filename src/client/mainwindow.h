@@ -3,12 +3,14 @@
 
 #include <QMainWindow>
 #include <QLineEdit>
+#include <QMenuBar>
 #include "packet.hpp"
 #include <QStackedWidget>
 #include "widgetlogin.h"
 #include "widgetcontactslist.h"
 #include "networkmgr.h"
 #include "sipPacket.hpp"
+#include "widgetconfigwindow.h"
 
 class MainWindow : public QMainWindow
 {
@@ -43,11 +45,16 @@ public:
     void handleCallRequest(SipRequest const& request);
     void handleByeRequest(SipRequest const& request);
 
+private slots:
+    void _handleLogout();
+    void _handleSettings();
 private:
     QStackedWidget* _widgets;
 
     WidgetLogin* _loginForm;
     WidgetContactsList* _contactForm;
+    QMenuBar* _menuBar;
+    WidgetConfigWindow* _configWindow;
 
 };
 
