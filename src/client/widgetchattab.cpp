@@ -25,8 +25,15 @@ WidgetChatTab::WidgetChatTab(ContactInfo const* info, QWidget *parent) :
     peer->peerName = info->getName();
     peer->peerPublicIp = info->getPublicIp();
     peer->peerPrivateIp = info->getPrivateIp();
-    peer->online = true;
+    peer->online = info->isOnline();
     _peersMap[peer->peerId] = peer;
+
+    _peerListWidget->hide();
+
+    if (peer->online)
+        _onlineLabel->setPixmap(QPixmap(":/images/button_icon_green"));
+    else
+        _onlineLabel->setPixmap(QPixmap(":/images/button_icon_red"));
 }
 
 WidgetChatTab::WidgetChatTab(quint32 id, QWidget *parent) :
@@ -149,6 +156,20 @@ void WidgetChatTab::loginContact(quint32 id)
     _sendButton->setEnabled(true);
 
     addMessage(peer->peerName + " logged in !");
+
+
+
+    if (_tabType == CHAT_TAB_SINGLE)
+        _onlineLabel->setPixmap(QPixmap(":/images/button_icon_green"));
+    else
+    {
+        QList<QListWidgetItem*> items = _peerListWidget->findItems(peer->peerName + " (" + peer->peerEmail + ")", Qt::MatchExactly);
+        if (!items.empty())
+        {
+            QListWidgetItem* item = items.first();
+            item->setIcon(QIcon(":/images/button_icon_green"));
+        }
+    }
 }
 
 void WidgetChatTab::logoutContact(quint32 id)
@@ -164,6 +185,18 @@ void WidgetChatTab::logoutContact(quint32 id)
     _sendButton->setEnabled(enable);
 
     addMessage(peer->peerName + " logged out ...");
+
+    if (_tabType == CHAT_TAB_SINGLE)
+        _onlineLabel->setPixmap(QPixmap(":/images/button_icon_red"));
+    else
+    {
+        QList<QListWidgetItem*> items = _peerListWidget->findItems(peer->peerName + " (" + peer->peerEmail + ")", Qt::MatchExactly);
+        if (!items.empty())
+        {
+            QListWidgetItem* item = items.first();
+            item->setIcon(QIcon(":/images/button_icon_red"));
+        }
+    }
 }
 
 void WidgetChatTab::addMessage(quint32 id, QString const& msg, bool notif)
@@ -336,6 +369,14 @@ void WidgetChatTab::memberJoin(PeerInfo* peer)
     std::cout << "PEER: " << peer->peerEmail.toStdString() << " JOIN GROUP CHAT: " << getTabId() << std::endl;
     _peersMap[peer->peerId] = peer;
     addMessage(peer->peerName + " join group");
+
+    if (_tabType == CHAT_TAB_MULTI)
+    {
+        QListWidgetItem* item = new QListWidgetItem(_peerListWidget);
+        item->setText(peer->peerName + " (" + peer->peerEmail + ")");
+        item->setIcon(QIcon(peer->online ? ":/images/button_icon_green" : ":/images/button_icon_red"));
+        _peerListWidget->addItem(item);
+    }
 }
 
 QString WidgetChatTab::getTabName() const

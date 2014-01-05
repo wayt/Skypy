@@ -89,3 +89,6 @@ FORMS += \
     widgetaddcontactwindow.ui \
     widgetchattabaddwindow.ui \
     widgetlogin.ui
+
+RESOURCES += \
+    Ressources.qrc

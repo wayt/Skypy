@@ -12,13 +12,17 @@ class ContactInfo : public QListWidgetItem
 {
 public:
     ContactInfo(QListWidget* parent, quint32 id, QString const& name, QString const& email, bool online = true, QString const& ipPublic = "", QString const& ipPrivate = "") :
-        QListWidgetItem(QString(name + " (" + email + ") - " + (online ? "Online" : "Offline")), parent),
+        QListWidgetItem(QString(name + " (" + email + ")"), parent),
         _id(id), _name(name), _email(email), _online(online), _publicIp(ipPublic), _privateIp(ipPrivate)
-    {}
+    {
+        setOnline(online);
+    }
     ContactInfo(QListWidget *parent, ContactInfo const* info) :
-        QListWidgetItem(QString(info->getName() + " (" + info->getEmail() + ") - " + (info->isOnline() ? "Online" : "Offline")), parent),
+        QListWidgetItem(QString(info->getName() + " (" + info->getEmail() + ")"), parent),
         _id(info->getId()), _name(info->getName()), _email(info->getEmail()), _online(info->isOnline()), _publicIp(info->getPublicIp()), _privateIp(info->getPrivateIp())
-    {}
+    {
+        setOnline(_online);
+    }
 
     quint32 getId() const { return _id; }
     QString const& getName() const { return _name; }
@@ -27,7 +31,11 @@ public:
     QString const& getPublicIp() const { return _publicIp; }
     QString const& getPrivateIp() const { return _privateIp; }
 
-    void setOnline(bool online) { _online = online; setText(QString(_name + " (" + _email + ") - " + (_online ? "Online" : "Offline"))); }
+    void setOnline(bool online)
+    {
+        _online = online;
+        setIcon(QIcon(online ? ":/images/button_icon_green" : ":/images/button_icon_red"));
+    }
     void setPublicIp(QString const& ip) { _publicIp = ip; }
     void setPrivateIp(QString const& ip) { _privateIp = ip; }
 

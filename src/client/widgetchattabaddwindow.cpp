@@ -25,6 +25,9 @@ void WidgetChatTabAddWindow::onShow()
     {
        if (!_chatTab->getPeerInfo(itr.value()->getId()))
        {
+           if (!itr.value()->isOnline())
+               continue;
+
            ContactInfo* peer = new ContactInfo(_contactList, itr.value());
            _contactList->addItem(peer);
        }
