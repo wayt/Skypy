@@ -424,6 +424,7 @@ bool WidgetChatTab::removeMember(quint32 id)
     {
         QListWidgetItem* item = items.first();
         _peerListWidget->removeItemWidget(item);
+        delete item;
     }
     delete peer;
 
