@@ -60,12 +60,16 @@ void WidgetContactsList::logoutContact(quint32 id)
 
     _chatWindow->logoutContact(id);
 
-    if (sClientMgr->hasActiveCallWith(id) || sClientMgr->hasCallRequestFrom(id))
+    if (CallPeer* peer = sClientMgr->getCallPeer(id))
     {
-        std::cout << "PEER " << id << " LOGOUT, STOPPING CALL" << std::endl;
-        sClientMgr->clearCallPeers();
-        sAudioManager->terminate();
-        sNetworkMgr->quitCall();
+        sClientMgr->removeCallPeer(peer);
+
+        if (sClientMgr->getCallPeerCount() == 0)
+        {
+            sClientMgr->clearCallPeers();
+            sAudioManager->terminate();
+            sNetworkMgr->quitCall();
+        }
     }
 }
 
