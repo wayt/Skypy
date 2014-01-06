@@ -24,7 +24,7 @@ void ClientMgr::makeCall(quint32 chatId, const QString &destEmail, quint32 destI
 
     QHostAddress host;
     QString destIp = destPublicIp;
-    if (_publicIp == destPublicIp)
+    if (_publicIp == destPublicIp || true)
     {
         host.setAddress(_privateIp);
         destIp = destPrivateIp;
@@ -66,7 +66,6 @@ void ClientMgr::stopCall(quint32 chatId, QString const& destEmail, quint32 destI
 
     sClientMgr->clearCallPeers();
     sAudioManager->terminate();
-    sAudioManager->wait();
     sNetworkMgr->quitCall();
 }
 

@@ -116,7 +116,7 @@ void WidgetChatWindow::logoutContact(quint32 id)
             sClientMgr->hasActiveCallWith(id))
     {
         sClientMgr->clearCallPeers();
-        sAudioManager->quit();
+        sAudioManager->terminate();
         sNetworkMgr->quitCall();
     }
 }

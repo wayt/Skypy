@@ -82,8 +82,12 @@ void AudioManager::terminate()
     if (!_run)
         return ;
 
-    _run = false;
     QThread::terminate();
+    _run = false;
+
+    AudioSample emptySample;
+    _input->inputQueue().enqueue(emptySample);
+    _output->outputQueue().enqueue(emptySample);
 
     wait();
 
