@@ -185,6 +185,6 @@ void WidgetContactsList::_handleContactRemove()
         data << quint32(info->getId());
         sNetworkMgr->tcpSendPacket(data);
         _contactList->removeItemWidget(items.first());
-        delete info;
+        sClientMgr->removeContact(info->getId());
     }
 }

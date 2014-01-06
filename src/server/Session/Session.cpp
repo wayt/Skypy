@@ -93,8 +93,7 @@ void Session::buildFriendListPacket(Packet& pkt) const
         for (std::map<uint32, ContactInfo*>::const_iterator itr = contacts.begin();
             itr != contacts.end(); ++itr)
         {
-            if (itr->second->saveStatus == STATUS_DELETED ||
-                    !sContactMgr->hasFriend(itr->first, getId()))
+            if (itr->second->saveStatus == STATUS_DELETED)
                 continue;
 
             ContactInfo const* info = itr->second;
@@ -102,11 +101,20 @@ void Session::buildFriendListPacket(Packet& pkt) const
             pkt << info->name;
             pkt << info->email;
 
-            if (Session* peer = sSkypy->findSession(itr->first))
+            if (sContactMgr->hasFriend(itr->first, getId()))
             {
-                pkt << peer->getHostAddress();
-                pkt << peer->getPrivateAddress();
-                pkt << uint8(1);
+                if (Session* peer = sSkypy->findSession(itr->first))
+                {
+                    pkt << peer->getHostAddress();
+                    pkt << peer->getPrivateAddress();
+                    pkt << uint8(1);
+                }
+                else
+                {
+                    pkt << std::string("");
+                    pkt << std::string("");
+                    pkt << uint8(0);
+                }
             }
             else
             {
@@ -330,7 +338,7 @@ void Session::handleAddContactRequest(Packet& pkt)
 
     Session* sess = sSkypy->findSession(email);
     uint32 dest_id = (sess ? sess->getId() : 0);
-    std::string name = (sess ? sess->getEmail() : "");
+    std::string name = (sess ? sess->getName() : "");
 
     if (!sess)
     {
@@ -545,4 +553,11 @@ void Session::handleRemoveContact(Packet& pkt)
         return;
 
     sContactMgr->delFriend(getId(), id);
+    if (Session const* peer = sSkypy->findSession(id))
+    {
+        Packet data(SMSG_CONTACT_LOGOUT);
+        data << uint32(1);
+        data << uint32(getId());
+        peer->send(data);
+    }
 }
