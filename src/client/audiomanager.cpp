@@ -80,10 +80,10 @@ bool AudioManager::start()
 void AudioManager::terminate()
 {
     if (!_run)
-        return ;
+        return;
 
-    QThread::terminate();
     _run = false;
+    //QThread::terminate();
 
     AudioSample emptySample;
     _input->inputQueue().enqueue(emptySample);
@@ -117,6 +117,8 @@ void AudioManager::run()
             {
                 AudioSample temp;
                 encodedSample = _outputQueue.dequeue();
+                if (!_run)
+                    return;
                 if (sAudioEncoder->decode(temp, encodedSample))
                 {
                     outSample += temp;
@@ -137,6 +139,8 @@ void AudioManager::run()
         {
             std::cout << "INPUT NO EMPTY" << std::endl;
             sample = _input->inputQueue().dequeue();
+            if (!_run)
+                return;
 
             QMap<quint32, AudioSample> sampleMap;
             for (QMap<quint32, QQueue<EncodedSample>*>::ConstIterator itr = _forwardQueues.begin();

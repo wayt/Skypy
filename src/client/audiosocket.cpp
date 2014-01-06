@@ -50,13 +50,14 @@ void AudioSocket::terminate()
 {
     _run = false;
     QThread::terminate();
+    wait();
 }
 
 void AudioSocket::run()
 {
     if (!_socket->isValid())
     {
-        qDebug("Socket isn't valid");
+        qDebug("Socket isn't valid ======================");
         return ;
     }
 
