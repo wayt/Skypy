@@ -36,6 +36,7 @@ public:
     void handleChatGroupAddMembers(Packet& pkt);
     void handleGroupChatText(Packet& pkt);
     void handleLeaveChatGroup(Packet& pkt);
+    void handleRemoveContact(Packet& pkt);
 
     bool hasFriend(Session const* sess) const { return hasFriend(sess->getId()); }
     bool hasFriend(uint32 id) const;

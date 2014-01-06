@@ -66,12 +66,16 @@ void Session::broadcastToFriend(Packet const& pkt) const
         std::map<uint32, ContactInfo*> const& contacts = sContactMgr->getContactMap(getId());
         for (std::map<uint32, ContactInfo*>::const_iterator itr = contacts.begin();
             itr != contacts.end(); ++itr)
-        if (Session* peer = sSkypy->findSession(itr->first))
-            if (peer->hasFriend(this))
-            {
-                std::cout << "BROAD TO FRIEND FROM " << getEmail() << " TO " << peer->getEmail() << std::endl;
-                peer->send(pkt);
-            }
+        {
+            if (itr->second->saveStatus == STATUS_DELETED)
+                continue;
+            if (Session* peer = sSkypy->findSession(itr->first))
+                if (peer->hasFriend(this))
+                {
+                    std::cout << "BROAD TO FRIEND FROM " << getEmail() << " TO " << peer->getEmail() << std::endl;
+                    peer->send(pkt);
+                }
+        }
     }
     catch (std::exception const&)
     {
@@ -89,7 +93,8 @@ void Session::buildFriendListPacket(Packet& pkt) const
         for (std::map<uint32, ContactInfo*>::const_iterator itr = contacts.begin();
             itr != contacts.end(); ++itr)
         {
-            if (!sContactMgr->hasFriend(itr->first, getId()))
+            if (itr->second->saveStatus == STATUS_DELETED ||
+                    !sContactMgr->hasFriend(itr->first, getId()))
                 continue;
 
             ContactInfo const* info = itr->second;
@@ -342,10 +347,28 @@ void Session::handleAddContactRequest(Packet& pkt)
     {
         uint32 time = Utils::getTime();
         addFriend(new ContactInfo(dest_id, name, email, time));
+        {
+            Packet data(SMSG_CONTACT_LIST);
+            data << uint32(1);
+            data << uint32(dest_id);
+            data << name;
+            data << email;
+            data << std::string("");
+            data << std::string("");
+            data << uint8(sess ? 1 : 0);
+            send(data);
+        }
         if (sess)
         {
-            friendLogin(sess);
-            sess->friendLogin(this);
+            Packet data(SMSG_CONTACT_LIST);
+            data << uint32(1);
+            data << uint32(getId());
+            data << getName();
+            data << getEmail();
+            data << getHostAddress();
+            data << getPrivateAddress();
+            data << uint8(1);
+            sess->send(data);
         }
     }
     else
@@ -511,4 +534,15 @@ void Session::handleLeaveChatGroup(Packet& pkt)
         if (chat->isEmpty())
             sChatGroupMgr->deleteChatGroup(chat);
     }
+}
+
+void Session::handleRemoveContact(Packet& pkt)
+{
+    uint32 id;
+    pkt >> id;
+
+    if (!hasFriend(id))
+        return;
+
+    sContactMgr->delFriend(getId(), id);
 }

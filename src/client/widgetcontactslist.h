@@ -6,6 +6,7 @@
 #include <map>
 #include "widgetchatwindow.h"
 #include "sipPacket.hpp"
+#include <QMenu>
 
 class WidgetAddContactWindow;
 
@@ -70,12 +71,15 @@ private:
     quint32 _accountId;
     QString _name;
     QString _email;
+    QMenu* _contextMenu;
 
 private slots:
     void handleContactDoubleClick(QListWidgetItem* contact);
     void handleNotificationDoubleClick(QListWidgetItem* item);
     void on__addContactButton_clicked();
     void on__tabWidget_currentChanged(int index);
+    void on__contactList_customContextMenuRequested(const QPoint &pos);
+    void _handleContactRemove();
 };
 
 #endif // WIDGETCONTACTSLIST_H

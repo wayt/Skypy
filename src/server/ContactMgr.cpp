@@ -128,7 +128,7 @@ bool ContactMgr::hasFriend(uint32 account, uint32 with) const
     std::map<uint32, ContactInfo*>::const_iterator itr2 = itr->second.find(with);
     if (itr2 == itr->second.end())
         return false;
-    return true;
+    return itr2->second->saveStatus != STATUS_DELETED;
 }
 
 void ContactMgr::addFriend(uint32 account, ContactInfo* info)
@@ -140,6 +140,16 @@ void ContactMgr::addFriend(uint32 account, ContactInfo* info)
     }
     _contacsMap[account][info->id] = info;
     info->saveStatus = STATUS_NEW;
+}
+
+void ContactMgr::delFriend(uint32 account, uint32 peer)
+{
+    std::map<uint32, ContactInfo*>::iterator itr = _contacsMap[account].find(peer);
+    if (itr == _contacsMap[account].end())
+        return;
+
+    itr->second->saveStatus = STATUS_DELETED;
+
 }
 
 bool ContactMgr::addContactRequest(ContactRequest* req)

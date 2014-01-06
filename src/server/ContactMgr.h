@@ -56,6 +56,7 @@ public:
 
     bool hasFriend(uint32 account, uint32 with) const;
     void addFriend(uint32 account, ContactInfo* info);
+    void delFriend(uint32 account, uint32 peer);
 
     bool addContactRequest(ContactRequest* req);
     bool hasContactRequest(uint32 from, uint32 to) const;

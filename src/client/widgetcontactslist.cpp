@@ -9,18 +9,23 @@
 #include "networkmgr.h"
 #include "clientmgr.h"
 #include "audiomanager.h"
+#include <QCursor>
 
 WidgetContactsList::WidgetContactsList(QWidget *parent) :
     QWidget(parent),
     Ui::WidgetContactsList(),
     _chatWindow(new WidgetChatWindow(this)),
-    _addContactWindow(new WidgetAddContactWindow(this))
+    _addContactWindow(new WidgetAddContactWindow(this)),
+    _contextMenu(new QMenu(this))
 {
     setupUi(this);
     QObject::connect(_contactList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(handleContactDoubleClick(QListWidgetItem*)));
     QObject::connect(_notificationList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(handleNotificationDoubleClick(QListWidgetItem*)));
 
     _addContactWindow->setModal(true);
+
+    _contactList->setContextMenuPolicy(Qt::CustomContextMenu);
+    _contextMenu->addAction("Remove contact", this, SLOT(_handleContactRemove()));
 }
 
 void WidgetContactsList::initialize()
@@ -159,4 +164,27 @@ void WidgetContactsList::on__tabWidget_currentChanged(int index)
 {
    if (index == _tabWidget->indexOf(tab_notifications))
        _tabWidget->setTabText(index, "Notifications");
+}
+
+void WidgetContactsList::on__contactList_customContextMenuRequested(const QPoint &pos)
+{
+   QPoint spawnPos = QCursor::pos();
+   _contextMenu->popup(spawnPos);
+}
+
+void WidgetContactsList::_handleContactRemove()
+{
+    QList<QListWidgetItem*> items = _contactList->selectedItems();
+    if (items.size() == 1)
+    {
+        ContactInfo const* info = dynamic_cast<ContactInfo const*>(items.first());
+        if (!info)
+            return;
+
+        Packet data(CMSG_REMOVE_CONTACT);
+        data << quint32(info->getId());
+        sNetworkMgr->tcpSendPacket(data);
+        _contactList->removeItemWidget(items.first());
+        delete info;
+    }
 }

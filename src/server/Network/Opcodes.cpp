@@ -16,6 +16,7 @@ OpcodeMgr::OpcodeDefinition const* OpcodeMgr::getOpcodeDefinition(uint16 opcode)
         { CMSG_CHAT_GROUP_ADD_MEMBERS, &Session::handleChatGroupAddMembers },
         { CMSG_GROUP_CHAT_TEXT, &Session::handleGroupChatText },
         { CMSG_LEAVE_CHAT_GROUP, &Session::handleLeaveChatGroup },
+        { CMSG_REMOVE_CONTACT, &Session::handleRemoveContact },
         { MSG_MAX, NULL }
     };
 

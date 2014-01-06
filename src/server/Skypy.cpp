@@ -178,12 +178,7 @@ void Skypy::_handleSessionLogin(Session* sess)
             itr != contacts.end(); ++itr)
         if (Session* peer = sSkypy->findSession(itr->first))
             if (peer->hasFriend(sess))
-            {
-                Packet data(SMSG_CONTACT_LOGIN);
-                data << uint32(1);
-                sess->buildLoginPacket(data);
-                peer->send(data);
-            }
+                peer->friendLogin(sess);
     }
     catch (std::exception const&)
     {
