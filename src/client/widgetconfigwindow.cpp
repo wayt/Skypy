@@ -40,7 +40,7 @@ void WidgetConfigWindow::show()
 
 void WidgetConfigWindow::on_buttonBox_accepted()
 {
-    sClientMgr->settings().setValue("frceLocalCall", _localCallCheck->isChecked());
+    sClientMgr->settings().setValue("forceLocalCall", _localCallCheck->isChecked());
 
     QList<QListWidgetItem*> items = _inputDevicesList->selectedItems();
     if (items.size() > 0)
