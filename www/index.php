@@ -6,7 +6,7 @@ if (isset($_POST['register'])) {
 
     $error = [];
 
-    if (!preg_match('/^([a-z0-9_-]{3,15})$/', $_POST['name'])) {
+    if (!preg_match('/^([a-zA-Z0-9_-]{3,15})$/', $_POST['name'])) {
 
         $error[] = "Le nom d'utilisateur n'est pas valide. a-Z0-9_-";
     }
