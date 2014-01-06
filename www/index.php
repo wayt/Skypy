@@ -22,8 +22,8 @@ if (isset($_POST['register'])) {
 
         $insert = $pdo->prepare('INSERT INTO account(id, email, name, pass_hash, online) VALUES(NULL, ?, ?, ?, 0);');
         $insert->execute([
-            $_POST['name'],
             $_POST['email'],
+            $_POST['name'],
             sha1($_POST['password']),
         ]);
         header('Location: download.php');
