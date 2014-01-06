@@ -117,7 +117,7 @@ public:
         return false;
     }
 
-    quint32 getCallPeerCount() const { _callPeer.size(); }
+    quint32 getCallPeerCount() const { return _callPeer.size(); }
 
     void addCallRequest(CallPeer* peer) { _callPeer.push_back(peer); }
     CallPeer* getCallPeer(quint32 id)
