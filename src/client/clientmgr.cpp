@@ -65,7 +65,8 @@ void ClientMgr::stopCall(quint32 chatId, QString const& destEmail, quint32 destI
     sNetworkMgr->tcpSendPacket(Rqst.getPacket());
 
     sClientMgr->clearCallPeers();
-    sAudioManager->quit();
+    sAudioManager->terminate();
+    sAudioManager->wait();
     sNetworkMgr->quitCall();
 }
 
