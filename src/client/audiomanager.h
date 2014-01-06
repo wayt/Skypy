@@ -21,6 +21,9 @@ public:
     bool setInputDevice(int device = DEFAULT_DEVICE, AudioSample::eChannel channel = AudioSample::MONO, AudioSample::eFrequency frequency = AudioSample::FREQ_48000);
     bool setOutputDevice(int device = DEFAULT_DEVICE, AudioSample::eChannel channel = AudioSample::MONO, AudioSample::eFrequency frequency = AudioSample::FREQ_48000);
 
+    inline int getCurrentInputDevice() const { return _input->inputDevice(); }
+    inline int getCurrentOutputDevice() const { return _output->outputDevice(); }
+
     AudioStream* input() { return _input; }
     const AudioStream* input() const { return _input; }
     AudioStream* output() { return _output; }

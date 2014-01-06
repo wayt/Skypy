@@ -37,6 +37,9 @@ public:
     inline void clearInputDevice() { _clearDevice(_inputParameter, _inputDeviceInfo); }
     inline void clearOutputDevice() { _clearDevice(_outputParameter, _outputDeviceInfo); }
 
+    inline int inputDevice() const { return _inputDevice; }
+    inline int outputDevice() const { return _outputDevice; }
+
     inline eStreamTypes streamType() const { return _streamType; }
 
     bool openDevice(AudioSample::eFrequency frequency = AudioSample::FREQ_48000);
@@ -84,6 +87,8 @@ private:
     int _channelCount;
     bool _isOpen;
     bool _isActive;
+    int _inputDevice;
+    int _outputDevice;
 
     QSynchronizedQueue<AudioSample> _inputQueue;
     QSynchronizedQueue<AudioSample> _outputQueue;

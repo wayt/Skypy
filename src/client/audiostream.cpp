@@ -15,6 +15,8 @@ AudioStream::AudioStream() :
     _channelCount(0),
     _isOpen(false),
     _isActive(false),
+    _inputDevice(0),
+    _outputDevice(0),
     _inputQueue(),
     _outputQueue()
 {
@@ -39,6 +41,7 @@ bool AudioStream::setInputDevice(int device, AudioSample::eChannel channel, eLat
     if (device < 0)
         device = Pa_GetDefaultInputDevice();
 
+    _inputDevice = device;
     return _setDevice(device, channel, latency, _inputParameter, INPUT_STREAM, _inputDeviceInfo);
 }
 
@@ -47,6 +50,7 @@ bool AudioStream::setOutputDevice(int device, AudioSample::eChannel channel, eLa
     if (device < 0)
         device = Pa_GetDefaultOutputDevice();
 
+    _outputDevice = device;
     return _setDevice(device, channel, latency, _outputParameter, OUTPUT_STREAM, _outputDeviceInfo);
 }
 
