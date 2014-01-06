@@ -7,7 +7,7 @@
 
 ClientMgr::ClientMgr() : _accountId(0), _username(""), _email(""),
     _publicIp(""), _privateIp(""), _callPeer(),
-    _contactMap()
+    _contactMap(), _settings("settings.ini", QSettings::IniFormat)
 {
 }
 
@@ -24,7 +24,8 @@ void ClientMgr::makeCall(quint32 chatId, const QString &destEmail, quint32 destI
 
     QHostAddress host;
     QString destIp = destPublicIp;
-    if (_publicIp == destPublicIp || true)
+    bool forceLocal = _settings.value("forceLocalCall", false).toBool();
+    if (_publicIp == destPublicIp || forceLocal)
     {
         host.setAddress(_privateIp);
         destIp = destPrivateIp;

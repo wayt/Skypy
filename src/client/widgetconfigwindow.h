@@ -13,6 +13,9 @@ public:
     explicit WidgetConfigWindow(QWidget *parent = 0);
 
     void show();
+private slots:
+    void on_buttonBox_accepted();
+
 private:
 };
 

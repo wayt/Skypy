@@ -7,6 +7,7 @@
 #include <QtGlobal>
 #include <QMap>
 #include <QListWidgetItem>
+#include <QSettings>
 
 class ContactInfo : public QListWidgetItem
 {
@@ -205,6 +206,7 @@ public:
     ContactInfo const* findContact(quint32 id) const;
     QMap<quint32, ContactInfo*> const& getContactMap() const { return _contactMap; }
 
+    QSettings& settings() { return _settings; }
 
 private:
     quint32 _accountId;
@@ -215,6 +217,7 @@ private:
 
     QList<CallPeer*> _callPeer;
     QMap<quint32, ContactInfo*> _contactMap;
+    QSettings _settings;
 };
 
 #define sClientMgr ClientMgr::instance()

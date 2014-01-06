@@ -2,6 +2,7 @@
 
 #include "widgetlogin.h"
 #include "networkmgr.h"
+#include "clientmgr.h"
 
 WidgetLogin::WidgetLogin(QWidget *parent) :
     QWidget(parent),
@@ -34,5 +35,7 @@ void WidgetLogin::on__connectButton_clicked()
     _email = _emailInput->text();
     _password = _passwordInput->text();
 
-    sNetworkMgr->tcpConnect("wayt.me", 5000);
+    QString addr = sClientMgr->settings().value("serverHost", "wayt.me").toString();
+    quint16 port = sClientMgr->settings().value("serverPort", 5000).toUInt();
+    sNetworkMgr->tcpConnect(addr, port);
 }
