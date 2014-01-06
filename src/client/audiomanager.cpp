@@ -87,6 +87,7 @@ void AudioManager::terminate()
     _run = false;
     _inputQueues.clear();
     QThread::terminate();
+    exit();
 }
 
 void AudioManager::run()
@@ -128,6 +129,7 @@ void AudioManager::run()
 
         if (!_input->inputQueue().isEmpty())
         {
+            std::cout << "INPUT NO EMPTY" << std::endl;
             sample = _input->inputQueue().dequeue();
 
             QMap<quint32, AudioSample> sampleMap;
