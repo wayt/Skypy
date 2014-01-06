@@ -42,10 +42,25 @@ MainWindow::MainWindow(QMainWindow *parent) :
     menu->addAction("Logout", this, SLOT(_handleLogout()));
 
     // Init audio
-    if (!sAudioManager->setInputDevice(DEFAULT_DEVICE, AudioSample::MONO, AudioSample::FREQ_48000))
-        std::cout << "FAIL INIT AUDIO INPUT: " << sAudioManager->errorText().toStdString() << std::endl;
-    if (!sAudioManager->setOutputDevice(DEFAULT_DEVICE, AudioSample::MONO, AudioSample::FREQ_48000))
-        std::cout << "FAIL INIT AUDIO OUPUT: " << sAudioManager->errorText().toStdString() << std::endl;
+    int index = AudioStream::deviceIndex(sClientMgr->settings().value("inputDevice", "").toString());
+    if (index != -1)
+    {
+        if (!sAudioManager->setInputDevice(index, AudioSample::MONO, AudioSample::FREQ_48000))
+            std::cout << "FAIL INIT AUDIO INPUT: " << sAudioManager->errorText().toStdString() << std::endl;
+    }
+    else
+        if (!sAudioManager->setInputDevice(DEFAULT_DEVICE, AudioSample::MONO, AudioSample::FREQ_48000))
+            std::cout << "FAIL INIT AUDIO INPUT: " << sAudioManager->errorText().toStdString() << std::endl;
+
+    index = AudioStream::deviceIndex(sClientMgr->settings().value("outputDevice", "").toString());
+    if (index != -1)
+    {
+        if (!sAudioManager->setOutputDevice(index, AudioSample::MONO, AudioSample::FREQ_48000))
+            std::cout << "FAIL INIT AUDIO OUPUT: " << sAudioManager->errorText().toStdString() << std::endl;
+    }
+    else
+        if (!sAudioManager->setOutputDevice(DEFAULT_DEVICE, AudioSample::MONO, AudioSample::FREQ_48000))
+            std::cout << "FAIL INIT AUDIO OUPUT: " << sAudioManager->errorText().toStdString() << std::endl;
 }
 
 MainWindow::~MainWindow()

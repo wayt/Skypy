@@ -148,6 +148,14 @@ const QString &AudioStream::deviceName(int device)
 
     return name;
 }
+int AudioStream::deviceIndex(QString const& name)
+{
+    int count = deviceCount();
+    for (int i = 0; i < count; ++i)
+        if (deviceName(i) == name)
+            return i;
+    return -1;
+}
 
 bool AudioStream::_setDevice(int device, AudioSample::eChannel channel, eLatency latency, PaStreamParameters &parameter, eStreamTypes streamType, const PaDeviceInfo *&info)
 {

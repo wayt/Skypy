@@ -66,6 +66,7 @@ public:
 public:
     static int deviceCount();
     static const QString& deviceName(int device);
+    static int deviceIndex(QString const& name);
 
 private:
     bool _setDevice(int device, AudioSample::eChannel channel, eLatency latency, PaStreamParameters &parameter, eStreamTypes streamType, const PaDeviceInfo *&info);

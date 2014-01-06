@@ -1,6 +1,8 @@
 #include "widgetconfigwindow.h"
 #include "clientmgr.h"
 #include "audiostream.h"
+#include "audiomanager.h"
+#include <iostream>
 
 WidgetConfigWindow::WidgetConfigWindow(QWidget *parent) :
     QDialog(parent),
@@ -16,10 +18,17 @@ void WidgetConfigWindow::show()
     _inputDevicesList->clear();
     _outputDevicesList->clear();
 
+    int inputDev = sAudioManager->getCurrentInputDevice();
+    int outputDev = sAudioManager->getCurrentOutputDevice();
+
     for (int i = 0; i < deviceCount; ++i)
     {
         _inputDevicesList->addItem(AudioStream::deviceName(i));
+        if (inputDev == i)
+            _inputDevicesList->setCurrentRow(i);
         _outputDevicesList->addItem(AudioStream::deviceName(i));
+        if (outputDev == i)
+            _outputDevicesList->setCurrentRow(i);
     }
 
     QString addr = sClientMgr->settings().value("serverHost", "wayt.me").toString();
@@ -35,11 +44,31 @@ void WidgetConfigWindow::on_buttonBox_accepted()
 
     QList<QListWidgetItem*> items = _inputDevicesList->selectedItems();
     if (items.size() > 0)
-        sClientMgr->settings().setValue("inputDevice", items.first()->text());
+    {
+        int index = AudioStream::deviceIndex(items.first()->text());
+        if (index != -1 && index != sAudioManager->getCurrentInputDevice())
+        {
+            sAudioManager->input()->closeDevice();;
+            if (!sAudioManager->setInputDevice(index, AudioSample::MONO, AudioSample::FREQ_48000))
+                std::cout << "FAIL INIT AUDIO INPUT: " << sAudioManager->errorText().toStdString() << std::endl;
+            else
+                sClientMgr->settings().setValue("inputDevice", items.first()->text());
+        }
+    }
 
     items = _outputDevicesList->selectedItems();
     if (items.size() > 0)
-        sClientMgr->settings().setValue("outputDevice", items.first()->text());
+    {
+        int index = AudioStream::deviceIndex(items.first()->text());
+        if (index != -1 && index != sAudioManager->getCurrentOutputDevice())
+        {
+            sAudioManager->output()->closeDevice();;
+            if (!sAudioManager->setOutputDevice(index, AudioSample::MONO, AudioSample::FREQ_48000))
+                std::cout << "FAIL INIT AUDIO OUPUT: " << sAudioManager->errorText().toStdString() << std::endl;
+            else
+                sClientMgr->settings().setValue("outputDevice", items.first()->text());
+        }
+    }
 
     QString addr = _serverAddress->text();
     QStringList strList = addr.split(':');
