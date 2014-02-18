@@ -7,7 +7,7 @@ Network.Debug = no
 
 MySQL.host = "localhost"
 MySQL.user = "root"
-MySQL.password = "root"
+MySQL.password = "d@v@ci7"
 MySQL.database = "skypy"
 MySQL.port = 3306
 MySQL.ThreadCount = 2
